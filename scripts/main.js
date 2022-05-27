@@ -1,50 +1,43 @@
-// Animations
-AOS.init({
-  anchorPlacement: 'top-left',
-  duration: 1000
-});
-// var button = document.getElementsByClassName("myButton1");
-// button[0].onclick=function(){send_data()};
-
-
-function send_data(){
-
-  //   $.ajax({
-  //     type: "POST",
-  //     url: "http://new.ihweb.ir/server.php",
-  //     data: { name: "John" ,
-  //             user_commnet : "new",
-  //             email : "newnew"}
-  //   }).done(function( msg ) {
-  //     alert( "Data Saved: " + msg );
-  //   });
-  //   alert("hi");
-  // );
-  alert("dsdd");
-
-  $.ajax({
-    cache: false,
-    dataType: "jsonp",
-    async: true,
-    crossDomain: true,
-    headers: {
-        "accept": "application/json",
-        "Access-Control-Allow-Origin":"*"
-    },
-        type: "POST",
-        url: "http://new.ihweb.ir/server1.php",
-        headers: {
-          "Access-Control-Allow-Origin":"http://new.ihweb.ir/"
-        },
-        data: { name: "John" ,
-                user_commnet : "new",
-                email : "newnew"},
-         success: function(res){
-                        alert("hey");    //do what you want here...
-                        alert(res.tostring());
-                 }
-     });
-     alert("wtffff");
-
-}
 // Add your javascript here
+// Don't forget to add it into respective layouts where this js file is needed
+
+$(document).ready(function() {
+  AOS.init( {
+    // uncomment below for on-scroll animations to played only once
+    // once: true  
+  }); // initialize animate on scroll library
+});
+
+// Smooth scroll for links with hashes
+$('a.smooth-scroll')
+.click(function(event) {
+  // On-page links
+  if (
+    location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') 
+    && 
+    location.hostname == this.hostname
+  ) {
+    // Figure out element to scroll to
+    var target = $(this.hash);
+    target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+    // Does a scroll target exist?
+    if (target.length) {
+      // Only prevent default if animation is actually gonna happen
+      event.preventDefault();
+      $('html, body').animate({
+        scrollTop: target.offset().top
+      }, 1000, function() {
+        // Callback after animation
+        // Must change focus!
+        var $target = $(target);
+        $target.focus();
+        if ($target.is(":focus")) { // Checking if the target was focused
+          return false;
+        } else {
+          $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
+          $target.focus(); // Set focus again
+        };
+      });
+    }
+  }
+});
