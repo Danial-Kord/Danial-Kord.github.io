@@ -5119,6 +5119,73 @@ Created using IcoMoon - icomoon.io
 .gallery figure.cc-effect:hover img {
   transition-delay: 0.15s; }
 
+/* Awards & Achievements Section */
+.cc-awards .achievement-item {
+  padding: 20px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.cc-awards .achievement-item:last-child {
+  border-bottom: none;
+}
+
+.cc-awards .achievement-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 15px;
+  border-radius: 8px;
+}
+
+.cc-awards .achievement-year {
+  font-size: 18px;
+  font-weight: bold;
+  color: #18ce0f;
+  padding: 8px 15px;
+  background: rgba(24, 206, 15, 0.1);
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.cc-awards .achievement-content {
+  padding-left: 10px;
+}
+
+.cc-awards .achievement-content i {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.cc-awards .achievement-content strong {
+  font-size: 16px;
+  color: #2c2c2c;
+}
+
+.cc-awards .achievement-content p {
+  margin-top: 5px;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.cc-awards .timeline-container {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .cc-awards .achievement-year {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+  
+  .cc-awards .achievement-content strong {
+    font-size: 14px;
+  }
+  
+  .cc-awards .achievement-content p {
+    font-size: 12px;
+  }
+}
+
 /* Header */
 /* Navbar style*/
 .navbar {
