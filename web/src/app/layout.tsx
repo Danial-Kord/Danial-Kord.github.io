@@ -5,6 +5,7 @@ import "./globals.css";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { ConsoleStrip } from "@/components/console-strip";
+import { MatrixRain } from "@/components/effects/MatrixRain";
 
 const display = Space_Grotesk({
   variable: "--font-display",
@@ -43,10 +44,15 @@ export default function RootLayout({
       className={`${display.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="grain min-h-full bg-bg text-fg">
+        {/* scroll-reactive matrix rain — fixed bg, behind all content */}
+        <MatrixRain />
+
         <Nav />
-        <main className="pt-12">{children}</main>
-        <Footer />
-        <ConsoleStrip />
+        <div className="relative z-10">
+          <main className="pt-12">{children}</main>
+          <Footer />
+          <ConsoleStrip />
+        </div>
       </body>
     </html>
   );
