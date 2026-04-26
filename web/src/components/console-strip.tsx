@@ -11,9 +11,9 @@ const lines = [
 
 export function ConsoleStrip() {
   return (
-    <div className="border-t border-rule bg-bg-1/70">
+    <div className="border-t border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-2.5">
-        <div className="flex items-center gap-3 overflow-hidden font-mono text-[11px] text-fg-mute">
+        <div className="text-scrim flex max-w-full items-center gap-3 overflow-hidden font-mono text-[11px] text-fg-mute">
           <span className="inline-block h-1.5 w-1.5 shrink-0 bg-accent shadow-[0_0_8px_var(--accent)]" />
           <div className="flex min-w-0 gap-6 overflow-hidden whitespace-nowrap">
             {lines.map((l, i) => (

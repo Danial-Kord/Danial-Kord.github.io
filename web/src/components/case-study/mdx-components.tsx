@@ -7,7 +7,7 @@ import type { MDXComponents } from "mdx/types";
 
 export function Architecture({ children }: { children: React.ReactNode }) {
   return (
-    <figure className="my-10 border border-rule bg-bg-1">
+    <figure className="glass-card my-10 border border-rule">
       <div className="flex items-center justify-between border-b border-rule px-4 py-2">
         <span className="label">system architecture</span>
         <span className="font-mono text-[10px] text-fg-mute">ascii · v1</span>

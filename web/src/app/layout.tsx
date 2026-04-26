@@ -48,7 +48,7 @@ export default function RootLayout({
         <MatrixRain />
 
         <Nav />
-        <div className="relative z-10">
+        <div className="relative isolate z-10">
           <main className="pt-12">{children}</main>
           <Footer />
           <ConsoleStrip />

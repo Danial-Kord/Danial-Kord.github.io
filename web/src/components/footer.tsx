@@ -9,7 +9,7 @@ export function Footer() {
   return (
     <footer className="mt-24 border-t border-rule">
       <div className="mx-auto flex max-w-[1240px] flex-col gap-6 px-5 py-10 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="text-scrim">
           <div className="label mb-2">end of buffer</div>
           <div className="font-display text-2xl tracking-tight">
             Danial Kordmodanlou
@@ -18,7 +18,7 @@ export function Footer() {
             ML × real-time systems × game engineering · Toronto
           </div>
         </div>
-        <div className="flex flex-col items-start gap-3 sm:items-end">
+        <div className="text-scrim flex flex-col items-start gap-3 sm:ml-auto sm:items-end">
           <div className="flex gap-4">
             {links.map((l) => (
               <a

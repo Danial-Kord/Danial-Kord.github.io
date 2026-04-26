@@ -31,19 +31,21 @@ const planned = [
 export default function LabPage() {
   return (
     <div className="mx-auto w-full max-w-[1240px] px-5 pb-20 pt-16">
-      <div className="label mb-4">section · lab</div>
-      <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
-        The lab.
-      </h1>
-      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-dim">
-        Smaller experiments — interactive demos, shaders, and ML toys that
-        don't earn a full case study but are too fun to throw away. The shelf
-        is being stocked.
-      </p>
+      <div className="text-scrim">
+        <div className="label mb-4">section · lab</div>
+        <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
+          The lab.
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-dim">
+          Smaller experiments — interactive demos, shaders, and ML toys that
+          don't earn a full case study but are too fun to throw away. The shelf
+          is being stocked.
+        </p>
+      </div>
 
-      <ul className="mt-12 grid gap-px border border-rule bg-rule sm:grid-cols-2">
+      <ul className="text-scrim mt-12 grid gap-px border border-rule bg-rule sm:grid-cols-2">
         {planned.map((p) => (
-          <li key={p.name} className="bg-bg p-6">
+          <li key={p.name} className="glass-inner p-6">
             <div className="flex items-center justify-between">
               <div className="font-display text-lg text-fg">{p.name}</div>
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
@@ -55,7 +57,7 @@ export default function LabPage() {
         ))}
       </ul>
 
-      <div className="mt-10 border-t border-rule pt-6 font-mono text-[12px] text-fg-mute">
+      <div className="text-scrim mt-10 border-t border-rule pt-2 font-mono text-[12px] text-fg-mute">
         // first three demos land in the next milestone. check back soon.
       </div>
     </div>

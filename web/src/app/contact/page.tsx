@@ -16,24 +16,26 @@ const channels = [
 export default function ContactPage() {
   return (
     <div className="mx-auto w-full max-w-[1240px] px-5 pb-20 pt-16">
-      <div className="label mb-4">section · contact</div>
-      <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
-        Let's <span className="text-accent">talk</span>.
-      </h1>
-      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-dim">
-        Best for: gameplay or graphics engineering, applied ML and LLM systems,
-        AR/VR research engineering, or interesting collaborations at the
-        intersection.
-      </p>
+      <div className="text-scrim">
+        <div className="label mb-4">section · contact</div>
+        <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
+          Let's <span className="text-accent">talk</span>.
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-dim">
+          Best for: gameplay or graphics engineering, applied ML and LLM systems,
+          AR/VR research engineering, or interesting collaborations at the
+          intersection.
+        </p>
+      </div>
 
-      <div className="mt-12 grid gap-px border border-rule bg-rule sm:grid-cols-2">
+      <div className="text-scrim mt-12 grid gap-px border border-rule bg-rule sm:grid-cols-2">
         {channels.map((c) => (
           <a
             key={c.label}
             href={c.href}
             target={c.href.startsWith("http") ? "_blank" : undefined}
             rel={c.href.startsWith("http") ? "noreferrer" : undefined}
-            className="group flex items-center justify-between gap-4 bg-bg p-6 transition-colors hover:bg-bg-1"
+            className="glass-inner glass-interactive group flex items-center justify-between gap-4 p-6"
           >
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-fg-mute">
@@ -48,7 +50,7 @@ export default function ContactPage() {
         ))}
       </div>
 
-      <div className="mt-12 border border-rule bg-bg-1 p-6">
+      <div className="text-scrim mt-12 border border-rule">
         <div className="label mb-2">response time</div>
         <p className="text-fg-dim">
           Usually within 48 hours. For roles, attaching a job description gets

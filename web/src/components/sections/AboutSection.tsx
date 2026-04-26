@@ -5,22 +5,23 @@ export function AboutSection() {
   return (
     <section className="border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
-        <SectionHeader num="001" kicker="who" title="Hybrid by design." />
-        <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
-          <p className="text-lg leading-relaxed text-fg-dim">{bio.about}</p>
+        <SectionHeader num="001" kicker="who" title="Hybrid by design.">
+          <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
+            <p className="text-lg leading-relaxed text-fg-dim">{bio.about}</p>
 
-          <aside className="border border-rule p-6">
-            <div className="label mb-3">vitals</div>
-            <dl className="space-y-3 font-mono text-[13px]">
-              <Row k="based" v={bio.location} />
-              <Row k="email" v={bio.email} />
-              <Row k="github" v="Danial-Kord" />
-              <Row k="linkedin" v="/in/danial-kord" />
-              <Row k="languages" v={bio.language} />
-              <Row k="status" v="open to roles" accent />
-            </dl>
-          </aside>
-        </div>
+            <aside className="glass-inner border border-rule p-6">
+              <div className="label mb-3">vitals</div>
+              <dl className="space-y-3 font-mono text-[13px]">
+                <Row k="based" v={bio.location} />
+                <Row k="email" v={bio.email} />
+                <Row k="github" v="Danial-Kord" />
+                <Row k="linkedin" v="/in/danial-kord" />
+                <Row k="languages" v={bio.language} />
+                <Row k="status" v="open to roles" accent />
+              </dl>
+            </aside>
+          </div>
+        </SectionHeader>
       </div>
     </section>
   );

@@ -11,49 +11,51 @@ export function ExperienceSection() {
           kicker="experience"
           title="Work."
           intro="Roles where I shipped — research labs, startups, game studios, university teaching."
-        />
-
-        <ol className="mt-12 border-t border-rule">
-          {experience.map((e, i) => (
-            <li
-              key={`${e.org}-${i}`}
-              className="grid grid-cols-1 gap-6 border-b border-rule py-8 lg:grid-cols-[180px_240px_1fr]"
-            >
-              <div className="font-mono text-[12px] uppercase tracking-[0.14em] text-fg-mute">
-                {e.when}
-              </div>
-              <div>
-                <div className="font-display text-lg text-fg">{e.org}</div>
-                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
-                  {e.role}
+        >
+          <ol>
+            {experience.map((e, i) => (
+              <li
+                key={`${e.org}-${i}`}
+                className="border-b border-rule py-8 last:border-b-0 last:pb-0"
+              >
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[180px_240px_1fr]">
+                  <div className="font-mono text-[12px] uppercase tracking-[0.14em] text-fg-mute">
+                    {e.when}
+                  </div>
+                  <div>
+                    <div className="font-display text-lg text-fg">{e.org}</div>
+                    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                      {e.role}
+                    </div>
+                  </div>
+                  <div className="text-fg-dim">
+                    {e.blurb && <p className="mb-3">{e.blurb}</p>}
+                    {e.bullets && (
+                      <ul className="space-y-1.5">
+                        {e.bullets.map((b, j) => (
+                          <li key={j} className="relative pl-5 text-[15px]">
+                            <span className="absolute left-0 top-[0.45em] h-px w-3 bg-accent/60" />
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {e.link && (
+                      <a
+                        href={e.link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-accent hover:underline"
+                      >
+                        {e.link.label} <ArrowUpRight className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="text-fg-dim">
-                {e.blurb && <p className="mb-3">{e.blurb}</p>}
-                {e.bullets && (
-                  <ul className="space-y-1.5">
-                    {e.bullets.map((b, j) => (
-                      <li key={j} className="relative pl-5 text-[15px]">
-                        <span className="absolute left-0 top-[0.45em] h-px w-3 bg-accent/60" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {e.link && (
-                  <a
-                    href={e.link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-accent hover:underline"
-                  >
-                    {e.link.label} <ArrowUpRight className="h-3 w-3" />
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        </SectionHeader>
       </div>
     </section>
   );

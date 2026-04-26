@@ -74,6 +74,74 @@ body {
 .rule { border-color: var(--rule); }
 .rule-s { border-color: var(--rule-strong); }
 
+/**
+ * Frosted glass over MatrixRain / backdrop (blur + translucent fill).
+ */
+.surface-over-rain {
+  background-color: color-mix(in srgb, var(--bg-1) 80%, transparent);
+  backdrop-filter: blur(14px) saturate(1.14);
+  -webkit-backdrop-filter: blur(14px) saturate(1.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/**
+ * Primary glass panel (section headers, floating copy blocks).
+ */
+.text-scrim {
+  background-color: color-mix(in srgb, var(--bg-1) 80%, transparent);
+  backdrop-filter: blur(14px) saturate(1.14);
+  -webkit-backdrop-filter: blur(14px) saturate(1.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 0.125rem;
+  padding: 0.75rem 1rem;
+}
+
+/** Span full content column (e.g. align with Education grid width) */
+.text-scrim.text-scrim--full {
+  width: 100%;
+}
+
+/** Nested glass inside a .text-scrim (vitals, skill cells, case-study meta, etc.) */
+.glass-inner {
+  background-color: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(11px) saturate(1.08);
+  -webkit-backdrop-filter: blur(11px) saturate(1.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+/** Full-card glass (education tiles, dense UI blocks) */
+.glass-card {
+  background-color: color-mix(in srgb, var(--bg-1) 80%, transparent);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+/** Hover lift for links/tiles on glass (work index, contact channels) */
+.glass-interactive {
+  transition: background-color 0.15s ease;
+}
+.glass-interactive:hover {
+  background-color: color-mix(in srgb, var(--bg-1) 82%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .surface-over-rain,
+  .text-scrim,
+  .glass-inner,
+  .glass-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: color-mix(in srgb, var(--bg-1) 91%, var(--bg));
+  }
+
+  .glass-interactive:hover {
+    background-color: color-mix(in srgb, var(--bg-2) 88%, var(--bg));
+  }
+}
+
 .grain::after {
   content: "";
   position: fixed;

@@ -16,17 +16,17 @@ export function ProjectsSection() {
           kicker="portfolio"
           title="Projects."
           intro="Selected work across game development, ML, computer vision, and systems. The four highlighted projects have full case studies; the rest live here as a gallery."
-        />
+        >
+          <div className="grid gap-6">
+            {feature && <FeatureCard p={feature} />}
 
-        <div className="mt-12 grid gap-6">
-          {feature && <FeatureCard p={feature} />}
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {rest.map((p) => (
-              <ProjectCard key={p.title} p={p} />
-            ))}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {rest.map((p) => (
+                <ProjectCard key={p.title} p={p} />
+              ))}
+            </div>
           </div>
-        </div>
+        </SectionHeader>
       </div>
     </section>
   );
@@ -35,7 +35,7 @@ export function ProjectsSection() {
 /* -------------------- feature (DigiHuman, full-width) -------------------- */
 function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
   return (
-    <article className="group relative grid overflow-hidden border border-rule bg-bg-1 lg:grid-cols-[1.4fr_1fr]">
+    <article className="group relative grid overflow-hidden border border-rule bg-transparent lg:grid-cols-[1.4fr_1fr]">
       {/* image */}
       <div className="relative aspect-[16/9] overflow-hidden border-b border-rule lg:aspect-auto lg:border-b-0 lg:border-r">
         {p.image.startsWith("http") ? (
@@ -56,13 +56,13 @@ function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
           />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg/40 via-transparent to-transparent" />
-        <div className="pointer-events-none absolute left-3 top-3 border border-accent/40 bg-bg/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent backdrop-blur">
+        <div className="glass-inner pointer-events-none absolute left-3 top-3 border border-accent/40 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
           ● featured · 500+ ★
         </div>
       </div>
 
       {/* body */}
-      <div className="flex flex-col justify-between gap-6 p-7">
+      <div className="glass-inner flex flex-col justify-between gap-6 p-7">
         <div>
           <div className="label mb-3">case study · open-source</div>
           <h3 className="font-display text-3xl tracking-tight text-fg">{p.title}</h3>
@@ -99,7 +99,7 @@ function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
 /* -------------------- standard card -------------------- */
 function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
   const inner = (
-    <article className="group relative flex h-full flex-col overflow-hidden border border-rule bg-bg-1 transition-colors hover:border-accent/50">
+    <article className="group relative flex h-full flex-col overflow-hidden border border-rule bg-transparent transition-colors hover:border-accent/50">
       {/* image */}
       <div className="relative aspect-[16/10] overflow-hidden border-b border-rule">
         {p.image.startsWith("http") ? (
@@ -121,14 +121,14 @@ function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/50 via-transparent to-transparent" />
         {p.caseStudySlug && (
-          <div className="pointer-events-none absolute left-2 top-2 border border-accent/40 bg-bg/70 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent backdrop-blur">
+          <div className="glass-inner pointer-events-none absolute left-2 top-2 border border-accent/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent">
             case study
           </div>
         )}
       </div>
 
       {/* body */}
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className="glass-inner flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-display text-lg leading-tight tracking-tight text-fg transition-colors group-hover:text-accent">
             {p.title}

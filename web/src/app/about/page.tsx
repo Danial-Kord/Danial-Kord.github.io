@@ -48,20 +48,22 @@ const timeline = [
 export default function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-[1240px] px-5 pb-20 pt-16">
-      <div className="label mb-4">section · about</div>
-      <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
-        Hybrid by design.
-      </h1>
+      <div className="text-scrim">
+        <div className="label mb-4">section · about</div>
+        <h1 className="font-display text-5xl font-light tracking-tight text-fg sm:text-6xl">
+          Hybrid by design.
+        </h1>
+      </div>
       <div className="mt-8 grid gap-12 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5 text-lg leading-relaxed text-fg-dim">
-          <p>
+          <p className="text-scrim">
             I'm <span className="text-fg">Danial Kordmodanlou</span> — a
             graduate student at York University and an engineer who lives where
             machine learning meets real-time systems. I've spent equal time in
             Unity, in PyTorch notebooks, and in the messy integration code that
             connects them.
           </p>
-          <p>
+          <p className="text-scrim">
             The work I'm proudest of is the work that crosses boundaries: a
             real-time mocap pipeline that wires four research models into a
             game engine, a procedural geometry system that lets an LLM emit
@@ -69,7 +71,7 @@ export default function AboutPage() {
             sequence-model output. None of these projects sit cleanly in "ML"
             or "graphics" or "gameplay" — they live in the seams.
           </p>
-          <p>
+          <p className="text-scrim">
             I'm interested in roles where that intersection is the point:
             gameplay engineering at studios shipping ambitious real-time
             systems, applied-ML and LLM teams at companies building embodied
@@ -78,7 +80,7 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <aside className="border border-rule p-6">
+        <aside className="text-scrim border border-rule">
           <div className="label mb-3">vitals</div>
           <dl className="space-y-3 font-mono text-[13px]">
             <Row k="based" v="Toronto, ON" />
@@ -92,23 +94,24 @@ export default function AboutPage() {
       </div>
 
       <div className="mt-20">
-        <div className="label mb-6">timeline</div>
+        <div className="label text-scrim mb-6">timeline</div>
         <ul className="border-t border-rule">
           {timeline.map((t) => (
-            <li
-              key={t.where}
-              className="grid grid-cols-1 gap-4 border-b border-rule py-7 lg:grid-cols-[180px_220px_1fr]"
-            >
-              <div className="font-mono text-[12px] tracking-[0.14em] uppercase text-fg-mute">
-                {t.when}
-              </div>
-              <div>
-                <div className="font-display text-lg text-fg">{t.where}</div>
-                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
-                  {t.role}
+            <li key={t.where} className="border-b border-rule py-7">
+              <div className="text-scrim">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[180px_220px_1fr]">
+                  <div className="font-mono text-[12px] tracking-[0.14em] uppercase text-fg-mute">
+                    {t.when}
+                  </div>
+                  <div>
+                    <div className="font-display text-lg text-fg">{t.where}</div>
+                    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                      {t.role}
+                    </div>
+                  </div>
+                  <div className="text-fg-dim">{t.body}</div>
                 </div>
               </div>
-              <div className="text-fg-dim">{t.body}</div>
             </li>
           ))}
         </ul>
