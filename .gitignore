@@ -14,3 +14,9 @@ cv-ui/.next/
 cv-ui/.env.local
 __pycache__/
 .env
+
+# Local referrals/outreach SQLite DB
+CV-Job-System/referrals.db
+CV-Job-System/referrals.db-journal
+CV-Job-System/referrals.db-wal
+CV-Job-System/referrals.db-shm
