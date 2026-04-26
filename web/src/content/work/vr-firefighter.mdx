@@ -1,0 +1,83 @@
+---
+title: VR Firefighter Trainer
+tagline: A MetaQuest VR training MVP with LSTM skill-deviation detection and an LLM coaching layer that gives trainees natural-language feedback in real time.
+year: "2026"
+role: Machine Learning Associate · Vector Institute × DXTR
+domain: [ml, vr, llm]
+stack: [Meta Quest SDK, Unity, PyTorch, LSTM, LLMs, Python]
+metrics:
+  - { label: "Telemetry", value: "full-body pose" }
+  - { label: "Model", value: "LSTM seq → 1" }
+  - { label: "Coach", value: "LLM-driven NL" }
+  - { label: "Partner", value: "DXTR" }
+links:
+  - { label: "Vector Institute", href: "https://vectorinstitute.ai/" }
+hero:
+  hue: "#f5c451"
+---
+
+## What it does
+
+A firefighter trainee puts on a Meta Quest, runs through a training scenario, and instead of getting a binary "pass / fail" at the end, hears a coaching voice the moment their technique starts to drift — *"hold the nozzle lower; you've drifted six degrees over the last three seconds."*
+
+The MVP combines a **VR scenario** (Unity), a **full-body pose telemetry pipeline** (Quest SDK), an **LSTM-based skill-deviation detector** trained on expert demonstrations, and an **LLM coaching layer** that converts deviation signals into actionable spoken feedback.
+
+## Why it was hard
+
+VR training systems traditionally either (a) score performance after the fact or (b) give canned hints triggered by hard-coded events. Real-time, *individualized* coaching requires three things to land at once:
+
+1. Reliable full-body pose under headset-only telemetry (no external trackers).
+2. A model that can detect *deviation from expert behavior* across a sequence, not just at a single frame.
+3. A coaching layer that turns "joint X drifted Y degrees over Z seconds" into a sentence that an exhausted trainee can act on.
+
+## System architecture
+
+<Architecture>
+{`  Meta Quest (HMD + controllers)
+        │
+        ▼
+  pose collection pipeline  (redundant: SDK + IK fallback)
+        │  60 Hz full-body skeleton
+        ▼
+  rolling window  (T = N seconds, stride = M frames)
+        │
+        ▼
+  LSTM (seq → 1) ──► deviation logits per skill axis
+        │
+        ▼
+  threshold + debounce
+        │
+        ▼
+  LLM coaching layer  (deviation context → NL prompt)
+        │
+        ▼
+  TTS → trainee's headphones`}
+</Architecture>
+
+## How it's built
+
+<Step n={1} label="Redundant full-body pose pipeline">
+The Meta Quest SDK's body-tracking output is the primary signal. To survive partial occlusion and SDK quirks, a fallback IK solver reconstructs the same skeleton from headset + controller transforms. The pipeline emits a single canonical skeleton at 60 Hz regardless of which source is currently authoritative — so downstream models see one input distribution, not two.
+</Step>
+
+<Step n={2} label="LSTM skill-deviation detector">
+Trained on expert demonstrations of the target skill (e.g., nozzle handling). The LSTM consumes a sliding window of pose frames and predicts deviation per skill axis at the **last step** of the sequence — not per-frame, because trainees naturally vary; the signal we want is *sustained drift*, not a single bad frame.
+</Step>
+
+<Step n={3} label="LLM coaching layer">
+A structured prompt encodes (a) the skill being trained, (b) the deviation axes that crossed threshold, and (c) the magnitude and duration. The LLM's job is to compress that into a short, calm, second-person sentence the trainee can act on without breaking flow. Templates exist as a fallback; the LLM is preferred because its phrasings adapt to context.
+</Step>
+
+<Step n={4} label="Threshold + debounce">
+Raw model logits are noisy. A simple state machine — "deviation must persist for K consecutive windows before the coach speaks, and the coach cannot speak twice within W seconds" — keeps the system from nagging.
+</Step>
+
+<Failure title="cross-platform SDK telemetry differences">
+The same Quest SDK call returned subtly different bone transforms across firmware versions. An early model trained on one firmware degraded badly on another. The fix was the redundant pose pipeline above — and a calibration pass at the start of every session that normalizes the trainee's neutral pose, removing per-firmware bias before anything reaches the model.
+</Failure>
+
+## Why this work matters
+
+The interesting bet is the *coaching layer*. There are dozens of papers on pose-based skill assessment; almost none of them solve "what should the system actually say to the human in the next 200 ms." Pairing a small, focused sequence model (LSTM) with an LLM that owns *only* the natural-language compression step is a pattern that generalizes well beyond firefighter training — surgical training, sports coaching, music practice all share the same shape.
+
+This is the project where I'm currently exploring how lightweight ML and LLMs can be deployed *together* in a real-time, embodied training context — and how to design the data pipeline so neither model has to compensate for the other's quirks.
