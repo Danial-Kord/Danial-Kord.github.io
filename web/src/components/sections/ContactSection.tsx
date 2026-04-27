@@ -6,14 +6,11 @@ export function ContactSection() {
   return (
     <section id="contact" className="scroll-mt-16">
       <div className="mx-auto max-w-[1240px] px-5 py-24">
-        <SectionHeader num="007" kicker="contact" title="Let's talk.">
+        <SectionHeader num="007" kicker="contact" title="Get in touch.">
           <div className="grid gap-12 lg:grid-cols-[1fr_auto]">
             <p className="font-display text-3xl font-light leading-snug tracking-tight text-fg sm:text-4xl">
-              Hiring for{" "}
-              <span className="text-accent">Unity / Unreal / gameplay</span>{" "}
-              or{" "}
-              <span className="text-accent-2">applied ML / LLM systems</span>?
-              I'd like to hear about it.
+              Interested in collaborating, or do you want to get in touch?{" "}
+              I&apos;m glad to hear from you.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
