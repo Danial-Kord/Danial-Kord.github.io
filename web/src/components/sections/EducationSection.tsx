@@ -5,12 +5,12 @@ export function EducationSection() {
   return (
     <section id="education" className="scroll-mt-16 border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
-        <SectionHeader num="004" kicker="education" title="Education.">
+        <SectionHeader num="004" kicker="education" title="Education." fullWidth>
           <div className="flex flex-col gap-8">
             {education.map((e) => (
               <article
-                key={e.school}
-                className="glass-card flex w-full flex-col border border-rule p-6"
+                key={`${e.school}-${e.when}`}
+                className="glass-card flex flex-col border border-rule p-6"
               >
                 <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-fg-mute">
                   {e.when}
@@ -21,7 +21,7 @@ export function EducationSection() {
                   </span>
                   <span className="font-display text-xl text-fg">{e.field}</span>
                 </div>
-                <div className="mt-1 text-[13px] text-fg-dim">{e.school}</div>
+                <div className="mt-2 text-[13px] text-fg-dim">{e.school}</div>
                 <p className="mt-4 text-[14.5px] leading-relaxed text-fg-dim">
                   {e.blurb}
                 </p>
