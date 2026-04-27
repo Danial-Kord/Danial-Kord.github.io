@@ -53,8 +53,7 @@ export const imgProjects: ImgProject[] = [
     blurb:
       "Strategic multiplayer card game. Reinforcement-learning AI opponent; Photon + PlayFab for online play.",
     stack: "Unity3D · Photon · PlayFab · C# · RL",
-    image:
-      "https://techuonthechair.com/wp-content/uploads/2024/08/TechuLogoPng.png",
+    image: "/images/techu-logo.png",
     href: "https://techuonthechair.com/",
     imageFit: "contain",
   },
@@ -173,8 +172,6 @@ export type Experience = {
   blurb?: string;
   bullets?: string[];
   link?: { label: string; href: string };
-  /** small visual preview shown alongside the bullets */
-  preview?: { image: string; alt: string };
   /** extra call-to-action buttons (e.g., "Play"), rendered next to `link` */
   cta?: { label: string; href: string }[];
 };
@@ -240,11 +237,6 @@ export const experience: Experience[] = [
       "Developed an AI agent using reinforcement learning principles.",
     ],
     link: { label: "Techu project", href: "https://techuonthechair.com/" },
-    preview: {
-      image:
-        "https://techuonthechair.com/wp-content/uploads/2024/08/TechuLogoPng.png",
-      alt: "Techu on the Chair logo",
-    },
   },
   {
     when: "Jan 2022 — present",

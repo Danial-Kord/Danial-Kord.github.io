@@ -29,24 +29,6 @@ export function ExperienceSection() {
                     </div>
                   </div>
                   <div className="text-fg-dim">
-                    {/* preview image — when provided */}
-                    {e.preview && (
-                      <a
-                        href={e.cta?.[0]?.href ?? e.link?.href ?? "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={`Open ${e.org}`}
-                        className="mb-4 block max-w-[280px]"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={e.preview.image}
-                          alt={e.preview.alt}
-                          className="h-auto w-full object-contain"
-                        />
-                      </a>
-                    )}
-
                     {e.blurb && <p className="mb-3">{e.blurb}</p>}
                     {e.bullets && (
                       <ul className="space-y-1.5">
