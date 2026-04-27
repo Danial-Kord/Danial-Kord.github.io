@@ -35,30 +35,15 @@ export function ExperienceSection() {
                         href={e.cta?.[0]?.href ?? e.link?.href ?? "#"}
                         target="_blank"
                         rel="noreferrer"
-                        aria-label={`Open ${e.org} preview`}
-                        className="group relative mb-4 block aspect-[16/9] max-w-[480px] overflow-hidden border border-rule"
+                        aria-label={`Open ${e.org}`}
+                        className="mb-4 block max-w-[280px]"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={e.preview.image}
                           alt={e.preview.alt}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                          className="h-auto w-full object-contain"
                         />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg/60 via-transparent to-transparent" />
-                        <div className="pointer-events-none absolute left-2.5 top-2.5 border border-accent/40 bg-bg/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent backdrop-blur">
-                          ● live
-                        </div>
-                        {/* center play affordance — only visible if a CTA exists */}
-                        {e.cta && e.cta.length > 0 && (
-                          <div
-                            className="absolute inset-0 flex items-center justify-center opacity-95 transition-transform group-hover:scale-105"
-                            aria-hidden
-                          >
-                            <span className="flex h-14 w-14 items-center justify-center border border-accent bg-bg/70 text-accent backdrop-blur transition-colors group-hover:bg-accent group-hover:text-bg">
-                              <Play className="ml-0.5 h-6 w-6" fill="currentColor" />
-                            </span>
-                          </div>
-                        )}
                       </a>
                     )}
 

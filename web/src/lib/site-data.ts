@@ -51,8 +51,8 @@ export const imgProjects: ImgProject[] = [
     blurb:
       "Strategic multiplayer card game. Reinforcement-learning AI opponent; Photon + PlayFab for online play.",
     stack: "Unity3D · Photon · PlayFab · C# · RL",
-    image: "https://techuonthechair.com/wp-content/uploads/2024/08/Gameplay1-1024x569.jpg",
-    href: "https://techuonthechair.com/",
+    image: "/images/techu-logo.png",
+    href: "https://app.techuonthechair.com/",
   },
   {
     slug: "backgammon3d",
@@ -236,11 +236,6 @@ export const experience: Experience[] = [
       "RL-based AI opponent agent.",
     ],
     link: { label: "techuonthechair.com", href: "https://techuonthechair.com/" },
-    preview: {
-      image:
-        "https://techuonthechair.com/wp-content/uploads/2024/08/Gameplay1-1024x569.jpg",
-      alt: "Techu gameplay screenshot",
-    },
     cta: [{ label: "Play now", href: "https://app.techuonthechair.com/" }],
   },
   {
