@@ -34,11 +34,15 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Danial Kordmodanlou",
     locale: "en_US",
-    // Explicit preview image so crawlers don’t grab a random project thumbnail.
+    // Explicit preview images (most platforms use the first).
     images: [
       {
         url: "/images/figure_headphone.gif",
         alt: "DigiHuman — real-time markerless mocap",
+      },
+      {
+        url: "/images/Dani.jpg",
+        alt: "Danial Kordmodanlou",
       },
     ],
   },
@@ -47,7 +51,7 @@ export const metadata: Metadata = {
     title: "Danial Kordmodanlou",
     description:
       "ML × real-time systems × game engineering. DigiHuman, DreamForge, VR firefighter trainer, LLM CV builder.",
-    images: ["/images/figure_headphone.gif"],
+    images: ["/images/figure_headphone.gif", "/images/Dani.jpg"],
   },
 };
 
