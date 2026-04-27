@@ -153,6 +153,19 @@ body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
+/**
+ * Brief highlight applied to a scroll-target right after the user clicks
+ * a hero station. Pulses the cyan accent rim, then fades.
+ */
+.anchor-target {
+  animation: anchor-pulse 1.4s ease-out 1;
+}
+@keyframes anchor-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(127, 255, 212, 0.55); }
+  40%  { box-shadow: 0 0 0 6px rgba(127, 255, 212, 0.30); }
+  100% { box-shadow: 0 0 0 0 rgba(127, 255, 212, 0);     }
+}
+
 .scanlines {
   background-image: repeating-linear-gradient(
     to bottom,

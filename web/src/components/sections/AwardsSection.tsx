@@ -14,7 +14,7 @@ const iconFor = (title: string) => {
 
 export function AwardsSection() {
   return (
-    <section id="awards" className="border-b border-rule">
+    <section id="awards" className="scroll-mt-16 border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
         <SectionHeader
           fullWidth

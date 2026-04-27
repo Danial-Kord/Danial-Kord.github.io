@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowUpRight, FileCode2 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { imgProjects } from "@/lib/site-data";
 import { SectionHeader } from "./SectionHeader";
 
@@ -9,20 +8,20 @@ export function ProjectsSection() {
   const rest = imgProjects.filter((p) => !p.feature);
 
   return (
-    <section id="portfolio" className="border-b border-rule">
+    <section id="portfolio" className="scroll-mt-16 border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
         <SectionHeader
           num="002"
           kicker="portfolio"
           title="Projects."
-          intro="Selected work across game development, ML, computer vision, and systems. The four highlighted projects have full case studies; the rest live here as a gallery."
+          intro="Selected work across game development, ML, computer vision, and systems."
         >
           <div className="grid gap-6">
             {feature && <FeatureCard p={feature} />}
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {rest.map((p) => (
-                <ProjectCard key={p.title} p={p} />
+                <ProjectCard key={p.slug} p={p} />
               ))}
             </div>
           </div>
@@ -35,7 +34,10 @@ export function ProjectsSection() {
 /* -------------------- feature (DigiHuman, full-width) -------------------- */
 function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
   return (
-    <article className="group relative grid overflow-hidden border border-rule bg-transparent lg:grid-cols-[1.4fr_1fr]">
+    <article
+      id={`project-${p.slug}`}
+      className="group relative grid scroll-mt-24 overflow-hidden border border-rule bg-transparent lg:grid-cols-[1.4fr_1fr]"
+    >
       {/* image */}
       <div className="relative aspect-[16/9] overflow-hidden border-b border-rule lg:aspect-auto lg:border-b-0 lg:border-r">
         {p.image.startsWith("http") ? (
@@ -64,33 +66,25 @@ function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
       {/* body */}
       <div className="glass-inner flex flex-col justify-between gap-6 p-7">
         <div>
-          <div className="label mb-3">case study · open-source</div>
+          <div className="label mb-3">open-source</div>
           <h3 className="font-display text-3xl tracking-tight text-fg">{p.title}</h3>
           <p className="mt-3 text-fg-dim">{p.blurb}</p>
           <div className="mt-4 font-mono text-[11.5px] tracking-[0.04em] text-fg-mute">
             {p.stack}
           </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          {p.caseStudySlug && (
-            <Link
-              href={`/work/${p.caseStudySlug}`}
-              className="group/btn inline-flex items-center gap-2 border border-accent bg-accent/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-bg"
-            >
-              <FileCode2 className="h-3.5 w-3.5" /> read case study
-            </Link>
-          )}
-          {p.href && (
+        {p.href && (
+          <div className="flex flex-wrap gap-3">
             <a
               href={p.href}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 border border-rule-strong px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-fg transition-colors hover:border-accent hover:text-accent"
+              className="inline-flex items-center gap-2 border border-accent bg-accent/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-bg"
             >
-              repo <ArrowUpRight className="h-3.5 w-3.5" />
+              repo / demo <ArrowUpRight className="h-3.5 w-3.5" />
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </article>
   );
@@ -120,11 +114,6 @@ function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
           />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/50 via-transparent to-transparent" />
-        {p.caseStudySlug && (
-          <div className="glass-inner pointer-events-none absolute left-2 top-2 border border-accent/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent">
-            case study
-          </div>
-        )}
       </div>
 
       {/* body */}
@@ -145,20 +134,23 @@ function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
     </article>
   );
 
-  // priority: case study > external link > no link
-  if (p.caseStudySlug) {
-    return (
-      <Link href={`/work/${p.caseStudySlug}`} className="block h-full">
-        {inner}
-      </Link>
-    );
-  }
+  // wrap in an anchor if a repo/demo URL exists; otherwise just the article (still anchor-targetable)
   if (p.href) {
     return (
-      <a href={p.href} target="_blank" rel="noreferrer" className="block h-full">
+      <a
+        id={`project-${p.slug}`}
+        href={p.href}
+        target="_blank"
+        rel="noreferrer"
+        className="block h-full scroll-mt-24"
+      >
         {inner}
       </a>
     );
   }
-  return inner;
+  return (
+    <div id={`project-${p.slug}`} className="scroll-mt-24">
+      {inner}
+    </div>
+  );
 }

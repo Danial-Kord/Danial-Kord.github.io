@@ -3,10 +3,19 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sparkles, Html, AdaptiveDpr, AdaptiveEvents } from "@react-three/drei";
 import { useRef, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import * as THREE from "three";
 
 import { projects } from "@/lib/projects";
+
+/** Smoothly scroll to an element id on the current page. */
+function scrollToAnchor(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  // brief glow on the target so the user sees what was clicked
+  el.classList.add("anchor-target");
+  window.setTimeout(() => el.classList.remove("anchor-target"), 1400);
+}
 
 /* ---------- floor: dim infinite grid (custom shader) ---------- */
 function GridFloor() {
@@ -67,14 +76,14 @@ function Station({
   position,
   hue,
   title,
-  slug,
+  anchor,
   onSelect,
 }: {
   position: [number, number, number];
   hue: string;
   title: string;
-  slug: string;
-  onSelect: (slug: string) => void;
+  anchor: string;
+  onSelect: (anchor: string) => void;
 }) {
   const sphereRef = useRef<THREE.Mesh>(null);
   const haloRef = useRef<THREE.Mesh>(null);
@@ -115,7 +124,7 @@ function Station({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          onSelect(slug);
+          onSelect(anchor);
         }}
       >
         <icosahedronGeometry args={[0.18, 1]} />
@@ -190,8 +199,7 @@ function CameraRig() {
 
 /* ---------- whole scene ---------- */
 function Scene() {
-  const router = useRouter();
-  const handleSelect = (slug: string) => router.push(`/work/${slug}`);
+  const handleSelect = (anchor: string) => scrollToAnchor(anchor);
 
   return (
     <>
@@ -221,7 +229,7 @@ function Scene() {
           position={p.station}
           hue={p.hue}
           title={p.title}
-          slug={p.slug}
+          anchor={p.anchor}
           onSelect={handleSelect}
         />
       ))}

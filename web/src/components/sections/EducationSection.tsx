@@ -3,7 +3,7 @@ import { SectionHeader } from "./SectionHeader";
 
 export function EducationSection() {
   return (
-    <section id="education" className="border-b border-rule">
+    <section id="education" className="scroll-mt-16 border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
         <SectionHeader num="004" kicker="education" title="Education.">
           <div className="grid gap-6 lg:grid-cols-3">

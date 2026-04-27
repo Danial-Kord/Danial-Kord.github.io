@@ -5,6 +5,8 @@
  */
 
 export type ImgProject = {
+  /** stable id used as anchor target (id={`project-${slug}`}) */
+  slug: string;
   title: string;
   blurb: string;
   stack: string;
@@ -12,12 +14,11 @@ export type ImgProject = {
   href?: string;
   /** if true, render as wide hero card spanning the full row */
   feature?: boolean;
-  /** marks a project that has its own deep case study */
-  caseStudySlug?: string;
 };
 
 export const imgProjects: ImgProject[] = [
   {
+    slug: "digihuman",
     title: "DigiHuman",
     blurb:
       "Real-time markerless mocap pipeline. BlazePose + MediaPipe drive a Unity humanoid; PIFuHD + RigNet turn one photo into a rigged 3D character.",
@@ -25,18 +26,18 @@ export const imgProjects: ImgProject[] = [
     image: "/images/figure_headphone.gif",
     href: "https://github.com/Danial-Kord/DigiHuman",
     feature: true,
-    caseStudySlug: "digihuman",
   },
   {
+    slug: "dreamforge",
     title: "DreamForge",
     blurb:
       "AI game engine that procedurally generates 3D worlds from text prompts. Built the wall-cutout system, cinematic camera, and CI/CD.",
     stack: "Unity · C# · LLMs · Docker · Azure",
     image: "/images/dreamForge.png",
     href: "https://www.youtube.com/watch?v=O6LgZn5o7ko",
-    caseStudySlug: "dreamforge",
   },
   {
+    slug: "hypervigilance",
     title: "HYPERVIGILANCE",
     blurb:
       "GameCraft 2025 jam demo — narrative experience inside the mind of a character with paranoia disorder. Mood, perception shifts, trust mechanics.",
@@ -45,6 +46,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://tahaelmi.itch.io/hypervigilance",
   },
   {
+    slug: "techu",
     title: "Techu",
     blurb:
       "Strategic multiplayer card game. Reinforcement-learning AI opponent; Photon + PlayFab for online play.",
@@ -53,6 +55,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://techuonthechair.com/",
   },
   {
+    slug: "backgammon3d",
     title: "Backgammon3D",
     blurb:
       "Turn-based multiplayer with offline + AI modes. Monte Carlo tree search drives AI decisions; Photon manages the online platform.",
@@ -60,6 +63,7 @@ export const imgProjects: ImgProject[] = [
     image: "/images/Backgammon 3D.jpg",
   },
   {
+    slug: "ai-visualization",
     title: "AI Visualization",
     blurb:
       "Visual content created during my AI-course teaching assistant role. Animations published on YouTube to explain core concepts.",
@@ -68,6 +72,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/Artificial-Intelligence-Visualization",
   },
   {
+    slug: "search-engine",
     title: "Search Engine",
     blurb:
       "Information-retrieval course project — built a search engine from scratch. KNN classification, K-means preprocessing, tf-idf, champion lists.",
@@ -76,6 +81,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/Information_Retrieval_Search_Engine",
   },
   {
+    slug: "poem-writer-detector",
     title: "Poem Writer Detector",
     blurb:
       "NLP project guessing the author of a poem from text. Bigram + unigram language models reach 86% accuracy.",
@@ -84,6 +90,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/AI_Cource_Projects",
   },
   {
+    slug: "solar-system-opengl",
     title: "Solar System (OpenGL)",
     blurb:
       "Real-time solar-system simulation written in raw OpenGL. Orbital mechanics, lighting, textured planets.",
@@ -92,6 +99,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/Solar-System-OpenGL",
   },
   {
+    slug: "panorama",
     title: "Panorama",
     blurb:
       "Panoramic image-stitching app for seamless 360° images. Feature detection + matching with OpenCV; intuitive upload UI.",
@@ -100,6 +108,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/Panorama",
   },
   {
+    slug: "deep-learning-practices",
     title: "Deep Learning Practices",
     blurb:
       "Course-based DL learning track — hand-digit recognition, MNIST GANs, cat/dog classifiers — at both low (NumPy) and high (Keras/TF) levels.",
@@ -108,6 +117,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/deep-learning-studies.git",
   },
   {
+    slug: "url-shortener",
     title: "URL Shortener SaaS",
     blurb:
       "URL-shortener service in Java + MySQL. Containerized with Docker and orchestrated on Kubernetes for concurrent multi-instance ops.",
@@ -116,6 +126,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/Cloud-Computing-Project.git",
   },
   {
+    slug: "xv6",
     title: "XV6",
     blurb:
       "Modified the XV6 OS — added syscalls, swapped CPU scheduling algorithms, and customized kernel behavior.",
@@ -124,6 +135,7 @@ export const imgProjects: ImgProject[] = [
     href: "https://github.com/Danial-Kord/XV6",
   },
   {
+    slug: "ringball",
     title: "RingBall",
     blurb:
       "Hyper-casual iOS game using 3D mesh pathfinding for smooth on-mesh movement.",
@@ -131,6 +143,7 @@ export const imgProjects: ImgProject[] = [
     image: "/images/ringball.jpg",
   },
   {
+    slug: "jnormal-tanks",
     title: "JNormal Tanks",
     blurb:
       "First game I ever shipped — a multiplayer P2P tank game in pure Java. Final project for advanced programming.",
@@ -138,6 +151,7 @@ export const imgProjects: ImgProject[] = [
     image: "/images/tanks.jpg",
   },
   {
+    slug: "hanoi-towers",
     title: "Hanoi Towers",
     blurb:
       "My very first programming project. The C-language Tower of Hanoi that lit the spark for everything since.",

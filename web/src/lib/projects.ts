@@ -17,6 +17,8 @@ export type Project = {
   station: [number, number, number];
   /** accent color for the hero hologram */
   hue: string;
+  /** id of the on-page section/card that the station should scroll to */
+  anchor: string;
 };
 
 export const projects: Project[] = [
@@ -40,6 +42,7 @@ export const projects: Project[] = [
     ],
     station: [-2.6, 0.8, -3.5],
     hue: "#7fffd4",
+    anchor: "project-digihuman",
   },
   {
     slug: "dreamforge",
@@ -62,6 +65,7 @@ export const projects: Project[] = [
     ],
     station: [2.4, 0.6, -5.2],
     hue: "#ff5c8a",
+    anchor: "project-dreamforge",
   },
   {
     slug: "vr-firefighter",
@@ -83,6 +87,7 @@ export const projects: Project[] = [
     ],
     station: [-3.0, 0.5, -7.4],
     hue: "#f5c451",
+    anchor: "experience",
   },
   {
     slug: "llm-cv-builder",
@@ -104,6 +109,7 @@ export const projects: Project[] = [
     ],
     station: [2.8, 0.9, -9.2],
     hue: "#7fb8ff",
+    anchor: "experience",
   },
 ];
 

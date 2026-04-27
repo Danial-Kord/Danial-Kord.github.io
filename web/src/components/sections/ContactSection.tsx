@@ -4,7 +4,7 @@ import { SectionHeader } from "./SectionHeader";
 
 export function ContactSection() {
   return (
-    <section id="contact">
+    <section id="contact" className="scroll-mt-16">
       <div className="mx-auto max-w-[1240px] px-5 py-24">
         <SectionHeader num="007" kicker="contact" title="Let's talk.">
           <div className="grid gap-12 lg:grid-cols-[1fr_auto]">
