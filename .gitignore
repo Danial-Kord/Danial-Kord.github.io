@@ -1,0 +1,22 @@
+/Latex/resume.pdf
+/Latex/resume.aux
+/Latex/resume.log
+/Latex/resume.out
+./Cover-Letters/
+
+# CV pipeline
+CV/generated/
+cv_pipeline/__pycache__/
+
+# Next.js CV UI (cv-ui/)
+cv-ui/node_modules/
+cv-ui/.next/
+cv-ui/.env.local
+__pycache__/
+.env
+
+# Local referrals/outreach SQLite DB
+CV-Job-System/referrals.db
+CV-Job-System/referrals.db-journal
+CV-Job-System/referrals.db-wal
+CV-Job-System/referrals.db-shm
