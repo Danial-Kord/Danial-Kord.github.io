@@ -184,6 +184,28 @@ body {
   color: var(--fg-dim);
 }
 
+/**
+ * Label rendered next to each Three.js planet via Drei <Html>.
+ * Treasure-Planet hologram vibe: amber outline rule under monospace caps.
+ */
+.planet-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.55;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 180ms ease, letter-spacing 200ms ease;
+  pointer-events: none;
+}
+.planet-label.is-active {
+  opacity: 1;
+  letter-spacing: 0.28em;
+}
+
 .tickline {
   background-image: linear-gradient(to right, var(--rule-strong) 1px, transparent 1px);
   background-size: 8px 100%;

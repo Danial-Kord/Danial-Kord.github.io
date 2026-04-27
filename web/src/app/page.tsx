@@ -1,4 +1,4 @@
-import { Hero } from "@/components/hero/Hero";
+import { Header3D } from "@/components/header3d/Header3D";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 import { ExperienceSection } from "@/components/sections/ExperienceSection";
@@ -10,7 +10,7 @@ import { ContactSection } from "@/components/sections/ContactSection";
 export default function Home() {
   return (
     <>
-      <Hero />
+      <Header3D />
       <AboutSection />
       <ProjectsSection />
       <ExperienceSection />
