@@ -95,13 +95,15 @@ function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
   const inner = (
     <article className="group relative flex h-full flex-col overflow-hidden border border-rule bg-transparent transition-colors hover:border-accent/50">
       {/* image */}
-      <div className="relative aspect-[16/10] overflow-hidden border-b border-rule">
+      <div
+        className={`relative aspect-[16/10] overflow-hidden border-b border-rule ${p.imageFit === "contain" ? "bg-bg/40 p-4" : ""}`}
+      >
         {p.image.startsWith("http") ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={p.image}
             alt={p.title}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+            className={`h-full w-full transition-transform duration-700 group-hover:scale-[1.05] ${p.imageFit === "contain" ? "object-contain" : "object-cover"}`}
           />
         ) : (
           <Image
@@ -109,7 +111,7 @@ function ProjectCard({ p }: { p: (typeof imgProjects)[number] }) {
             alt={p.title}
             fill
             sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+            className={`transition-transform duration-700 group-hover:scale-[1.05] ${p.imageFit === "contain" ? "object-contain" : "object-cover"}`}
             unoptimized={p.image.endsWith(".gif")}
           />
         )}

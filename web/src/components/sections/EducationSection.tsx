@@ -6,16 +6,16 @@ export function EducationSection() {
     <section id="education" className="scroll-mt-16 border-b border-rule">
       <div className="mx-auto max-w-[1240px] px-5 py-20">
         <SectionHeader num="004" kicker="education" title="Education.">
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-8">
             {education.map((e) => (
               <article
                 key={e.school}
-                className="glass-card flex flex-col border border-rule p-6"
+                className="glass-card flex w-full flex-col border border-rule p-6"
               >
                 <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-fg-mute">
                   {e.when}
                 </div>
-                <div className="mt-3 flex items-baseline gap-2">
+                <div className="mt-3 flex flex-col gap-1">
                   <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
                     {e.degree}
                   </span>

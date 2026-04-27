@@ -10,10 +10,12 @@ export type ImgProject = {
   title: string;
   blurb: string;
   stack: string;
-  image: string;            // path under /public
+  image: string;            // path under /public or absolute URL
   href?: string;
   /** if true, render as wide hero card spanning the full row */
   feature?: boolean;
+  /** `contain` for logos / transparent PNGs (default cover) */
+  imageFit?: "cover" | "contain";
 };
 
 export const imgProjects: ImgProject[] = [
@@ -51,8 +53,10 @@ export const imgProjects: ImgProject[] = [
     blurb:
       "Strategic multiplayer card game. Reinforcement-learning AI opponent; Photon + PlayFab for online play.",
     stack: "Unity3D · Photon · PlayFab · C# · RL",
-    image: "/images/techu-logo.png",
-    href: "https://app.techuonthechair.com/",
+    image:
+      "https://techuonthechair.com/wp-content/uploads/2024/08/TechuLogoPng.png",
+    href: "https://techuonthechair.com/",
+    imageFit: "contain",
   },
   {
     slug: "backgammon3d",
@@ -181,12 +185,12 @@ export const experience: Experience[] = [
     org: "Vector Institute",
     role: "Machine Learning Associate (MLA)",
     blurb:
-      "Partnering with DXTR on a real-time VR firefighter training MVP focused on skill-deviation detection from headset telemetry.",
+      "Partnering with DXTR to develop an MVP for a real-time VR firefighter training system, focusing on skill deviation detection using headset telemetry.",
     bullets: [
-      "Built an LSTM-based model that predicts and detects skill deviations on the last step of a sequence window.",
-      "Designed an LLM-driven coaching layer that turns deviation signals into immediate natural-language feedback.",
-      "Engineered a redundant full-body pose pipeline on the MetaQuest SDK for cross-firmware reliability.",
-      "Collaborated on data integration and evaluation of pose-deviation models for high-fidelity training scenarios.",
+      "Developed an LSTM-based model to predict and detect skill deviations based on the last step of the sequence.",
+      "Designed and architected an LLM-driven coaching layer that interprets pose deviation data to provide immediate, natural-language feedback to trainees.",
+      "Engineered a redundant full-body pose collection pipeline using Meta Quest SDK to ensure cross-platform compatibility and reliable telemetry capture.",
+      "Collaborated on data integration and evaluation of pose deviation models for high-fidelity training scenarios.",
     ],
   },
   {
@@ -196,22 +200,22 @@ export const experience: Experience[] = [
     blurb:
       "Core contributor to DreamForge, an AI-driven game engine that procedurally generates complete 3D game worlds from text prompts.",
     bullets: [
-      "Procedural wall-cutout system — CSG boolean subtraction with four interchangeable silhouette strategies (convex hull, radial ray casting, voxel boundary tracing, alpha-shape concave hull), BFS island filtering, ear-clipping triangulation, mesh extrusion.",
-      "CI/CD pipelines: Docker, Azure Container Instances, .NET, GitHub Actions, Slack — automated exception analysis, PR creation, deploy notifications.",
-      "Multi-mode Cinemachine camera: adaptive framing, multi-candidate selection with occlusion filtering, bone-based NPC framing, 3-ray spherecast occlusion fading, velocity-damped yaw constraints.",
-      "Polygon-based room-shape system with grid flood-fill validation and reusable geometry utilities.",
+      "Implemented a procedural wall cutout system using CSG boolean subtraction with four interchangeable silhouette strategies (convex hull, radial ray casting, voxel boundary tracing, alpha-shape concave hull), BFS connected-component filtering, and ear-clipping triangulation for mesh extrusion.",
+      "Built CI/CD pipelines using Docker, Azure Container Instances, .NET, GitHub Actions, and Slack webhooks for automated exception analysis, PR creation, and deployment notifications.",
+      "Architected a multi-mode camera system using Cinemachine with adaptive framing optimization, multi-candidate camera selection with occlusion filtering, bone-based NPC framing, 3-ray spherecast occlusion fading, and dynamic room-geometry yaw constraints with velocity damping.",
+      "Designed a polygon-based room shape system with grid-based flood fill validation and geometry utilities (segment intersection, polygon scaling, convex hull).",
     ],
-    link: { label: "playdreamforge.com", href: "https://www.playdreamforge.com/" },
+    link: { label: "DreamForge", href: "https://www.playdreamforge.com/" },
   },
   {
     when: "Jan 2024 — present",
     org: "York University",
     role: "Research Assistant & Teaching Assistant",
     blurb:
-      "VR and motion-capture research using Meta Quest, ARKit, Unity3D, and Unreal Engine.",
+      "VR and motion-capture projects using Meta Quest, ARKit, Unity3D, and Unreal Engine.",
     bullets: [
-      "Designed VR-illusion experiments for the Cubics project; built the Deep app for immersive iOS-based telecommunication.",
-      "Java OOP labs — TA across four semesters.",
+      "Designed experiments for VR illusions in the Cubics project and developed the Deep app for immersive iOS-based telecommunication.",
+      "Taught Java-based object-oriented programming labs for four semesters.",
     ],
   },
   {
@@ -219,10 +223,10 @@ export const experience: Experience[] = [
     org: "TectoTrack",
     role: "Software Developer",
     blurb:
-      "Crowd-simulation systems for high-traffic environments (airports, stations, malls) in Unity3D.",
+      "Simulation systems for high-traffic environments such as airports, train stations, and malls using Unity3D.",
     bullets: [
-      "Integrated pathfinding for adaptive, efficient agent navigation.",
-      "Built tooling to visualize and modify agent behavior in real time.",
+      "Integrated pathfinding algorithms to enable adaptive and efficient crowd navigation.",
+      "Created tools to visualize and modify agent behavior in real time for simulation control and testing.",
     ],
   },
   {
@@ -230,33 +234,37 @@ export const experience: Experience[] = [
     org: "Techu",
     role: "Lead Unity3D Game Developer",
     blurb:
-      "Led development of Techu, a strategic card game — gameplay, AI, and live-ops integrations.",
+      "Led development of Techu, a strategic card game — gameplay, AI, and multiplayer integrations.",
     bullets: [
-      "Online multiplayer via Photon + PlayFab.",
-      "RL-based AI opponent agent.",
+      "Integrated online multiplayer using Photon and PlayFab, improving engagement and online interaction.",
+      "Developed an AI agent using reinforcement learning principles.",
     ],
-    link: { label: "techuonthechair.com", href: "https://techuonthechair.com/" },
-    cta: [{ label: "Play now", href: "https://app.techuonthechair.com/" }],
+    link: { label: "Techu project", href: "https://techuonthechair.com/" },
+    preview: {
+      image:
+        "https://techuonthechair.com/wp-content/uploads/2024/08/TechuLogoPng.png",
+      alt: "Techu on the Chair logo",
+    },
   },
   {
     when: "Jan 2022 — present",
     org: "IAESTE",
     role: "Full-Stack Developer (volunteer)",
     blurb:
-      "Volunteer full-stack work for the International Association for the Exchange of Students for Technical Experience.",
+      "Volunteer full-stack developer for IAESTE (International Association for the Exchange of Students for Technical Experience).",
     bullets: [
-      "Built and maintained non-profit web applications in Vue.js and Django.",
+      "Developed and maintained web applications for non-profit projects with Vue.js and Django, improving functionality and user experience.",
     ],
   },
   {
     when: "Sep 2017 — Aug 2022",
-    org: "Amirkabir University (AUT)",
+    org: "Amirkabir University of Technology (AUT)",
     role: "Teaching Assistant & Technical Staff",
     blurb:
-      "Two-year technical-staff role at AUT Game Development Events; TA across multiple courses.",
+      "Technical staff for AUT Game Development Events for two consecutive years — organizing technical aspects, content, and tutoring — plus teaching assistant roles across several courses.",
     bullets: [
-      "Organized event tech, prepared content, tutored participants.",
-      "TA'd Principles of AI, Advanced Java OOP, and Fundamentals of C.",
+      "Organized and managed event technology, prepared participant materials, and tutored attendees to promote game development education and community.",
+      "Assisted in teaching Principles of Artificial Intelligence, Advanced Computer Programming with Java, and Fundamentals of Computer Programming with C.",
     ],
   },
   {
@@ -264,14 +272,14 @@ export const experience: Experience[] = [
     org: "Sepantab",
     role: "Intern",
     blurb:
-      "Pandemic-summer internship at an IoT startup. Shipped an online mobile game for cafe customers to play while orders are prepared.",
+      "Internship at Sepantab, an IoT startup, during the first summer after the pandemic began. Built an online mobile game for café customers to use while waiting for orders — simple engagement and light rewards while orders are prepared.",
   },
   {
     when: "Jan 2019 — Apr 2020",
     org: "Pherma",
     role: "Game Developer",
     blurb:
-      "Hyper-casual and adventure games for iOS, Android, and Windows in a small, friendly team.",
+      "Game developer on a small team shipping hyper-casual and adventure games for iOS, Android, and Windows.",
   },
 ];
 
@@ -288,13 +296,13 @@ export type Education = {
 
 export const education: Education[] = [
   {
-    when: "2024 — present",
+    when: "2024 — 2025",
     degree: "MSc",
     field: "Computer Science",
-    school: "York University, Toronto",
+    school: "York University, Toronto, Ontario",
     blurb:
-      "Exploring the intersection of VR and telecommunication via facial expression and motion capture on 3D characters. Working in Unity3D, Unreal, and ARKit; pushing C#/C++ depth.",
-    stats: ["CGPA 4.0 / 4.0"],
+      "Master's work at the intersection of virtual reality and telecommunication: facial expression and motion capture on 3D virtual characters. Leverages Unity3D, Unreal Engine, and ARKit to bridge virtual and real-world interaction — pushing C# and C++ depth for game development and XR.",
+    stats: ["CGPA: 4.0 / 4.0"],
   },
   {
     when: "2017 — 2022",
@@ -302,17 +310,21 @@ export const education: Education[] = [
     field: "Computer Engineering",
     school: "Amirkabir University of Technology (AUT)",
     blurb:
-      "Pivoted from gameplay to AI mid-degree. Took GANs and DNNs deep through Stanford and Coursera; finished with an eight-month thesis on pose estimation, automatic 3D animation, and rigged-mesh generation.",
-    stats: ["GPA 3.88 / 4.0", "CGPA 3.73 / 4.0", "140 / 140 credits"],
+      "Early focus on game development; after an AI course, deepened into generative models via Stanford and Coursera (GANs, deep networks) during the pandemic. Fascinated by generative models in computer vision. Thesis (eight months): pose estimation, automatic 3D animation generation, and 3D rigged character mesh generation.",
+    stats: [
+      "Relevant courses: Data Structures 18.25, Advanced Programming 18.5, Principles of Computer & Programming 20, Information Retrieval 18.75, Data Mining 18.1, Software Testing 19.9",
+      "GPA: 3.88 / 4.0",
+      "CGPA: 3.73 / 4.0 (17.41 / 20.0) — 140 / 140 credits",
+    ],
   },
   {
     when: "2013 — 2017",
-    degree: "Diploma",
+    degree: "High School Diploma",
     field: "Mathematics & Physics",
     school: "Allameh Helli (NODET)",
     blurb:
-      "Robotics workshops, open-weight football robots, RoboCup competition.",
-    stats: ["CGPA 4.0 / 4.0 (19.56 / 20)"],
+      "Completed in NODET (National Organization for Development of Exceptional Talents). Robotics workshops with open-weight football robots; competed at RoboCup and placed 4th of 32 teams.",
+    stats: ["CGPA: 4.0 / 4.0 (19.56 / 20.0)"],
   },
 ];
 
@@ -332,18 +344,18 @@ export const awards: Award[] = [
   },
   {
     year: "2025",
-    title: "Boson AI + MScAC Hackathon — Semi-finalist",
+    title: "Boson AI + MScAC Hackathon (semi-finalist)",
     body: "Advanced to semi-finals in a competitive AI hackathon.",
   },
   {
     year: "2025",
     title: "47th European Conference on Visual Perception (ECVP 2025)",
-    body: "Mainz, Germany. Presented research on depth perception, stereopsis, and motion parallax in VR.",
+    body: "Mainz, Germany — presented research on depth perception, stereopsis, and motion parallax in VR.",
   },
   {
     year: "2024",
     title: "Fully funded MSc, York University",
-    body: "Full scholarship for the Master's in Computer Science.",
+    body: "Full scholarship for Master's in Computer Science.",
   },
   {
     year: "2023",
@@ -352,13 +364,13 @@ export const awards: Award[] = [
   },
   {
     year: "2023",
-    title: "Top 0.5% — AI Graduate National Exam",
-    body: "Exceptional performance in the national AI graduate examination.",
+    title: "Top 0.5% — AI graduate national exam",
+    body: "Exceptional performance in the national artificial intelligence examination.",
   },
   {
     year: "2015",
-    title: "4th Place — National RoboCup",
-    body: "Competed among 32 teams in robotics.",
+    title: "4th place — National RoboCup",
+    body: "Ranked 4th among 32 teams in the robotics competition.",
   },
 ];
 
@@ -400,5 +412,5 @@ export const bio = {
   instagram: "https://www.instagram.com/danial._.km",
   cv: "https://drive.google.com/file/d/1WE7IhSHCR79zJD5mhZ3sAkDQkbu7MgBx/view?usp=sharing",
   about:
-    "MSc Computer Science at York University (Toronto), focused on Virtual Reality — facial expression and motion capture for 3D characters with Unity3D, Unreal, and ARKit. I build hybrid systems where ML, real-time graphics, and game engines overlap: real-time mocap pipelines, AI-driven game engines, VR training, and LLM systems.",
+    "MSc Computer Science at York University (Toronto, Ontario), focused on VR — facial expression and motion capture for 3D virtual characters with Unity3D, Unreal Engine, and ARKit, bridging virtual and real-world interaction. I build hybrid systems where ML, real-time graphics, and game engines meet: mocap pipelines, AI-driven engines, VR training, and LLM systems.",
 };
