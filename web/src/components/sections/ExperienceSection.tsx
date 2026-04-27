@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Play } from "lucide-react";
 import { experience } from "@/lib/site-data";
 import { SectionHeader } from "./SectionHeader";
 
@@ -29,6 +29,39 @@ export function ExperienceSection() {
                     </div>
                   </div>
                   <div className="text-fg-dim">
+                    {/* preview image — when provided */}
+                    {e.preview && (
+                      <a
+                        href={e.cta?.[0]?.href ?? e.link?.href ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Open ${e.org} preview`}
+                        className="group relative mb-4 block aspect-[16/9] max-w-[480px] overflow-hidden border border-rule"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={e.preview.image}
+                          alt={e.preview.alt}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg/60 via-transparent to-transparent" />
+                        <div className="pointer-events-none absolute left-2.5 top-2.5 border border-accent/40 bg-bg/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent backdrop-blur">
+                          ● live
+                        </div>
+                        {/* center play affordance — only visible if a CTA exists */}
+                        {e.cta && e.cta.length > 0 && (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center opacity-95 transition-transform group-hover:scale-105"
+                            aria-hidden
+                          >
+                            <span className="flex h-14 w-14 items-center justify-center border border-accent bg-bg/70 text-accent backdrop-blur transition-colors group-hover:bg-accent group-hover:text-bg">
+                              <Play className="ml-0.5 h-6 w-6" fill="currentColor" />
+                            </span>
+                          </div>
+                        )}
+                      </a>
+                    )}
+
                     {e.blurb && <p className="mb-3">{e.blurb}</p>}
                     {e.bullets && (
                       <ul className="space-y-1.5">
@@ -40,15 +73,33 @@ export function ExperienceSection() {
                         ))}
                       </ul>
                     )}
-                    {e.link && (
-                      <a
-                        href={e.link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-accent hover:underline"
-                      >
-                        {e.link.label} <ArrowUpRight className="h-3 w-3" />
-                      </a>
+
+                    {/* CTA buttons + secondary site link */}
+                    {(e.link || (e.cta && e.cta.length > 0)) && (
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        {e.cta?.map((c) => (
+                          <a
+                            key={c.href}
+                            href={c.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group inline-flex items-center gap-2 border border-accent bg-accent/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-bg"
+                          >
+                            <Play className="h-3 w-3" fill="currentColor" />
+                            {c.label}
+                          </a>
+                        ))}
+                        {e.link && (
+                          <a
+                            href={e.link.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-accent hover:underline"
+                          >
+                            {e.link.label} <ArrowUpRight className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

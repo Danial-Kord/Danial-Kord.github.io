@@ -23,6 +23,9 @@ import * as THREE from "three";
 
 import { sections, type SectionPlanet } from "./data";
 
+/** Plain tuple — keeps `THREE.Vector3` out of the parent component's bundle. */
+export type V3 = [number, number, number];
+
 /* ------------------------------ sun ------------------------------ */
 function Sun() {
   const core = useRef<THREE.Mesh>(null!);
@@ -102,7 +105,7 @@ function Planet({
 }: {
   p: SectionPlanet;
   selectedAnchor: string | null;
-  onSelect: (anchor: string) => void;
+  onSelect: (anchor: string, position: V3) => void;
   onHoverChange: (p: SectionPlanet | null) => void;
 }) {
   const orbitRef = useRef<THREE.Group>(null!);
@@ -145,7 +148,12 @@ function Planet({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          onSelect(p.anchor);
+          // Snapshot the planet's world position at click time so the camera
+          // can fly to where the user clicked, not where it'll be when the
+          // animation arrives.
+          const wp = new THREE.Vector3();
+          e.eventObject.getWorldPosition(wp);
+          onSelect(p.anchor, [wp.x, wp.y, wp.z]);
         }}
       >
         <sphereGeometry args={[p.size, 24, 18]} />
@@ -194,31 +202,67 @@ function Planet({
 
 /* ------------------------------ camera rig ------------------------------ */
 /**
- * Mouse parallax + click "FOV kick".
- * When `zoomKick` is true, FOV briefly narrows and the camera dollies in.
+ * Mouse parallax in idle. When `target` is set (after a planet click), the
+ * camera flies toward the planet's world position and frames it from
+ * slightly behind/above the planet relative to the sun. FOV narrows for
+ * a cinematic zoom feel. Releasing `target` returns to baseline.
  */
-function CameraRig({ zoomKick }: { zoomKick: boolean }) {
+function CameraRig({ target }: { target: V3 | null }) {
   const { camera, mouse, size } = useThree();
-  const baselineFov = 52;
-  const kickFov = 38;
+
+  // Reusable working vectors — avoid per-frame allocation
+  const targetVec = useRef(new THREE.Vector3());
+  const desiredPos = useRef(new THREE.Vector3());
+  const lookAtVec = useRef(new THREE.Vector3());
+  const offset = useRef(new THREE.Vector3());
+  const origin = useRef(new THREE.Vector3(0, 0, 0));
+
+  const BASE_FOV = 52;
+  const ZOOM_FOV = 36;
+  const BASE_Y = 3.0;
+  const BASE_Z = 7.6;
 
   useFrame((_, dt) => {
-    // ---- parallax ----
-    const aspect = size.width / size.height;
-    const targetX = mouse.x * 0.55 * Math.min(1.4, aspect);
-    const targetY = 3.0 + mouse.y * 0.35;
-    camera.position.x += (targetX - camera.position.x) * Math.min(dt * 1.6, 1);
-    camera.position.y += (targetY - camera.position.y) * Math.min(dt * 1.4, 1);
-
-    // ---- zoom kick on click ----
-    const targetFov = zoomKick ? kickFov : baselineFov;
-    const targetZ = zoomKick ? 5.4 : 7.6;
     const cam = camera as THREE.PerspectiveCamera;
-    cam.fov += (targetFov - cam.fov) * Math.min(dt * 5, 1);
-    cam.position.z += (targetZ - cam.position.z) * Math.min(dt * 4, 1);
+
+    if (target) {
+      // ---- zoom toward the clicked planet ----
+      targetVec.current.set(target[0], target[1], target[2]);
+
+      // Sit ~2.4 units further along the planet's radial direction from the
+      // sun, with a slight Y lift so the planet sits comfortably mid-frame.
+      offset.current.copy(targetVec.current).normalize().multiplyScalar(2.4);
+      desiredPos.current.copy(targetVec.current).add(offset.current);
+      desiredPos.current.y += 0.7;
+
+      // Position lerp — fairly punchy
+      camera.position.lerp(desiredPos.current, Math.min(dt * 4.5, 1));
+
+      // FOV lerp
+      cam.fov += (ZOOM_FOV - cam.fov) * Math.min(dt * 5, 1);
+      cam.updateProjectionMatrix();
+
+      // Smoothly aim at the planet (slerp via lookAt + interpolated focus)
+      lookAtVec.current.lerp(targetVec.current, Math.min(dt * 6, 1));
+      cam.lookAt(lookAtVec.current);
+      return;
+    }
+
+    // ---- idle: parallax around the sun ----
+    const aspect = size.width / size.height;
+    const px = mouse.x * 0.55 * Math.min(1.4, aspect);
+    const py = BASE_Y + mouse.y * 0.35;
+
+    camera.position.x += (px - camera.position.x) * Math.min(dt * 1.6, 1);
+    camera.position.y += (py - camera.position.y) * Math.min(dt * 1.4, 1);
+    camera.position.z += (BASE_Z - camera.position.z) * Math.min(dt * 1.6, 1);
+
+    cam.fov += (BASE_FOV - cam.fov) * Math.min(dt * 4, 1);
     cam.updateProjectionMatrix();
 
-    cam.lookAt(0, 0, 0);
+    // Ease focus back to the sun
+    lookAtVec.current.lerp(origin.current, Math.min(dt * 4, 1));
+    cam.lookAt(lookAtVec.current);
   });
 
   return null;
@@ -226,14 +270,14 @@ function CameraRig({ zoomKick }: { zoomKick: boolean }) {
 
 /* ------------------------------ scene ------------------------------ */
 function Scene({
-  zoomKick,
+  target,
   selectedAnchor,
   onSelect,
   onHoverChange,
 }: {
-  zoomKick: boolean;
+  target: V3 | null;
   selectedAnchor: string | null;
-  onSelect: (anchor: string) => void;
+  onSelect: (anchor: string, position: V3) => void;
   onHoverChange: (p: SectionPlanet | null) => void;
 }) {
   return (
@@ -286,21 +330,21 @@ function Scene({
         speed={0.35}
       />
 
-      <CameraRig zoomKick={zoomKick} />
+      <CameraRig target={target} />
     </>
   );
 }
 
 /* ------------------------------ canvas wrapper ------------------------------ */
 export default function SolarScene({
-  zoomKick,
+  target,
   selectedAnchor,
   onSelect,
   onHoverChange,
 }: {
-  zoomKick: boolean;
+  target: V3 | null;
   selectedAnchor: string | null;
-  onSelect: (anchor: string) => void;
+  onSelect: (anchor: string, position: V3) => void;
   onHoverChange: (p: SectionPlanet | null) => void;
 }) {
   return (
@@ -314,7 +358,7 @@ export default function SolarScene({
       <AdaptiveEvents />
       <Suspense fallback={null}>
         <Scene
-          zoomKick={zoomKick}
+          target={target}
           selectedAnchor={selectedAnchor}
           onSelect={onSelect}
           onHoverChange={onHoverChange}

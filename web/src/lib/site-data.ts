@@ -169,6 +169,10 @@ export type Experience = {
   blurb?: string;
   bullets?: string[];
   link?: { label: string; href: string };
+  /** small visual preview shown alongside the bullets */
+  preview?: { image: string; alt: string };
+  /** extra call-to-action buttons (e.g., "Play"), rendered next to `link` */
+  cta?: { label: string; href: string }[];
 };
 
 export const experience: Experience[] = [
@@ -232,6 +236,12 @@ export const experience: Experience[] = [
       "RL-based AI opponent agent.",
     ],
     link: { label: "techuonthechair.com", href: "https://techuonthechair.com/" },
+    preview: {
+      image:
+        "https://techuonthechair.com/wp-content/uploads/2024/08/Gameplay1-1024x569.jpg",
+      alt: "Techu gameplay screenshot",
+    },
+    cta: [{ label: "Play now", href: "https://app.techuonthechair.com/" }],
   },
   {
     when: "Jan 2022 — present",

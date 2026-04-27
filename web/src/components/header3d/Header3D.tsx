@@ -19,6 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
 
 import type { SectionPlanet } from "./data";
+import type { V3 } from "./SolarScene";
 import { Fallback } from "./Fallback";
 
 const SolarScene = dynamic(() => import("./SolarScene"), {
@@ -63,31 +64,35 @@ export function Header3D() {
 
   const [hovered, setHovered] = useState<SectionPlanet | null>(null);
   const [selectedAnchor, setSelectedAnchor] = useState<string | null>(null);
-  const [zoomKick, setZoomKick] = useState(false);
+  /** world-space position of the clicked planet (snapshot at click time) */
+  const [target, setTarget] = useState<V3 | null>(null);
 
-  const kickTimer = useRef<number | null>(null);
+  const releaseTimer = useRef<number | null>(null);
   const scrollTimer = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
-      if (kickTimer.current) window.clearTimeout(kickTimer.current);
+      if (releaseTimer.current) window.clearTimeout(releaseTimer.current);
       if (scrollTimer.current) window.clearTimeout(scrollTimer.current);
     };
   }, []);
 
-  const handleSelect = useCallback((anchor: string) => {
+  const handleSelect = useCallback((anchor: string, position: V3) => {
     setSelectedAnchor(anchor);
-    setZoomKick(true);
-    // brief camera kick…
-    if (kickTimer.current) window.clearTimeout(kickTimer.current);
-    kickTimer.current = window.setTimeout(() => setZoomKick(false), 620);
-    // …then scroll while the camera is mid-zoom so the page motion feels continuous
+    setTarget(position);
+
+    // Camera flies for ~900ms — long enough to read as a real cinematic zoom,
+    // short enough that the page-scroll afterwards still feels snappy.
+    if (releaseTimer.current) window.clearTimeout(releaseTimer.current);
+    releaseTimer.current = window.setTimeout(() => {
+      setTarget(null);
+      setSelectedAnchor(null);
+    }, 900);
+
+    // Scroll fires partway through the flight so the camera-zoom and the
+    // page-scroll feel like one continuous motion arriving at the section.
     if (scrollTimer.current) window.clearTimeout(scrollTimer.current);
-    scrollTimer.current = window.setTimeout(() => {
-      scrollToAnchor(anchor);
-      // clear selected state after the scroll has clearly started
-      window.setTimeout(() => setSelectedAnchor(null), 900);
-    }, 240);
+    scrollTimer.current = window.setTimeout(() => scrollToAnchor(anchor), 380);
   }, []);
 
   // ----- non-WebGL path -----
@@ -110,7 +115,7 @@ export function Header3D() {
       {/* canvas */}
       <div className="absolute inset-0">
         <SolarScene
-          zoomKick={zoomKick}
+          target={target}
           selectedAnchor={selectedAnchor}
           onSelect={handleSelect}
           onHoverChange={setHovered}
