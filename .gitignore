@@ -20,3 +20,7 @@ CV-Job-System/referrals.db
 CV-Job-System/referrals.db-journal
 CV-Job-System/referrals.db-wal
 CV-Job-System/referrals.db-shm
+/CV/*.pdf
+/CV/*.aux
+/CV/*.log
+/CV/*.out
