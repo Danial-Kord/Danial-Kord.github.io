@@ -26,12 +26,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      # Set repo secret NEXT_PUBLIC_CHAT_API_URL to your Worker URL, e.g.
+      # https://chatbot-backend.<account-subdomain>.workers.dev
+      # (Settings → Secrets and variables → Actions)
       - name: Install and build
         working-directory: web
+        env:
+          NEXT_PUBLIC_CHAT_API_URL: ${{ secrets.NEXT_PUBLIC_CHAT_API_URL }}
         run: |
           npm ci
           npm run build
