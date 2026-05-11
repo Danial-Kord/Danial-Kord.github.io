@@ -24,3 +24,12 @@ CV-Job-System/referrals.db-shm
 /CV/*.aux
 /CV/*.log
 /CV/*.out
+
+# Cloudflare Worker (chatbot-backend)
+chatbot-worker/node_modules/
+chatbot-worker/.wrangler/
+chatbot-worker/.dev.vars
+
+# Next.js site env (only the example is committed)
+web/.env.local
+

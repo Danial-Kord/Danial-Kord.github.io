@@ -5,6 +5,7 @@ const items = [
   { href: "/#experience", label: "Experience" },
   { href: "/#awards", label: "Honors" },
   { href: "/#skills", label: "Skills" },
+  { href: "/#chat", label: "Ask" },
   { href: "/#contact", label: "Contact" },
 ];
 
