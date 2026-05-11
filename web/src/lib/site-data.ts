@@ -330,6 +330,11 @@ export type Award = {
 
 export const awards: Award[] = [
   {
+    year: "2026",
+    title: "3rd place — EvenUp-Tech Hackathon",
+    body: "Built CaseLogic with hybrid retrieval (vector + keyword), a verification layer, and agentic planning — 24-hour build.",
+  },
+  {
     year: "2025",
     title: "Lab2Market — $10,000 funding",
     body: "Secured funding for innovative research commercialization.",
