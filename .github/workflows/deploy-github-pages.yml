@@ -32,7 +32,17 @@ jobs:
 
       # Set repo secret NEXT_PUBLIC_CHAT_API_URL to your Worker URL, e.g.
       # https://chatbot-backend.<account-subdomain>.workers.dev
-      # (Settings → Secrets and variables → Actions)
+      # (Settings → Secrets and variables → Actions — value must not include quotes)
+      - name: Verify chat backend URL for production build
+        env:
+          NEXT_PUBLIC_CHAT_API_URL: ${{ secrets.NEXT_PUBLIC_CHAT_API_URL }}
+        run: |
+          if [ -z "$NEXT_PUBLIC_CHAT_API_URL" ]; then
+            echo "::warning::NEXT_PUBLIC_CHAT_API_URL is empty — production chat will be disabled until this Actions secret is set."
+          else
+            echo "NEXT_PUBLIC_CHAT_API_URL is set for build (length ${#NEXT_PUBLIC_CHAT_API_URL})."
+          fi
+
       - name: Install and build
         working-directory: web
         env:
