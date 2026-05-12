@@ -46,12 +46,7 @@ by the Worker:
 - max 20 messages per request
 - max 2000 chars per message
 - last message must have `role: "user"`
-- CORS: `https://danial-kord.github.io`, `https://www.danial-kord.github.io`,
-  and `http://localhost:3000` / `127.0.0.1:3000` by default
-- Optional: set plain-text var **`EXTRA_ALLOWED_ORIGINS`** (comma-separated)
-  in [`wrangler.toml`](wrangler.toml) or the Cloudflare dashboard for custom
-  Pages domains (must match the browser `Origin` exactly, e.g.
-  `https://danialkord.com,https://www.danialkord.com`)
+- CORS locked to `https://danial-kord.github.io` and `http://localhost:3000`
 
 ## First-time setup
 
@@ -96,8 +91,7 @@ Wrangler prints the production URL, e.g.
 `https://chatbot-backend.<your-subdomain>.workers.dev`.
 
 **GitHub Pages:** add a repository secret `NEXT_PUBLIC_CHAT_API_URL` with
-that exact URL (Settings → Secrets and variables → Actions). Paste the URL
-only — **do not wrap it in quotes.** The
+that exact URL (Settings → Secrets and variables → Actions). The
 [`deploy-github-pages.yml`](../.github/workflows/deploy-github-pages.yml)
 workflow passes it into `next build` so the static site calls the right
 Worker.
@@ -105,8 +99,8 @@ Worker.
 **Local builds:** copy [`web/.env.local.example`](../web/.env.local.example)
 to `web/.env.local` and set the same variable.
 
-After changing allowed origins (`EXTRA_ALLOWED_ORIGINS` in [`wrangler.toml`](wrangler.toml)
-or the Worker variables in the Cloudflare dashboard), run `npm run deploy` again.
+After updating CORS in [`src/index.js`](src/index.js), run `npm run deploy`
+again so production picks up new allowed origins.
 
 Then push — the Pages workflow rebuilds with the URL inlined.
 

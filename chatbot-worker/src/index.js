@@ -13,46 +13,35 @@
 
 import { PORTFOLIO_SYSTEM_PROMPT } from "./prompt.js";
 
-/** Built-in origins; extend via env.EXTRA_ALLOWED_ORIGINS (comma-separated). */
-const BUILTIN_ORIGINS = [
+const ALLOWED_ORIGINS = new Set([
   "https://danial-kord.github.io",
   "https://www.danial-kord.github.io",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-];
+]);
 
 const MAX_MESSAGES = 20;
 const MAX_CONTENT_CHARS = 2000;
 const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const GEMINI_TIMEOUT_MS = 25_000;
 
-function allowedOriginSet(env) {
-  const set = new Set(BUILTIN_ORIGINS);
-  const extra = String(env.EXTRA_ALLOWED_ORIGINS || "")
-    .split(",")
-    .map((s) => s.trim().replace(/\/+$/, ""))
-    .filter(Boolean);
-  for (const o of extra) set.add(o);
-  return set;
-}
-
-function corsHeaders(origin, allowed) {
-  const allow = origin && allowed.has(origin) ? origin : "";
+function corsHeaders(origin) {
+  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "";
   return {
     "Access-Control-Allow-Origin": allow,
-    Vary: "Origin",
+    "Vary": "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
   };
 }
 
-function json(body, init = {}, origin, allowed) {
+function json(body, init = {}, origin = "") {
   return new Response(JSON.stringify(body), {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...corsHeaders(origin, allowed),
+      ...corsHeaders(origin),
       ...(init.headers || {}),
     },
   });
@@ -134,6 +123,7 @@ async function callGemini(env, messages) {
 
   const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!reply) {
+    // Surface a useful hint when the response was filtered or empty.
     const finish = data?.candidates?.[0]?.finishReason;
     if (finish && finish !== "STOP") {
       const err = new Error(`Gemini stopped early: ${finish}.`);
@@ -148,18 +138,17 @@ async function callGemini(env, messages) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
-    const allowed = allowedOriginSet(env);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders(origin, allowed) });
+      return new Response(null, { headers: corsHeaders(origin) });
     }
 
     if (request.method !== "POST") {
-      return json({ error: "Method not allowed." }, { status: 405 }, origin, allowed);
+      return json({ error: "Method not allowed." }, { status: 405 }, origin);
     }
 
-    if (origin && !allowed.has(origin)) {
-      return json({ error: "Origin not allowed." }, { status: 403 }, origin, allowed);
+    if (origin && !ALLOWED_ORIGINS.has(origin)) {
+      return json({ error: "Origin not allowed." }, { status: 403 }, origin);
     }
 
     if (!env.GEMINI_API_KEY) {
@@ -167,7 +156,6 @@ export default {
         { error: "Server misconfigured: missing GEMINI_API_KEY." },
         { status: 500 },
         origin,
-        allowed,
       );
     }
 
@@ -175,24 +163,23 @@ export default {
     try {
       payload = await request.json();
     } catch {
-      return json({ error: "Invalid JSON body." }, { status: 400 }, origin, allowed);
+      return json({ error: "Invalid JSON body." }, { status: 400 }, origin);
     }
 
     const invalid = validate(payload);
     if (invalid) {
-      return json({ error: invalid }, { status: 400 }, origin, allowed);
+      return json({ error: invalid }, { status: 400 }, origin);
     }
 
     try {
       const reply = await callGemini(env, payload.messages);
-      return json({ reply }, { status: 200 }, origin, allowed);
+      return json({ reply }, { status: 200 }, origin);
     } catch (err) {
       const status = err?.status || 500;
       return json(
         { error: err?.message || "Upstream error." },
         { status },
         origin,
-        allowed,
       );
     }
   },
