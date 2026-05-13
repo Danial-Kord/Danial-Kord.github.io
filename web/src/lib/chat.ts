@@ -2,7 +2,7 @@
  * Client helper for the portfolio chatbot.
  *
  * Hits the Cloudflare Worker (see ../../../chatbot-worker) which proxies
- * to Gemini 3.1 Flash Lite and holds the API key + persona prompt.
+ * to Gemini 2.5 Flash Lite and holds the API key + persona prompt.
  *
  * Set NEXT_PUBLIC_CHAT_API_URL in web/.env.local at build time to your
  * deployed Worker URL, or hardcode it via the DEFAULT_CHAT_API_URL

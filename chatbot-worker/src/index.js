@@ -2,7 +2,7 @@
  * Cloudflare Worker — portfolio chatbot backend.
  *
  * Proxies multi-turn chat from danial-kord.github.io to Google's
- * Gemini 3.1 Flash Lite. Holds the API key as a secret (env.GEMINI_API_KEY)
+ * Gemini 2.5 Flash Lite. Holds the API key as a secret (env.GEMINI_API_KEY)
  * and injects a persona system prompt so the bot answers as Danial's
  * portfolio assistant.
  *
@@ -22,7 +22,7 @@ const ALLOWED_ORIGINS = new Set([
 
 const MAX_MESSAGES = 20;
 const MAX_CONTENT_CHARS = 2000;
-const GEMINI_MODEL = "gemini-3.1-flash-lite";
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_TIMEOUT_MS = 25_000;
 
 function corsHeaders(origin) {

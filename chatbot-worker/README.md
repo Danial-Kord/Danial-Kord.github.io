@@ -2,7 +2,7 @@
 
 Cloudflare Worker that proxies the portfolio chatbot on
 [danial-kord.github.io](https://danial-kord.github.io) to
-Google's Gemini 3.1 Flash Lite. The Worker holds the API key as a secret
+Google's Gemini 2.5 Flash Lite. The Worker holds the API key as a secret
 and injects a persona system prompt (see [`src/prompt.js`](src/prompt.js))
 so the bot answers as Danial's portfolio assistant.
 

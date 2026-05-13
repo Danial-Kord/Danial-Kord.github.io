@@ -5,6 +5,7 @@ import "./globals.css";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { ConsoleStrip } from "@/components/console-strip";
+import { ChatWidget } from "@/components/chat-widget";
 import { MatrixRain } from "@/components/effects/MatrixRain";
 
 const display = Space_Grotesk({
@@ -73,6 +74,7 @@ export default function RootLayout({
           <Footer />
           <ConsoleStrip />
         </div>
+        <ChatWidget />
       </body>
     </html>
   );
