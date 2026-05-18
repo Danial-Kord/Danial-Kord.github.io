@@ -1,0 +1,742 @@
+"""
+Daniel Kordmodanlou — 5-min Talk Deck
+Focus: Agentic AI · LLMs · System Design
+~12 slides @ ~25s each
+"""
+import os
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from pptx.oxml.ns import qn
+from lxml import etree
+
+# Midnight Executive palette
+NAVY     = RGBColor(0x0F, 0x17, 0x2A)
+INDIGO   = RGBColor(0x1E, 0x2A, 0x55)
+ROYAL    = RGBColor(0x2E, 0x42, 0x82)
+AMBER    = RGBColor(0xF5, 0x9E, 0x0B)
+GOLD     = RGBColor(0xFB, 0xBF, 0x24)
+IVORY    = RGBColor(0xF8, 0xFA, 0xFC)
+SLATE    = RGBColor(0x94, 0xA3, 0xB8)
+DARK_TEXT = RGBColor(0x1F, 0x29, 0x37)
+LIGHT_GREY = RGBColor(0xE2, 0xE8, 0xF0)
+
+MEDIA = "extracted/ppt/media"
+H_FONT = "Calibri"
+B_FONT = "Calibri Light"
+SLIDE_W = Inches(13.333)
+SLIDE_H = Inches(7.5)
+
+prs = Presentation()
+prs.slide_width = SLIDE_W
+prs.slide_height = SLIDE_H
+blank_layout = prs.slide_layouts[6]
+
+
+# ---- helpers (compact subset reused from main CV builder) ----
+def add_rect(slide, x, y, w, h, fill, line=None):
+    shp = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, h)
+    shp.fill.solid(); shp.fill.fore_color.rgb = fill
+    if line is None: shp.line.fill.background()
+    else: shp.line.color.rgb = line; shp.line.width = Pt(0.75)
+    spPr = shp.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return shp
+
+
+def add_round_rect(slide, x, y, w, h, fill, radius=0.08, line=None):
+    shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+    shp.fill.solid(); shp.fill.fore_color.rgb = fill
+    if line is None: shp.line.fill.background()
+    else: shp.line.color.rgb = line; shp.line.width = Pt(1)
+    try: shp.adjustments[0] = radius
+    except Exception: pass
+    spPr = shp.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return shp
+
+
+def add_oval(slide, x, y, w, h, fill):
+    shp = slide.shapes.add_shape(MSO_SHAPE.OVAL, x, y, w, h)
+    shp.fill.solid(); shp.fill.fore_color.rgb = fill
+    shp.line.fill.background()
+    spPr = shp.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return shp
+
+
+def _split_bold(s):
+    out, i = [], 0
+    while i < len(s):
+        start = s.find("[b]", i)
+        if start == -1: out.append((s[i:], False)); break
+        if start > i: out.append((s[i:start], False))
+        end = s.find("[/b]", start)
+        if end == -1: out.append((s[start:], False)); break
+        out.append((s[start+3:end], True))
+        i = end + 4
+    return out
+
+
+def add_text(slide, x, y, w, h, text, *, font=H_FONT, size=14, bold=False,
+             color=DARK_TEXT, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
+             italic=False, line_spacing=None):
+    tb = slide.shapes.add_textbox(x, y, w, h)
+    tf = tb.text_frame
+    tf.margin_left = Pt(0); tf.margin_right = Pt(0)
+    tf.margin_top = Pt(0); tf.margin_bottom = Pt(0)
+    tf.word_wrap = True
+    tf.vertical_anchor = anchor
+    p = tf.paragraphs[0]
+    p.alignment = align
+    if line_spacing: p.line_spacing = line_spacing
+    parts = _split_bold(text)
+    for txt, is_bold in parts:
+        run = p.add_run()
+        run.text = txt
+        run.font.name = font
+        run.font.size = Pt(size)
+        run.font.bold = bold or is_bold
+        run.font.italic = italic
+        run.font.color.rgb = color
+    return tb
+
+
+def add_bullets(slide, x, y, w, h, bullets, *, font=B_FONT, size=14,
+                color=DARK_TEXT, line_spacing=1.25, bullet_char="▸",
+                spacing_after=6):
+    tb = slide.shapes.add_textbox(x, y, w, h)
+    tf = tb.text_frame
+    tf.margin_left = Pt(0); tf.margin_right = Pt(0)
+    tf.margin_top = Pt(0); tf.margin_bottom = Pt(0)
+    tf.word_wrap = True
+    for i, b in enumerate(bullets):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.line_spacing = line_spacing
+        p.space_after = Pt(spacing_after)
+        if bullet_char:
+            run = p.add_run()
+            run.text = bullet_char + "  "
+            run.font.name = font
+            run.font.size = Pt(size)
+            run.font.color.rgb = color
+        for txt, is_bold in _split_bold(b):
+            run = p.add_run()
+            run.text = txt
+            run.font.name = font
+            run.font.size = Pt(size)
+            run.font.bold = is_bold
+            run.font.color.rgb = color
+    return tb
+
+
+def fill_slide(slide, color):
+    bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, SLIDE_W, SLIDE_H)
+    bg.fill.solid(); bg.fill.fore_color.rgb = color
+    bg.line.fill.background()
+    spPr = bg.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return bg
+
+
+def add_image(slide, path, x, y, w=None, h=None):
+    if not os.path.exists(path): return None
+    if w and h: return slide.shapes.add_picture(path, x, y, w, h)
+    if w: return slide.shapes.add_picture(path, x, y, width=w)
+    if h: return slide.shapes.add_picture(path, x, y, height=h)
+    return slide.shapes.add_picture(path, x, y)
+
+
+def light_footer(s, num, total):
+    add_text(s, Inches(0.5), Inches(7.05), Inches(8), Inches(0.4),
+             "Danial Kordmodanlou  ·  Agentic AI / LLMs / System Design",
+             font=B_FONT, size=9, color=RGBColor(0x94, 0xA3, 0xB8))
+    add_text(s, Inches(11.6), Inches(7.05), Inches(1.3), Inches(0.4),
+             f"{num:02d}  /  {total:02d}", font=B_FONT, size=9,
+             color=RGBColor(0x94, 0xA3, 0xB8), align=PP_ALIGN.RIGHT)
+
+
+def page_footer(s, num, total):
+    add_text(s, Inches(0.5), Inches(7.05), Inches(8), Inches(0.4),
+             "Danial Kordmodanlou  ·  Agentic AI / LLMs / System Design",
+             font=B_FONT, size=9, color=SLATE)
+    add_text(s, Inches(11.6), Inches(7.05), Inches(1.3), Inches(0.4),
+             f"{num:02d}  /  {total:02d}", font=B_FONT, size=9, color=SLATE,
+             align=PP_ALIGN.RIGHT)
+
+
+def corner_marker(s, label):
+    add_rect(s, Inches(0.5), Inches(0.5), Inches(0.06), Inches(0.5), AMBER)
+    add_text(s, Inches(0.7), Inches(0.5), Inches(6), Inches(0.5),
+             label, font=H_FONT, size=11, bold=True, color=AMBER,
+             anchor=MSO_ANCHOR.MIDDLE)
+
+
+def chip_row(s, x_start, y, items, color_fill=NAVY, text_color=GOLD,
+             size=10, max_x=None):
+    cx = x_start
+    if max_x is None: max_x = Inches(13.0)
+    for t in items:
+        cw = Inches(0.3 + 0.09 * len(t))
+        if cx + cw > max_x:
+            cx = x_start
+            y += Inches(0.45)
+        add_round_rect(s, cx, y, cw, Inches(0.34), color_fill, radius=0.4)
+        add_text(s, cx, y + Inches(0.045), cw, Inches(0.3),
+                 t, font=B_FONT, size=size, bold=True, color=text_color,
+                 align=PP_ALIGN.CENTER)
+        cx += cw + Inches(0.1)
+    return y
+
+
+TOTAL = 12
+
+
+# ====================================================================
+# 1 — TITLE
+# ====================================================================
+def slide_title():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, NAVY)
+    add_rect(s, Inches(0.6), Inches(0.9), Inches(0.12), Inches(5.7), AMBER)
+    # decorative dots
+    add_oval(s, Inches(11.6), Inches(0.7), Inches(0.5), Inches(0.5), AMBER)
+    add_oval(s, Inches(11.85), Inches(0.95), Inches(0.5), Inches(0.5), INDIGO)
+    # tag line
+    add_text(s, Inches(1.0), Inches(0.95), Inches(11), Inches(0.4),
+             "5-MINUTE TALK  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    # name
+    add_text(s, Inches(1.0), Inches(1.65), Inches(12), Inches(1.6),
+             "Danial Kordmodanlou",
+             font=H_FONT, size=70, bold=True, color=IVORY)
+    # role line
+    add_text(s, Inches(1.0), Inches(3.4), Inches(11), Inches(0.7),
+             "Building agentic AI systems  ·  grounded LLMs  ·  production at scale",
+             font=B_FONT, size=22, color=GOLD)
+    # divider
+    add_rect(s, Inches(1.0), Inches(4.4), Inches(2.5), Inches(0.04), AMBER)
+    # identity
+    add_text(s, Inches(1.0), Inches(4.6), Inches(11), Inches(0.4),
+             "Machine Learning Associate  ·  Vector Institute, Toronto",
+             font=B_FONT, size=15, color=IVORY)
+    add_text(s, Inches(1.0), Inches(5.05), Inches(11), Inches(0.4),
+             "M.Sc. Computer Science  ·  York University",
+             font=B_FONT, size=14, italic=True, color=SLATE)
+    # contact strip
+    add_text(s, Inches(1.0), Inches(6.2), Inches(12), Inches(0.4),
+             "danielkordm@gmail.com   ·   linkedin.com/in/danial-kord   ·   github.com/Danial-Kord",
+             font=B_FONT, size=12, color=SLATE)
+
+
+# ====================================================================
+# 2 — ABOUT  /  Why I'm here
+# ====================================================================
+def slide_about():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    # left panel
+    add_rect(s, 0, 0, Inches(5.0), SLIDE_H, NAVY)
+    add_image(s, f"{MEDIA}/image39.jpg", Inches(0.9), Inches(1.4), w=Inches(3.2))
+    add_rect(s, Inches(0.9), Inches(5.0), Inches(0.6), Inches(0.06), AMBER)
+    add_text(s, Inches(0.9), Inches(5.1), Inches(4), Inches(0.4),
+             "DANIAL KORDMODANLOU", font=H_FONT, size=13, bold=True, color=IVORY)
+    add_text(s, Inches(0.9), Inches(5.45), Inches(4), Inches(0.4),
+             "ML Associate — Vector Institute", font=B_FONT, size=11, color=GOLD)
+    add_text(s, Inches(0.9), Inches(5.75), Inches(4), Inches(0.4),
+             "M.Sc. Computer Science — York", font=B_FONT, size=11, color=SLATE)
+
+    # right side
+    corner_marker_x = Inches(5.4)
+    add_text(s, corner_marker_x, Inches(0.7), Inches(7), Inches(0.5),
+             "WHO I AM", font=H_FONT, size=12, bold=True, color=AMBER)
+    add_rect(s, corner_marker_x, Inches(1.05), Inches(0.6), Inches(0.06), AMBER)
+
+    add_text(s, corner_marker_x, Inches(1.3), Inches(8), Inches(1.2),
+             "Hi, I'm Danial.",
+             font=H_FONT, size=44, bold=True, color=NAVY)
+    add_text(s, corner_marker_x, Inches(2.3), Inches(8), Inches(0.5),
+             "I build [b]agentic AI systems[/b] grounded in real-world data.",
+             font=B_FONT, size=17, italic=True, color=ROYAL)
+
+    bullets = [
+        "Currently a [b]Machine Learning Associate at the Vector Institute[/b], shipping a real-time VR firefighter training system: skeletal-telemetry deviation detection + an LLM coaching layer grounded in training manuals.",
+        "Hackathon track record: [b]3rd place[/b] (Legal-Tech, Toronto 2026) and [b]semi-finals[/b] (Boson AI × MScAC 2025) — both multi-agent, source-grounded AI systems.",
+        "Open-source: [b]DigiHuman[/b] (500⭐), a real-time 3D avatar animation pipeline.",
+    ]
+    add_bullets(s, corner_marker_x, Inches(3.0), Inches(7.6), Inches(3.5),
+                bullets, size=13, color=DARK_TEXT, line_spacing=1.3,
+                bullet_char="●")
+    light_footer(s, 2, TOTAL)
+
+
+# ====================================================================
+# 3 — THE THREE PILLARS
+# ====================================================================
+def slide_pillars():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "FOCUS")
+    add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
+             "What I build", font=H_FONT, size=40, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
+             "Three pillars that cut through every project I take on.",
+             font=B_FONT, size=15, italic=True, color=ROYAL)
+
+    pillars = [
+        ("01",  "Agentic AI",
+         "Multi-agent planning, tool-use orchestration, and per-claim verification.",
+         ["LangChain", "LangGraph", "Multi-Agent", "n8n", "Cursor IDE"],
+         AMBER),
+        ("02",  "LLM Systems",
+         "Grounded LLMs with RAG over hybrid retrieval, voice + vision modalities.",
+         ["RAG", "FAISS", "Chroma", "Ollama", "GPT-4o", "Higgs Audio"],
+         GOLD),
+        ("03",  "System Design",
+         "Microservices, CI/CD, containers and observability — built to ship.",
+         ["Docker", "AWS", "Spring Boot", ".NET / Azure", "Streaming UI"],
+         AMBER),
+    ]
+    sx = Inches(0.7); sy = Inches(2.7)
+    cw = Inches(4.05); ch = Inches(3.95); gap = Inches(0.15)
+    for i, (num, title, body, chips, color) in enumerate(pillars):
+        x = sx + i * (cw + gap)
+        add_round_rect(s, x, sy, cw, ch, NAVY, radius=0.05)
+        # left color band
+        add_rect(s, x, sy, Inches(0.08), ch, color)
+        add_text(s, x + Inches(0.35), sy + Inches(0.25), Inches(2), Inches(0.5),
+                 num, font=H_FONT, size=22, bold=True, color=color)
+        add_text(s, x + Inches(0.35), sy + Inches(0.85), cw - Inches(0.5), Inches(0.6),
+                 title, font=H_FONT, size=22, bold=True, color=IVORY)
+        add_text(s, x + Inches(0.35), sy + Inches(1.55), cw - Inches(0.5), Inches(1.4),
+                 body, font=B_FONT, size=12, color=LIGHT_GREY,
+                 line_spacing=1.3)
+        # chips
+        cy = sy + Inches(2.7)
+        cx = x + Inches(0.35)
+        max_x = x + cw - Inches(0.3)
+        for c in chips:
+            chip_w = Inches(0.28 + 0.085 * len(c))
+            if cx + chip_w > max_x:
+                cx = x + Inches(0.35); cy += Inches(0.4)
+            add_round_rect(s, cx, cy, chip_w, Inches(0.32), INDIGO, radius=0.5)
+            add_text(s, cx, cy + Inches(0.04), chip_w, Inches(0.28),
+                     c, font=B_FONT, size=9, bold=True, color=GOLD,
+                     align=PP_ALIGN.CENTER)
+            cx += chip_w + Inches(0.08)
+    light_footer(s, 3, TOTAL)
+
+
+# ====================================================================
+# 4 — VECTOR INSTITUTE  (current role headline)
+# ====================================================================
+def slide_vector():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "CURRENT ROLE")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
+             "JANUARY 2026 — MAY 2026  ·  VECTOR INSTITUTE",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(0.9),
+             "VR firefighter coaching — grounded LLMs in real time",
+             font=H_FONT, size=32, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.25), Inches(12), Inches(0.5),
+             "Partnered with [b]DXTR[/b] to detect skill deviations from headset telemetry and explain them in plain language.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # two-column: Deviation Engine and Coaching Layer
+    cw = Inches(5.95)
+    sy = Inches(3.05)
+    ch = Inches(3.7)
+
+    # left card — Deviation Engine
+    add_round_rect(s, Inches(0.7), sy, cw, ch, NAVY, radius=0.06)
+    add_rect(s, Inches(0.7), sy, Inches(0.1), ch, AMBER)
+    add_text(s, Inches(0.95), sy + Inches(0.2), cw, Inches(0.4),
+             "DEVIATION ENGINE", font=H_FONT, size=11, bold=True, color=AMBER)
+    add_text(s, Inches(0.95), sy + Inches(0.55), cw, Inches(0.5),
+             "Skeletal-telemetry analysis", font=H_FONT, size=20, bold=True, color=IVORY)
+    add_bullets(s, Inches(0.95), sy + Inches(1.2), cw - Inches(0.4), Inches(2.5),
+                [
+                    "Sliding windows of 3D skeletal telemetry",
+                    "[b]MPJPE[/b] + quaternion angular distance vs. ground truth",
+                    "Cross-platform [b]NTU-25 skeleton[/b] normalization",
+                ],
+                size=12, line_spacing=1.3, bullet_char="▸", color=IVORY)
+
+    # right card — Coaching Layer
+    rx = Inches(6.85)
+    add_round_rect(s, rx, sy, cw, ch, NAVY, radius=0.06)
+    add_rect(s, rx, sy, Inches(0.1), ch, GOLD)
+    add_text(s, rx + Inches(0.25), sy + Inches(0.2), cw, Inches(0.4),
+             "LLM COACHING LAYER", font=H_FONT, size=11, bold=True, color=GOLD)
+    add_text(s, rx + Inches(0.25), sy + Inches(0.55), cw, Inches(0.5),
+             "Grounded natural-language feedback", font=H_FONT, size=20, bold=True, color=IVORY)
+    add_bullets(s, rx + Inches(0.25), sy + Inches(1.2), cw - Inches(0.4), Inches(2.5),
+                [
+                    "[b]RAG[/b] over training-manual excerpts ([b]FAISS[/b] similarity)",
+                    "[b]Ollama / LangChain[/b] for local & remote LLM orchestration",
+                    "Structured evaluation of generative-AI training pipelines",
+                ],
+                size=12, line_spacing=1.3, bullet_char="▸", color=IVORY)
+    light_footer(s, 4, TOTAL)
+
+
+# ====================================================================
+# 5 — CASELOGIC  (3rd place hackathon)
+# ====================================================================
+def slide_caselogic():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "HACKATHON  ·  3RD PLACE")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
+             "TORONTO LEGAL-TECH HACKATHON  ·  2026",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
+             "CaseLogic — source-grounded legal research",
+             font=H_FONT, size=32, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
+             "Built end-to-end in 24 hours. Every claim traced back to a paragraph.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # bullets left
+    add_text(s, Inches(0.7), Inches(3.1), Inches(7), Inches(0.4),
+             "WHY IT WON", font=H_FONT, size=11, bold=True, color=AMBER)
+    bullets = [
+        "[b]Hybrid retrieval[/b]: Chroma vector DB + SQLite FTS5 keyword search — vector recall plus literal-term precision for legal lookups.",
+        "[b]Per-claim verification[/b]: every assertion grounded back to the originating source paragraph — no hallucinated citations.",
+        "[b]Multi-agent planning workspace[/b]: orchestrated research, drafting, and verification agents in parallel.",
+        "[b]Shipped end-to-end[/b] in 24h — UI + multi-agent backend, all deployed.",
+    ]
+    add_bullets(s, Inches(0.7), Inches(3.55), Inches(7.5), Inches(3.2),
+                bullets, size=12, line_spacing=1.3, bullet_char="▸",
+                color=DARK_TEXT)
+
+    # right column: badge + stack
+    add_round_rect(s, Inches(8.6), Inches(3.1), Inches(4.2), Inches(3.7), NAVY, radius=0.06)  # CaseLogic
+    add_rect(s, Inches(8.6), Inches(3.1), Inches(0.1), Inches(3.7), AMBER)
+
+    # big "3rd"
+    add_text(s, Inches(8.85), Inches(3.25), Inches(3.8), Inches(0.5),
+             "RESULT", font=H_FONT, size=11, bold=True, color=AMBER)
+    add_text(s, Inches(8.85), Inches(3.55), Inches(3.8), Inches(1.4),
+             "3rd",
+             font=H_FONT, size=88, bold=True, color=AMBER)
+    add_text(s, Inches(8.85), Inches(5.0), Inches(3.8), Inches(0.4),
+             "out of all Toronto Legal-Tech teams",
+             font=B_FONT, size=11, color=IVORY)
+
+    add_text(s, Inches(8.85), Inches(5.55), Inches(3.8), Inches(0.4),
+             "STACK", font=H_FONT, size=10, bold=True, color=AMBER)
+    chip_row(s, Inches(8.85), Inches(5.95),
+             ["Chroma", "SQLite FTS5", "LangChain", "Multi-Agent", "RAG"],
+             color_fill=INDIGO, text_color=GOLD, size=9,
+             max_x=Inches(12.7))
+    light_footer(s, 7, TOTAL)
+
+
+# ====================================================================
+# 6 — SAFEZONE AI
+# ====================================================================
+def slide_safezone():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "HACKATHON  ·  SEMI-FINALIST")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
+             "BOSON AI × UofT MScAC HACKATHON  ·  2025",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
+             "SAFEZone AI — voice-first therapist agent",
+             font=H_FONT, size=32, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
+             "A multi-stage agent pipeline that listens, reasons, and responds in a cloned voice with synced facial animation.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # pipeline as steps
+    steps = [
+        ("ASR",        "Higgs Audio Understanding", "Transcript + emotional tone", AMBER),
+        ("Reasoning",  "GPT-4o LLM",                "Onboarding-grounded reply", GOLD),
+        ("TTS",        "Higgs Audio Generation",    "Cloned voice", AMBER),
+        ("Avatar",     "Unity 3D therapist",        "Lip-sync + expressions", GOLD),
+    ]
+    sx = Inches(0.7); sy = Inches(3.15); cw = Inches(2.95); ch = Inches(3.4)
+    gap = Inches(0.1)
+    for i, (stage, name, desc, color) in enumerate(steps):
+        x = sx + i * (cw + gap)
+        add_round_rect(s, x, sy, cw, ch, NAVY, radius=0.05)
+        add_rect(s, x, sy, Inches(0.08), ch, color)
+        # step number
+        add_text(s, x + Inches(0.3), sy + Inches(0.2), cw - Inches(0.4), Inches(0.4),
+                 f"STEP {i+1}", font=H_FONT, size=10, bold=True, color=color)
+        add_text(s, x + Inches(0.3), sy + Inches(0.55), cw - Inches(0.4), Inches(0.5),
+                 stage, font=H_FONT, size=20, bold=True, color=IVORY)
+        add_rect(s, x + Inches(0.3), sy + Inches(1.1), Inches(0.4), Inches(0.04), color)
+        add_text(s, x + Inches(0.3), sy + Inches(1.3), cw - Inches(0.4), Inches(0.6),
+                 name, font=H_FONT, size=13, bold=True, color=GOLD)
+        add_text(s, x + Inches(0.3), sy + Inches(1.85), cw - Inches(0.4), Inches(1.0),
+                 desc, font=B_FONT, size=11, color=IVORY, line_spacing=1.3)
+        # arrow indicator between cards
+        if i < len(steps) - 1:
+            arrow_x = x + cw + Inches(-0.02)
+            add_text(s, arrow_x, sy + Inches(1.5), Inches(0.15), Inches(0.4),
+                     "▸", font=H_FONT, size=18, bold=True, color=AMBER,
+                     align=PP_ALIGN.CENTER)
+    light_footer(s, 8, TOTAL)
+
+
+# ====================================================================
+# 7 — SAFEZONE ARCHITECTURE (image)
+# ====================================================================
+def slide_safezone_arch():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, NAVY)
+    add_text(s, Inches(0.7), Inches(0.5), Inches(8), Inches(0.4),
+             "SAFEZONE AI  ·  ARCHITECTURE",
+             font=H_FONT, size=11, bold=True, color=AMBER)
+    add_rect(s, Inches(0.7), Inches(0.85), Inches(0.4), Inches(0.04), AMBER)
+    add_text(s, Inches(0.7), Inches(1.05), Inches(12), Inches(0.8),
+             "End-to-end agent loop",
+             font=H_FONT, size=30, bold=True, color=IVORY)
+    add_text(s, Inches(0.7), Inches(1.85), Inches(12), Inches(0.4),
+             "Voice  →  ASR + emotion  →  LLM grounded in APA PsycInfo  →  cloned-voice TTS  →  blend-shape lip-sync.",
+             font=B_FONT, size=13, italic=True, color=GOLD)
+    add_image(s, f"{MEDIA}/image26.png", Inches(0.7), Inches(2.45), w=Inches(12))
+    page_footer(s, 9, TOTAL)
+
+
+# ====================================================================
+# 8 — LATEX CV BUILDER  (System design + RAG)
+# ====================================================================
+def slide_latex_cv():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "SYSTEM DESIGN")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
+             "PERSONAL PROJECT  ·  2022 — PRESENT",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
+             "LaTeX CV Builder — RAG over documents",
+             font=H_FONT, size=32, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
+             "A distributed document generator: LLM agents parse old CVs and emit role-tailored LaTeX.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # left: stack
+    add_text(s, Inches(0.7), Inches(3.1), Inches(7), Inches(0.4),
+             "WHAT'S INSIDE", font=H_FONT, size=11, bold=True, color=AMBER)
+    bullets = [
+        "[b]Next.js (App Router + Server Components)[/b] with streaming UI patterns.",
+        "[b]LangChain[/b] LLM agents for automated CV parsing and structuring.",
+        "[b]RAG[/b] pipeline for context-aware formatting from prior versions.",
+        "[b]Spring Boot[/b] orchestration with [b]Docker + AWS[/b] microservices.",
+        "[b]Nginx[/b] service for LaTeX → PDF rendering.",
+    ]
+    add_bullets(s, Inches(0.7), Inches(3.55), Inches(7), Inches(3.2),
+                bullets, size=12, line_spacing=1.3, bullet_char="▸",
+                color=DARK_TEXT)
+
+    # right: arch image inside a dark frame
+    add_rect(s, Inches(8.0), Inches(3.1), Inches(4.85), Inches(3.7), NAVY)
+    add_image(s, f"{MEDIA}/image22.png", Inches(8.15), Inches(3.4), w=Inches(4.55))
+    light_footer(s, 5, TOTAL)
+
+
+# ====================================================================
+# 9 — DREAMFORGE  (AI tooling)
+# ====================================================================
+def slide_dreamforge():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "INDUSTRY  ·  AGENTIC TOOLING")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
+             "DECEMBER 2025 — FEBRUARY 2026  ·  DREAMFORGE",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
+             "Claude-assisted dev tools that fix themselves",
+             font=H_FONT, size=30, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
+             "AI-driven engine for procedural generation — with autonomous build-health agents.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # 3 callouts
+    cards = [
+        ("Auto-intercept",
+         "Custom Claude tooling that watches CI/CD streams and intercepts thrown exceptions in real time.",
+         AMBER),
+        ("Auto-investigate",
+         "Agents reproduce, isolate root causes across C# / Python / Docker layers, and gather evidence.",
+         GOLD),
+        ("Auto-resolve",
+         "When confidence is high, the agent commits a permanent codebase fix straight into the repo.",
+         AMBER),
+    ]
+    sx = Inches(0.7); sy = Inches(3.1); cw = Inches(4.15); ch = Inches(3.7); gap = Inches(0.1)
+    for i, (title, desc, color) in enumerate(cards):
+        x = sx + i * (cw + gap)
+        add_round_rect(s, x, sy, cw, ch, NAVY, radius=0.06)
+        add_rect(s, x, sy, Inches(0.1), ch, color)
+        add_text(s, x + Inches(0.35), sy + Inches(0.3), cw, Inches(0.5),
+                 f"0{i+1}", font=H_FONT, size=28, bold=True, color=color)
+        add_text(s, x + Inches(0.35), sy + Inches(0.95), cw - Inches(0.5), Inches(0.5),
+                 title, font=H_FONT, size=22, bold=True, color=IVORY)
+        add_rect(s, x + Inches(0.35), sy + Inches(1.55), Inches(0.4), Inches(0.04), color)
+        add_text(s, x + Inches(0.35), sy + Inches(1.75), cw - Inches(0.6), Inches(1.7),
+                 desc, font=B_FONT, size=12, color=LIGHT_GREY, line_spacing=1.35)
+    light_footer(s, 6, TOTAL)
+
+
+# ====================================================================
+# 10 — STACK / TOOLKIT
+# ====================================================================
+def slide_stack():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, NAVY)
+    add_text(s, Inches(0.7), Inches(0.5), Inches(8), Inches(0.4),
+             "THE TOOLKIT",
+             font=H_FONT, size=11, bold=True, color=AMBER)
+    add_rect(s, Inches(0.7), Inches(0.85), Inches(0.4), Inches(0.04), AMBER)
+    add_text(s, Inches(0.7), Inches(1.05), Inches(12), Inches(0.9),
+             "Stack I reach for", font=H_FONT, size=38, bold=True, color=IVORY)
+    add_text(s, Inches(0.7), Inches(1.9), Inches(12), Inches(0.4),
+             "Battle-tested across the projects above.",
+             font=B_FONT, size=14, italic=True, color=GOLD)
+
+    cols = [
+        ("Agentic AI",     AMBER,
+         ["LangChain", "LangGraph", "Multi-Agent", "Ollama", "n8n", "Cursor IDE", "Claude API"]),
+        ("LLM & Retrieval", GOLD,
+         ["RAG", "FAISS", "Chroma", "SQLite FTS5", "GPT-4o", "Higgs Audio", "Embeddings"]),
+        ("System Design",  AMBER,
+         ["Docker", "Kubernetes", "AWS (ECR)", "Spring Boot", ".NET / Azure",
+          "GitHub Actions", "Next.js", "FastAPI", "MySQL", "Firebase"]),
+    ]
+    sx = Inches(0.7); sy = Inches(2.8); cw = Inches(4.1); ch = Inches(3.7); gap = Inches(0.15)
+    for i, (label, color, items) in enumerate(cols):
+        x = sx + i * (cw + gap)
+        add_round_rect(s, x, sy, cw, ch, INDIGO, radius=0.05)
+        add_rect(s, x, sy, cw, Inches(0.55), ROYAL)
+        add_text(s, x + Inches(0.25), sy + Inches(0.1), cw, Inches(0.4),
+                 label.upper(), font=H_FONT, size=14, bold=True, color=color,
+                 anchor=MSO_ANCHOR.MIDDLE)
+        cx = x + Inches(0.25); cy = sy + Inches(0.75)
+        max_x = x + cw - Inches(0.2)
+        for it in items:
+            chip_w = Inches(0.28 + 0.085 * len(it))
+            if cx + chip_w > max_x:
+                cx = x + Inches(0.25); cy += Inches(0.45)
+            add_round_rect(s, cx, cy, chip_w, Inches(0.34), NAVY, radius=0.4)
+            add_text(s, cx, cy + Inches(0.05), chip_w, Inches(0.28),
+                     it, font=B_FONT, size=10, bold=True, color=IVORY,
+                     align=PP_ALIGN.CENTER)
+            cx += chip_w + Inches(0.08)
+    page_footer(s, 10, TOTAL)
+
+
+# ====================================================================
+# 11 — RECOGNITION
+# ====================================================================
+def slide_recognition():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "RECOGNITION")
+    add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
+             "Track record", font=H_FONT, size=40, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
+             "Funded, ranked, and shipped — selected highlights.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    cards = [
+        ("3rd",      "Legal-Tech Hackathon",
+         "Toronto, 2026 — built CaseLogic in 24h.", AMBER),
+        ("Semi-Finals", "Boson AI × MScAC",
+         "UofT, 2025 — built SAFEZone AI in 48h.", GOLD),
+        ("$10K",     "L2M Lab to Market",
+         "Accepted into the program (2025).", AMBER),
+        ("$10K",     "Mitacs Funding",
+         "Additional research funding (2024).", GOLD),
+        ("500⭐",    "DigiHuman (OSS)",
+         "Open-source 3D character animation pipeline.", AMBER),
+        ("Top 0.5%", "AI Graduate Exam",
+         "Iranian national exam (2023).", GOLD),
+    ]
+    cw = Inches(4.1); ch = Inches(2.05); sx = Inches(0.7); sy = Inches(2.65)
+    gap_x = Inches(0.15); gap_y = Inches(0.18)
+    for i, (big, title, desc, color) in enumerate(cards):
+        r, c = i // 3, i % 3
+        x = sx + c * (cw + gap_x); y = sy + r * (ch + gap_y)
+        add_round_rect(s, x, y, cw, ch, NAVY, radius=0.05)
+        add_rect(s, x, y, Inches(0.1), ch, color)
+        add_text(s, x + Inches(0.3), y + Inches(0.15), cw - Inches(0.5), Inches(0.8),
+                 big, font=H_FONT, size=32, bold=True, color=color)
+        add_text(s, x + Inches(0.3), y + Inches(1.0), cw - Inches(0.5), Inches(0.4),
+                 title, font=H_FONT, size=14, bold=True, color=IVORY)
+        add_text(s, x + Inches(0.3), y + Inches(1.45), cw - Inches(0.5), Inches(0.5),
+                 desc, font=B_FONT, size=10, color=LIGHT_GREY, line_spacing=1.25)
+    light_footer(s, 11, TOTAL)
+
+
+# ====================================================================
+# 12 — THANKS / CONTACT
+# ====================================================================
+def slide_thanks():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, NAVY)
+    add_rect(s, Inches(0.6), Inches(0.9), Inches(0.12), Inches(5.7), AMBER)
+    add_text(s, Inches(1.0), Inches(1.05), Inches(11), Inches(0.5),
+             "Q & A", font=H_FONT, size=14, bold=True, color=AMBER)
+    add_text(s, Inches(1.0), Inches(1.7), Inches(12), Inches(2.0),
+             "Thank you.",
+             font=H_FONT, size=88, bold=True, color=IVORY)
+    add_text(s, Inches(1.0), Inches(3.85), Inches(11), Inches(0.5),
+             "Happy to dig into any of these in more depth.",
+             font=B_FONT, size=18, italic=True, color=GOLD)
+
+    # contact strip
+    contacts = [
+        ("Email",    "danielkordm@gmail.com",       AMBER),
+        ("LinkedIn", "linkedin.com/in/danial-kord", GOLD),
+        ("GitHub",   "github.com/Danial-Kord",      AMBER),
+        ("Website",  "danial-kord.github.io",       GOLD),
+    ]
+    cw = Inches(3.0); ch = Inches(1.05); sx = Inches(1.0); sy = Inches(5.2)
+    gap_x = Inches(0.1)
+    for i, (label, value, color) in enumerate(contacts):
+        x = sx + i * (cw + gap_x)
+        add_round_rect(s, x, sy, cw, ch, INDIGO, radius=0.08)
+        add_rect(s, x, sy, Inches(0.08), ch, color)
+        add_text(s, x + Inches(0.25), sy + Inches(0.18), cw - Inches(0.4), Inches(0.3),
+                 label.upper(), font=H_FONT, size=9, bold=True, color=color)
+        add_text(s, x + Inches(0.25), sy + Inches(0.5), cw - Inches(0.4), Inches(0.45),
+                 value, font=H_FONT, size=12, bold=True, color=IVORY)
+
+
+# ====================================================================
+# BUILD
+# ====================================================================
+def build():
+    slide_title()           # 1
+    slide_about()           # 2
+    slide_pillars()         # 3
+    slide_vector()          # 4  — current role
+    slide_latex_cv()        # 5  — RAG over docs
+    slide_dreamforge()      # 6  — agentic tooling
+    slide_caselogic()       # 7  — multi-agent legal
+    slide_safezone()        # 8  — voice-first agent
+    slide_safezone_arch()   # 9  — architecture
+    slide_stack()           # 10
+    slide_recognition()     # 11
+    slide_thanks()          # 12
+
+    out = "Daniel-CV-5min-Talk.pptx"
+    prs.save(out)
+    print(f"Saved {out} with {len(prs.slides)} slides")
+
+
+if __name__ == "__main__":
+    build()
