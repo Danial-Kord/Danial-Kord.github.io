@@ -18,6 +18,7 @@ INDIGO   = RGBColor(0x1E, 0x2A, 0x55)
 ROYAL    = RGBColor(0x2E, 0x42, 0x82)
 AMBER    = RGBColor(0xF5, 0x9E, 0x0B)
 GOLD     = RGBColor(0xFB, 0xBF, 0x24)
+TEAL     = RGBColor(0x14, 0xB8, 0xA6)
 IVORY    = RGBColor(0xF8, 0xFA, 0xFC)
 SLATE    = RGBColor(0x94, 0xA3, 0xB8)
 DARK_TEXT = RGBColor(0x1F, 0x29, 0x37)
@@ -195,7 +196,7 @@ def chip_row(s, x_start, y, items, color_fill=NAVY, text_color=GOLD,
     return y
 
 
-TOTAL = 12
+TOTAL = 13
 
 
 # ====================================================================
@@ -511,6 +512,69 @@ def slide_safezone_arch():
 
 
 # ====================================================================
+# 10 — PROJECT PORTFOLIO  (more projects at a glance)
+# ====================================================================
+def slide_more_projects():
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, IVORY)
+    corner_marker(s, "MORE PROJECTS")
+    add_text(s, Inches(0.7), Inches(1.05), Inches(12), Inches(0.9),
+             "And there's more",
+             font=H_FONT, size=40, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
+             "A snapshot of what else I've shipped — across AI, vision, games and systems.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # color-coded legend
+    legend = [
+        ("AI / ML / VISION", AMBER),
+        ("GAMES + CLASSICAL AI", GOLD),
+        ("SYSTEMS / IR", TEAL),
+    ]
+    lx = Inches(0.7); ly = Inches(2.4)
+    for label, color in legend:
+        add_oval(s, lx, ly + Inches(0.08), Inches(0.16), Inches(0.16), color)
+        add_text(s, lx + Inches(0.25), ly, Inches(2.5), Inches(0.3),
+                 label, font=H_FONT, size=9, bold=True, color=DARK_TEXT)
+        lx += Inches(2.55)
+
+    # 4 cols × 3 rows = 12 mini cards
+    projects = [
+        # Row 1 — AI / ML / Vision (AMBER)
+        ("DigiHuman  ⭐ 500",   "Open-source 3D avatar animation from monocular video.", AMBER),
+        ("GauGan Painter",      "Semantic-segmentation → photoreal scenes.",             AMBER),
+        ("AI Algorithms Viz",   "Manim animations of A*, BFS / DFS, iterative deepening.", AMBER),
+        ("CV: Panorama + 3D",   "SIFT + RANSAC + PoinTr point-cloud upsampling.",         AMBER),
+        # Row 2 — Games + classical AI (GOLD)
+        ("Techu",               "Cross-platform card game — DQN + MCTS opponents.",       GOLD),
+        ("Backgammon 3D",       "Monte-Carlo AI with online matchmaking.",                GOLD),
+        ("HYPERVIGILANCE",      "Generative video + Unity psychological-horror short.",   GOLD),
+        ("Mobile Games",        "Unity titles shipped to App Store / Google Play.",       GOLD),
+        # Row 3 — Systems / IR (TEAL)
+        ("Search Engine",       "tf-idf · champion lists · KNN · K-means — from scratch.", TEAL),
+        ("URL Shortener SaaS",  "Java · MySQL · Docker · K8s · AWS · Hadoop.",            TEAL),
+        ("XV6 Kernel",          "Custom syscalls + CPU scheduling modifications.",        TEAL),
+        ("Multi-Core C",        "Optimized C with OpenMP + CUDA on CPU & GPU.",           TEAL),
+    ]
+
+    sx = Inches(0.7); sy = Inches(2.95)
+    cw = Inches(3.0); ch = Inches(1.32)
+    gap_x = Inches(0.13); gap_y = Inches(0.13)
+    for i, (name, desc, color) in enumerate(projects):
+        r = i // 4
+        c = i % 4
+        x = sx + c * (cw + gap_x)
+        y = sy + r * (ch + gap_y)
+        add_round_rect(s, x, y, cw, ch, NAVY, radius=0.06)
+        add_rect(s, x, y, Inches(0.08), ch, color)
+        add_text(s, x + Inches(0.22), y + Inches(0.2), cw - Inches(0.35), Inches(0.4),
+                 name, font=H_FONT, size=12, bold=True, color=color)
+        add_text(s, x + Inches(0.22), y + Inches(0.6), cw - Inches(0.35), Inches(0.7),
+                 desc, font=B_FONT, size=9.5, color=LIGHT_GREY, line_spacing=1.25)
+    light_footer(s, 10, TOTAL)
+
+
+# ====================================================================
 # 8 — LATEX CV BUILDER  (System design + RAG)
 # ====================================================================
 def slide_latex_cv():
@@ -635,7 +699,7 @@ def slide_stack():
                      it, font=B_FONT, size=10, bold=True, color=IVORY,
                      align=PP_ALIGN.CENTER)
             cx += chip_w + Inches(0.08)
-    page_footer(s, 10, TOTAL)
+    page_footer(s, 11, TOTAL)
 
 
 # ====================================================================
@@ -678,7 +742,7 @@ def slide_recognition():
                  title, font=H_FONT, size=14, bold=True, color=IVORY)
         add_text(s, x + Inches(0.3), y + Inches(1.45), cw - Inches(0.5), Inches(0.5),
                  desc, font=B_FONT, size=10, color=LIGHT_GREY, line_spacing=1.25)
-    light_footer(s, 11, TOTAL)
+    light_footer(s, 12, TOTAL)
 
 
 # ====================================================================
@@ -729,9 +793,10 @@ def build():
     slide_caselogic()       # 7  — multi-agent legal
     slide_safezone()        # 8  — voice-first agent
     slide_safezone_arch()   # 9  — architecture
-    slide_stack()           # 10
-    slide_recognition()     # 11
-    slide_thanks()          # 12
+    slide_more_projects()   # 10 — portfolio at a glance
+    slide_stack()           # 11
+    slide_recognition()     # 12
+    slide_thanks()          # 13
 
     out = "Daniel-CV-5min-Talk.pptx"
     prs.save(out)
