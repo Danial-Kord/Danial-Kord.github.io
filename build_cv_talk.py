@@ -196,6 +196,218 @@ def chip_row(s, x_start, y, items, color_fill=NAVY, text_color=GOLD,
     return y
 
 
+# ====================================================================
+# ANIMATIONS  ·  inject OOXML <p:transition> and <p:timing> trees
+# ====================================================================
+_PNS = "http://schemas.openxmlformats.org/presentationml/2006/main"
+
+# Effect preset registry (PowerPoint built-in entrance effects).
+# (presetID, presetClass, presetSubtype) — see ECMA-376 §19.5.51.
+_EFFECTS = {
+    "fade":         (10, "entr", 0),
+    "float_up":     (42, "entr", 0),
+    "zoom":         (23, "entr", 0),
+    "wipe_up":      (22, "entr", 4),
+    "fly_from_bot": (2,  "entr", 4),
+}
+
+
+def apply_fade_transition(slide, speed="med"):
+    """Add a fade transition (inserted in correct schema slot: after cSld/clrMapOvr)."""
+    sld = slide.element
+    for el in sld.findall(qn('p:transition')):
+        sld.remove(el)
+    transition_el = etree.fromstring(
+        f'<p:transition xmlns:p="{_PNS}" spd="{speed}"><p:fade/></p:transition>'
+    )
+    csld = sld.find(qn('p:cSld'))
+    idx = list(sld).index(csld) + 1
+    while idx < len(sld) and sld[idx].tag == qn('p:clrMapOvr'):
+        idx += 1
+    sld.insert(idx, transition_el)
+
+
+def _shape_anim_ids(slide):
+    """Shape IDs in z-order, skipping full-slide background fills."""
+    out = []
+    for sp in slide.shapes:
+        try:
+            l = int(sp.left or 0); t = int(sp.top or 0)
+            w = int(sp.width or 0); h = int(sp.height or 0)
+        except Exception:
+            l = t = w = h = 0
+        if l == 0 and t == 0 and w == int(SLIDE_W) and h == int(SLIDE_H):
+            continue  # full-slide background — keep visible from slide load
+        out.append(sp.shape_id)
+    return out
+
+
+# Manual section breaks: id(slide) -> list of shape_ids that END a section.
+_SLIDE_BREAKS = {}
+
+
+def mark_break(slide):
+    """Mark the most recently added shape as the end of an animation section.
+
+    On playback the cascade plays up to and including this shape, then waits
+    for a click/space before revealing the next section. Use it in slide
+    builders between logical blocks (header, each card, footer, ...).
+    """
+    if len(slide.shapes) == 0:
+        return
+    last_sid = slide.shapes[-1].shape_id
+    _SLIDE_BREAKS.setdefault(id(slide), []).append(last_sid)
+
+
+def _detect_group_boundaries(slide):
+    """Auto-detect shape_ids that should START a new animation section.
+
+    Heuristic: a rounded rectangle larger than ~2.5"x1.5" is treated as a
+    'card' container and starts a fresh section. Smaller rounded rects
+    (chips, buttons) are ignored.
+    """
+    THRESH_W = int(Inches(2.5))
+    THRESH_H = int(Inches(1.5))
+    boundary_ids = set()
+    for sp in slide.shapes:
+        try:
+            if sp.auto_shape_type != MSO_SHAPE.ROUNDED_RECTANGLE:
+                continue
+            if int(sp.width or 0) >= THRESH_W and int(sp.height or 0) >= THRESH_H:
+                boundary_ids.add(sp.shape_id)
+        except Exception:
+            continue
+    return boundary_ids
+
+
+def _split_into_groups(slide, animated_ids):
+    """Partition animated shape_ids into ordered groups using manual breaks
+    and auto-detected card boundaries."""
+    manual_after = set(_SLIDE_BREAKS.get(id(slide), []))
+    auto_before = _detect_group_boundaries(slide)
+    groups, current = [], []
+    for sid in animated_ids:
+        if sid in auto_before and current:
+            groups.append(current)
+            current = []
+        current.append(sid)
+        if sid in manual_after:
+            groups.append(current)
+            current = []
+    if current:
+        groups.append(current)
+    return groups
+
+
+def apply_cascade_anim(slide, *, effects=("fade",), step_ms=120, dur_ms=420):
+    """
+    Section-aware cascade entrance animations.
+
+    Animated shapes are partitioned into sections (manual breaks via
+    mark_break() + auto-detected card containers). The first section plays
+    automatically when the slide enters; each subsequent section waits for
+    a click/space. Within a section the cascade overlaps so it finishes in
+    ~(N-1)*step_ms + dur_ms.
+
+    `effects` is a tuple of effect names from _EFFECTS; cycled per shape.
+    """
+    animated_ids = _shape_anim_ids(slide)
+    if not animated_ids:
+        return
+    groups = _split_into_groups(slide, animated_ids)
+    sld = slide.element
+    for el in sld.findall(qn('p:timing')):
+        sld.remove(el)
+    xml = _cascade_timing_xml(groups, effects, step_ms, dur_ms)
+    sld.append(etree.fromstring(xml))
+
+
+def _anim_par_xml(spid, preset_id, preset_class, preset_sub,
+                  node_type, offset_ms, dur_ms, nid):
+    """Build the <p:par> for a single entrance animation on one shape."""
+    ctn_id = nid(); set_id = nid(); anim_id = nid()
+    return (
+        f'<p:par><p:cTn id="{ctn_id}" presetID="{preset_id}" '
+        f'presetClass="{preset_class}" presetSubtype="{preset_sub}" '
+        f'fill="hold" grpId="0" nodeType="{node_type}">'
+        f'<p:stCondLst><p:cond delay="{offset_ms}"/></p:stCondLst>'
+        f'<p:childTnLst>'
+        f'<p:set><p:cBhvr>'
+        f'<p:cTn id="{set_id}" dur="1" fill="hold">'
+        f'<p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>'
+        f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+        f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>'
+        f'</p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>'
+        f'<p:anim calcmode="lin" valueType="num">'
+        f'<p:cBhvr additive="base">'
+        f'<p:cTn id="{anim_id}" dur="{dur_ms}" fill="hold"/>'
+        f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+        f'<p:attrNameLst><p:attrName>style.opacity</p:attrName></p:attrNameLst>'
+        f'</p:cBhvr><p:tavLst>'
+        f'<p:tav tm="0"><p:val><p:fltVal val="0"/></p:val></p:tav>'
+        f'<p:tav tm="100000"><p:val><p:fltVal val="1"/></p:val></p:tav>'
+        f'</p:tavLst></p:anim>'
+        f'</p:childTnLst></p:cTn></p:par>'
+    )
+
+
+def _cascade_timing_xml(groups, effects, step_ms, dur_ms):
+    """Build <p:timing> with one click step per section.
+
+    Section 0: auto-starts on slide enter (cond delay='0').
+    Sections 1+: each waits for a click event (cond delay='indefinite').
+    """
+    counter = [3]  # 1=tmRoot, 2=mainSeq; click step + inner par ids issued below
+    def nid():
+        v = counter[0]; counter[0] += 1; return v
+
+    click_steps_xml = []
+    builds = []
+    eff_idx = 0
+    for gi, group in enumerate(groups):
+        click_id = nid()
+        inner_id = nid()
+        anims = []
+        for i, spid in enumerate(group):
+            eff_name = effects[eff_idx % len(effects)]
+            preset_id, preset_class, preset_sub = _EFFECTS.get(eff_name, _EFFECTS["fade"])
+            eff_idx += 1
+            # First anim in each section is tied to the click trigger; the
+            # rest run "with" it but offset for an overlapping cascade.
+            node_type = "clickEffect" if i == 0 else "withEffect"
+            offset = i * step_ms
+            anims.append(_anim_par_xml(
+                spid, preset_id, preset_class, preset_sub,
+                node_type, offset, dur_ms, nid))
+            builds.append(f'<p:bldP spid="{spid}" grpId="0"/>')
+
+        step_delay = "0" if gi == 0 else "indefinite"
+        click_steps_xml.append(
+            f'<p:par>'
+            f'<p:cTn id="{click_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="{step_delay}"/></p:stCondLst>'
+            f'<p:childTnLst><p:par>'
+            f'<p:cTn id="{inner_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+            f'<p:childTnLst>{"".join(anims)}</p:childTnLst>'
+            f'</p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
+        )
+
+    return (
+        f'<p:timing xmlns:p="{_PNS}">'
+        f'<p:tnLst><p:par>'
+        f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">'
+        f'<p:childTnLst><p:seq concurrent="1" nextAc="seek">'
+        f'<p:cTn id="2" dur="indefinite" nodeType="mainSeq">'
+        f'<p:childTnLst>{"".join(click_steps_xml)}</p:childTnLst></p:cTn>'
+        f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+        f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+        f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
+        f'<p:bldLst>{"".join(builds)}</p:bldLst>'
+        f'</p:timing>'
+    )
+
+
 TOTAL = 13
 
 
@@ -252,6 +464,7 @@ def slide_about():
              "ML Associate — Vector Institute", font=B_FONT, size=11, color=GOLD)
     add_text(s, Inches(0.9), Inches(5.75), Inches(4), Inches(0.4),
              "M.Sc. Computer Science — York", font=B_FONT, size=11, color=SLATE)
+    mark_break(s)  # — pause after left identity panel
 
     # right side
     corner_marker_x = Inches(5.4)
@@ -265,6 +478,7 @@ def slide_about():
     add_text(s, corner_marker_x, Inches(2.3), Inches(8), Inches(0.5),
              "I build [b]agentic AI systems[/b] grounded in real-world data.",
              font=B_FONT, size=17, italic=True, color=ROYAL)
+    mark_break(s)  # — pause before bullets
 
     bullets = [
         "Currently a [b]Machine Learning Associate at the Vector Institute[/b], shipping a real-time VR firefighter training system: skeletal-telemetry deviation detection + an LLM coaching layer grounded in training manuals.",
@@ -507,6 +721,8 @@ def slide_safezone_arch():
     add_text(s, Inches(0.7), Inches(1.85), Inches(12), Inches(0.4),
              "Voice  →  ASR + emotion  →  LLM grounded in APA PsycInfo  →  cloned-voice TTS  →  blend-shape lip-sync.",
              font=B_FONT, size=13, italic=True, color=GOLD)
+    mark_break(s)  # — pause before architecture diagram
+
     add_image(s, f"{MEDIA}/image26.png", Inches(0.7), Inches(2.45), w=Inches(12))
     page_footer(s, 9, TOTAL)
 
@@ -537,6 +753,7 @@ def slide_more_projects():
         add_text(s, lx + Inches(0.25), ly, Inches(2.5), Inches(0.3),
                  label, font=H_FONT, size=9, bold=True, color=DARK_TEXT)
         lx += Inches(2.55)
+    mark_break(s)  # — pause before first row of project cards
 
     # 4 cols × 3 rows = 12 mini cards
     projects = [
@@ -571,6 +788,9 @@ def slide_more_projects():
                  name, font=H_FONT, size=12, bold=True, color=color)
         add_text(s, x + Inches(0.22), y + Inches(0.6), cw - Inches(0.35), Inches(0.7),
                  desc, font=B_FONT, size=9.5, color=LIGHT_GREY, line_spacing=1.25)
+        # pause after every row of 4 cards (except the final row — let footer ride along)
+        if (i + 1) % 4 == 0 and (i + 1) < len(projects):
+            mark_break(s)
     light_footer(s, 10, TOTAL)
 
 
@@ -604,6 +824,7 @@ def slide_latex_cv():
     add_bullets(s, Inches(0.7), Inches(3.55), Inches(7), Inches(3.2),
                 bullets, size=12, line_spacing=1.3, bullet_char="▸",
                 color=DARK_TEXT)
+    mark_break(s)  # — pause before right-side architecture panel
 
     # right: arch image inside a dark frame
     add_rect(s, Inches(8.0), Inches(3.1), Inches(4.85), Inches(3.7), NAVY)
@@ -760,6 +981,7 @@ def slide_thanks():
     add_text(s, Inches(1.0), Inches(3.85), Inches(11), Inches(0.5),
              "Happy to dig into any of these in more depth.",
              font=B_FONT, size=18, italic=True, color=GOLD)
+    mark_break(s)  # — pause before contact cards
 
     # contact strip
     contacts = [
@@ -797,6 +1019,29 @@ def build():
     slide_stack()           # 11
     slide_recognition()     # 12
     slide_thanks()          # 13
+
+    # --- Animations + transitions ---------------------------------------
+    # Per-slide effect mix; cycled per shape in z-order. fade is the
+    # workhorse; float_up + zoom add subtle variation on key moments.
+    effect_mix = {
+        0:  ("fade", "float_up"),                 # title — calm
+        1:  ("fade",),                            # about — readable
+        2:  ("zoom", "fade"),                     # pillars — punchy
+        3:  ("fade", "wipe_up"),                  # vector
+        4:  ("fade", "float_up"),                 # latex CV
+        5:  ("fade", "wipe_up"),                  # dreamforge
+        6:  ("fade", "float_up"),                 # caselogic
+        7:  ("fade", "fly_from_bot"),             # safezone
+        8:  ("fade", "wipe_up"),                  # safezone arch
+        9:  ("zoom", "fade"),                     # more projects — grid pop
+        10: ("fade", "float_up"),                 # stack
+        11: ("zoom", "fade"),                     # recognition — punchy
+        12: ("fade", "float_up"),                 # thanks
+    }
+    for i, slide in enumerate(prs.slides):
+        apply_fade_transition(slide, speed="med")
+        apply_cascade_anim(slide, effects=effect_mix.get(i, ("fade",)),
+                           step_ms=110, dur_ms=420)
 
     out = "Daniel-CV-5min-Talk.pptx"
     prs.save(out)
