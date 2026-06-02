@@ -693,41 +693,79 @@ def _split_into_groups(slide, animated_ids):
     return groups
 
 
+def _is_container(sp):
+    """A 'box' that holds content: a rounded rectangle wide enough to be a
+    card / tile / pill / bar (≥1.5in). Small rounded rects (chips) are NOT
+    containers — they ride along with their parent card."""
+    try:
+        return (sp.auto_shape_type == MSO_SHAPE.ROUNDED_RECTANGLE
+                and int(sp.width or 0) >= int(Inches(1.5)))
+    except Exception:
+        return False
+
+
+def _center_in(sp, cont):
+    """True if sp's center sits inside cont's bounds (sp is 'inside' the box)."""
+    try:
+        cx = int(sp.left or 0) + int(sp.width or 0) // 2
+        cy = int(sp.top or 0) + int(sp.height or 0) // 2
+        return (int(cont.left) <= cx <= int(cont.left) + int(cont.width)
+                and int(cont.top) <= cy <= int(cont.top) + int(cont.height))
+    except Exception:
+        return False
+
+
+def _content_groups(slide):
+    """Partition a slide into click-reveal GROUPS of 'a box + everything in it'.
+
+    Everything created before the first container box (background, decorative
+    shapes, section marker, title, subtitle — the page 'style') is left OUT of
+    every group, so it is STATIC: present the moment the slide opens. From the
+    first box onward, each STANDALONE box starts a new group; shapes that
+    follow it — including chips/pills whose centre sits INSIDE that box — ride
+    along in the same group. So a box and its text reveal together on one
+    click, while a separate box (e.g. a pipeline pill) gets its own click.
+    """
+    shapes = list(slide.shapes)
+    first = next((i for i, sp in enumerate(shapes) if _is_container(sp)), None)
+    if first is None:
+        return []                       # no boxes → whole slide is static
+    groups, cur, cont = [], [], None
+    for sp in shapes[first:]:
+        try:
+            if (int(sp.left or 0) == 0 and int(sp.top or 0) == 0
+                    and int(sp.width or 0) == int(SLIDE_W)
+                    and int(sp.height or 0) == int(SLIDE_H)):
+                continue                # skip a full-slide background
+        except Exception:
+            pass
+        if _is_container(sp) and not (cont is not None and _center_in(sp, cont)):
+            if cur:
+                groups.append(cur)
+            cur = [sp.shape_id]; cont = sp     # standalone box → new group
+        else:
+            cur.append(sp.shape_id)            # rides with the current box
+    if cur:
+        groups.append(cur)
+    return groups
+
+
 def apply_cascade_anim(slide, *, effects=("fade",), step_ms=120, dur_ms=420):
-    """
-    Section-aware cascade entrance animations.
-
-    Animated shapes are partitioned into sections (manual breaks via
-    mark_break() + auto-detected card containers). The first section plays
-    automatically when the slide enters; each subsequent section waits for
-    a click/space. Within a section the cascade overlaps so it finishes in
-    ~(N-1)*step_ms + dur_ms.
-
-    `effects` is a tuple of effect names from _EFFECTS; cycled per shape.
-    """
-    animated_ids = _shape_anim_ids(slide)
-    if not animated_ids:
-        return
-    groups = _split_into_groups(slide, animated_ids)
+    """Grouped click reveals: the page frame is static; each content box and
+    its text fade in TOGETHER on one click (step_ms=0 → simultaneous)."""
+    groups = _content_groups(slide)
+    if not groups:
+        return                          # fully static slide
     sld = slide.element
     for el in sld.findall(qn('p:timing')):
         sld.remove(el)
-    xml = _cascade_timing_xml(groups, effects, step_ms, dur_ms)
+    xml = _cascade_timing_xml(groups, ("fade",), 0, dur_ms)
     sld.append(etree.fromstring(xml))
 
 
-def apply_single_cascade(slide, *, step_ms=80, dur_ms=340):
-    """Auto-playing fade build-up: every shape in one section, revealed in
-    z-order (= creation order) with a small overlap. Used for the DigiHuman
-    pipeline so the diagram 'draws itself' when the slide appears."""
-    ids = _shape_anim_ids(slide)
-    if not ids:
-        return
-    sld = slide.element
-    for el in sld.findall(qn('p:timing')):
-        sld.remove(el)
-    xml = _cascade_timing_xml([ids], ("fade",), step_ms, dur_ms)
-    sld.append(etree.fromstring(xml))
+def apply_single_cascade(slide, *, step_ms=0, dur_ms=420):
+    """DigiHuman pipeline uses the same grouped click reveals."""
+    apply_cascade_anim(slide, dur_ms=dur_ms)
 
 
 def _anim_par_xml(spid, preset_id, preset_class, preset_sub,
@@ -789,7 +827,7 @@ def _cascade_timing_xml(groups, effects, step_ms, dur_ms):
                 node_type, offset, dur_ms, nid))
             builds.append(f'<p:bldP spid="{spid}" grpId="0"/>')
 
-        step_delay = "0" if gi == 0 else "indefinite"
+        step_delay = "indefinite"   # every step waits for its own click
         click_steps_xml.append(
             f'<p:par>'
             f'<p:cTn id="{click_id}" fill="hold">'
@@ -1682,24 +1720,20 @@ def build(theme="midnight", out=None):
     if SHOW_SLIDES["honors"]:       build_honors()            # all honors
     slide_thanks()                                   # always
 
-    # --- Footers & page numbers (dynamic): every slide except title & thanks
+    # --- Animations + transitions (BEFORE footers, so footers stay static) ---
+    # The page frame (background, decorations, marker, title, subtitle) is
+    # static — present on slide enter. Each content box + its text fades in
+    # together on a single click.
+    for i, slide in enumerate(prs.slides):
+        apply_fade_transition(slide, speed="med")
+        apply_cascade_anim(slide, dur_ms=400)
+
+    # --- Footers & page numbers: added AFTER animation → never animated.
     total = len(prs.slides)
     for i, slide in enumerate(prs.slides):
         if i == 0 or i == total - 1 or id(slide) in _no_footer_ids:
             continue
         add_footer(slide, i + 1, total)
-
-    # --- Animations + transitions ---------------------------------------
-    # Per-slide effect mix recorded at slide-creation time; cycled per shape
-    # in z-order. fade is the workhorse; float_up + zoom add subtle variation.
-    # ("seq",) marks a smooth auto build-up (DigiHuman pipeline).
-    for i, slide in enumerate(prs.slides):
-        apply_fade_transition(slide, speed="med")
-        eff = _slide_effects[i] if i < len(_slide_effects) else ("fade",)
-        if eff == ("seq",):
-            apply_single_cascade(slide)
-        else:
-            apply_cascade_anim(slide, effects=eff, step_ms=110, dur_ms=420)
 
     out = out or OUT_FILE.get(theme, "Daniel-CV-5min-Talk.pptx")
     prs.save(out)

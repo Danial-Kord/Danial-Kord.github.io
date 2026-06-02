@@ -1258,35 +1258,71 @@ def _dh_anim_par(spid, dur_ms, offset_ms, node_type, nid):
             f'</p:childTnLst></p:cTn></p:par>')
 
 
-def _dh_build_anim(slide, *, step_ms=80, dur_ms=340):
-    """Auto-playing fade build-up over every shape in z-order."""
-    ids = []
-    for sp in slide.shapes:
+def _dh_build_anim(slide, *, dur_ms=400):
+    """Grouped click reveals — the page frame (title, decorations) is static;
+    each box (tile / pill / bar) fades in TOGETHER with its text & image on a
+    single click. Shapes before the first box stay static (present on enter)."""
+    def container(sp):
         try:
-            l = int(sp.left or 0); t = int(sp.top or 0)
-            w = int(sp.width or 0); h = int(sp.height or 0)
+            return (sp.auto_shape_type == MSO_SHAPE.ROUNDED_RECTANGLE
+                    and int(sp.width or 0) >= int(Inches(1.5)))
         except Exception:
-            l = t = w = h = 0
-        if l == 0 and t == 0 and w == int(SLIDE_W) and h == int(SLIDE_H):
-            continue
-        ids.append(sp.shape_id)
-    if not ids:
+            return False
+    def center_in(sp, c):
+        try:
+            cx = int(sp.left or 0) + int(sp.width or 0) // 2
+            cy = int(sp.top or 0) + int(sp.height or 0) // 2
+            return (int(c.left) <= cx <= int(c.left) + int(c.width)
+                    and int(c.top) <= cy <= int(c.top) + int(c.height))
+        except Exception:
+            return False
+    shapes = list(slide.shapes)
+    first = next((i for i, sp in enumerate(shapes) if container(sp)), None)
+    if first is None:
+        return
+    groups, cur, cont = [], [], None
+    for sp in shapes[first:]:
+        try:
+            if (int(sp.left or 0) == 0 and int(sp.top or 0) == 0
+                    and int(sp.width or 0) == int(SLIDE_W)
+                    and int(sp.height or 0) == int(SLIDE_H)):
+                continue
+        except Exception:
+            pass
+        if container(sp) and not (cont is not None and center_in(sp, cont)):
+            if cur:
+                groups.append(cur)
+            cur = [sp.shape_id]; cont = sp
+        else:
+            cur.append(sp.shape_id)
+    if cur:
+        groups.append(cur)
+    if not groups:
         return
     counter = [3]
     def nid():
         v = counter[0]; counter[0] += 1; return v
-    click = nid(); inner = nid()
-    anims = [_dh_anim_par(spid, dur_ms, i * step_ms,
-                          "clickEffect" if i == 0 else "withEffect", nid)
-             for i, spid in enumerate(ids)]
-    builds = "".join(f'<p:bldP spid="{spid}" grpId="0"/>' for spid in ids)
+    steps = []
+    builds_list = []
+    for g in groups:
+        click = nid(); inner = nid()
+        anims = []
+        for j, spid in enumerate(g):
+            nt = "clickEffect" if j == 0 else "withEffect"
+            anims.append(_dh_anim_par(spid, dur_ms, 0, nt, nid))
+            builds_list.append(f'<p:bldP spid="{spid}" grpId="0"/>')
+        steps.append(
+            f'<p:par><p:cTn id="{click}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="indefinite"/></p:stCondLst><p:childTnLst>'
+            f'<p:par><p:cTn id="{inner}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+            f'<p:childTnLst>{"".join(anims)}</p:childTnLst></p:cTn></p:par>'
+            f'</p:childTnLst></p:cTn></p:par>')
+    builds = "".join(builds_list)
     xml = (f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
            f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
            f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
-           f'<p:par><p:cTn id="{click}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
-           f'<p:par><p:cTn id="{inner}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
-           f'{"".join(anims)}</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
-           f'</p:childTnLst></p:cTn>'
+           f'{"".join(steps)}</p:childTnLst></p:cTn>'
            f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
            f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
            f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
