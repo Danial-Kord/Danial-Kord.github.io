@@ -66,6 +66,7 @@ SHOW_SLIDES = {
     "vector":        True,   # deep-dive: Vector Institute (current role)
     "latex_cv":      True,   # deep-dive: LaTeX CV Builder
     "dreamforge":    True,   # deep-dive: DreamForge
+    "guardian":      True,   # deep-dive: Guardian (NVIDIA Spark Hack)
     "caselogic":     True,   # deep-dive: CaseLogic hackathon
     "safezone":      True,   # deep-dive: SAFEZone AI hackathon
     "safezone_arch": True,   # deep-dive: SAFEZone architecture diagram
@@ -177,6 +178,8 @@ PROJECTS = [
     # AI / ML / Vision
     {"show": True, "cat": "ai", "name": "BakeryPilot",
      "desc": "Agentic supply-chain copilot; LangGraph + Next.js. 4th @ TMLS."},
+    {"show": True, "cat": "ai", "name": "Guardian",
+     "desc": "Local-first emergency AI; LangGraph agents on NVIDIA DGX Spark."},
     {"show": True, "cat": "ai", "name": "DigiHuman  ⭐ 500",
      "desc": "Open-source real-time 3D avatar animation from monocular video."},
     {"show": True, "cat": "ai", "name": "LaTeX CV Builder",
@@ -926,6 +929,55 @@ def slide_vector():
 
 
 # ====================================================================
+# DEEP-DIVE · GUARDIAN  (NVIDIA Spark Hack — agentic emergency AI)
+# ====================================================================
+def slide_guardian():
+    s = new_slide(("fade", "float_up"))
+    fill_slide(s, IVORY)
+    corner_marker(s, "HACKATHON  ·  NVIDIA SPARK HACK")
+    add_text(s, Inches(0.7), Inches(1.0), Inches(11), Inches(0.4),
+             "NVIDIA SPARK HACK TORONTO  ·  2026",
+             font=H_FONT, size=12, bold=True, color=AMBER)
+    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
+             "Guardian — local-first emergency AI companion",
+             font=H_FONT, size=32, bold=True, color=NAVY)
+    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
+             "[b]Led the backend & multi-agent core[/b] (5-person team) — for people who live alone.",
+             font=B_FONT, size=14, italic=True, color=ROYAL)
+
+    # bullets left — how it works
+    add_text(s, Inches(0.7), Inches(3.1), Inches(7), Inches(0.4),
+             "HOW IT WORKS", font=H_FONT, size=11, bold=True, color=AMBER)
+    bullets = [
+        "A [b]Wear OS watch[/b] detects falls & vitals anomalies; a deterministic fast-path routes emergencies to the Safety agent first.",
+        "[b]FastAPI + LangGraph router[/b] over six specialist agents — only the Safety agent can dispatch 911.",
+        "[b]CTAS-aligned risk scoring[/b] + idempotent Twilio tools in plain Python — the live demo never breaks on a flaky model.",
+        "[b]Real-time voice[/b] (faster-whisper → Kokoro) + an SSE bus to a Next.js dashboard, Flutter app & Wear OS watch.",
+    ]
+    add_bullets(s, Inches(0.7), Inches(3.55), Inches(7.6), Inches(3.3),
+                bullets, size=12, line_spacing=1.3, bullet_char="▸",
+                color=DARK_TEXT)
+
+    # right column: hero stat + stack
+    add_round_rect(s, Inches(8.6), Inches(3.1), Inches(4.2), Inches(3.7), NAVY, radius=0.06)
+    add_rect(s, Inches(8.6), Inches(3.1), Inches(0.1), Inches(3.7), AMBER)
+    add_text(s, Inches(8.85), Inches(3.25), Inches(3.8), Inches(0.5),
+             "AUTONOMOUS", font=H_FONT, size=11, bold=True, color=AMBER)
+    add_text(s, Inches(8.85), Inches(3.55), Inches(3.8), Inches(1.4),
+             "911",
+             font=H_FONT, size=88, bold=True, color=AMBER)
+    add_text(s, Inches(8.85), Inches(4.95), Inches(3.7), Inches(0.5),
+             "calls with full medical context — running on-device on an NVIDIA DGX Spark",
+             font=B_FONT, size=11, color=IVORY, line_spacing=1.2)
+    add_text(s, Inches(8.85), Inches(5.55), Inches(3.8), Inches(0.4),
+             "STACK", font=H_FONT, size=10, bold=True, color=AMBER)
+    chip_row(s, Inches(8.85), Inches(5.95),
+             ["FastAPI", "LangGraph", "Twilio", "Nemotron"],
+             color_fill=INDIGO, text_color=GOLD, size=9,
+             max_x=Inches(12.7))
+
+
+# ====================================================================
 # DEEP-DIVE · CASELOGIC  (3rd place hackathon)
 # ====================================================================
 def slide_caselogic():
@@ -1307,6 +1359,7 @@ def build():
     if SHOW_SLIDES["vector"]:       slide_vector()            # deep-dive
     if SHOW_SLIDES["latex_cv"]:     slide_latex_cv()          # deep-dive
     if SHOW_SLIDES["dreamforge"]:   slide_dreamforge()        # deep-dive
+    if SHOW_SLIDES["guardian"]:     slide_guardian()          # deep-dive
     if SHOW_SLIDES["caselogic"]:    slide_caselogic()         # deep-dive
     if SHOW_SLIDES["safezone"]:     slide_safezone()          # deep-dive
     if SHOW_SLIDES["safezone_arch"]: slide_safezone_arch()    # deep-dive
