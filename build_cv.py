@@ -1208,31 +1208,166 @@ def slide_proj_digihuman_cover():
     light_footer(s, "PROJECTS", 23)
 
 
+# --- DigiHuman pipeline assets + a minimal fade-build animation engine ------
+DH_MEDIA = "digihuman_assets"
+DH_MINT  = RGBColor(0xD4, 0xF0, 0xD5)
+DH_CORAL = RGBColor(0xEE, 0x6B, 0x6B)
+DH_ARROW = RGBColor(0xFC, 0xA0, 0x8E)
+DH_INK   = RGBColor(0x2B, 0x2B, 0x2B)
+_PNS = "http://schemas.openxmlformats.org/presentationml/2006/main"
+
+
+def add_chevron(slide, x, y, w, h, fill, left=False):
+    shp = slide.shapes.add_shape(MSO_SHAPE.CHEVRON, x, y, w, h)
+    shp.fill.solid(); shp.fill.fore_color.rgb = fill
+    shp.line.fill.background()
+    if left:
+        shp.rotation = 180
+    spPr = shp.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return shp
+
+
+def _dh_fade_transition(slide, speed="med"):
+    sld = slide.element
+    for el in sld.findall(qn('p:transition')): sld.remove(el)
+    tr = etree.fromstring(f'<p:transition xmlns:p="{_PNS}" spd="{speed}"><p:fade/></p:transition>')
+    csld = sld.find(qn('p:cSld'))
+    idx = list(sld).index(csld) + 1
+    while idx < len(sld) and sld[idx].tag == qn('p:clrMapOvr'): idx += 1
+    sld.insert(idx, tr)
+
+
+def _dh_anim_par(spid, dur_ms, offset_ms, node_type, nid):
+    ctn = nid(); setid = nid(); animid = nid()
+    return (f'<p:par><p:cTn id="{ctn}" presetID="10" presetClass="entr" presetSubtype="0" '
+            f'fill="hold" grpId="0" nodeType="{node_type}">'
+            f'<p:stCondLst><p:cond delay="{offset_ms}"/></p:stCondLst><p:childTnLst>'
+            f'<p:set><p:cBhvr><p:cTn id="{setid}" dur="1" fill="hold">'
+            f'<p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>'
+            f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+            f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr>'
+            f'<p:to><p:strVal val="visible"/></p:to></p:set>'
+            f'<p:anim calcmode="lin" valueType="num"><p:cBhvr additive="base">'
+            f'<p:cTn id="{animid}" dur="{dur_ms}" fill="hold"/>'
+            f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+            f'<p:attrNameLst><p:attrName>style.opacity</p:attrName></p:attrNameLst></p:cBhvr>'
+            f'<p:tavLst><p:tav tm="0"><p:val><p:fltVal val="0"/></p:val></p:tav>'
+            f'<p:tav tm="100000"><p:val><p:fltVal val="1"/></p:val></p:tav></p:tavLst></p:anim>'
+            f'</p:childTnLst></p:cTn></p:par>')
+
+
+def _dh_build_anim(slide, *, step_ms=80, dur_ms=340):
+    """Auto-playing fade build-up over every shape in z-order."""
+    ids = []
+    for sp in slide.shapes:
+        try:
+            l = int(sp.left or 0); t = int(sp.top or 0)
+            w = int(sp.width or 0); h = int(sp.height or 0)
+        except Exception:
+            l = t = w = h = 0
+        if l == 0 and t == 0 and w == int(SLIDE_W) and h == int(SLIDE_H):
+            continue
+        ids.append(sp.shape_id)
+    if not ids:
+        return
+    counter = [3]
+    def nid():
+        v = counter[0]; counter[0] += 1; return v
+    click = nid(); inner = nid()
+    anims = [_dh_anim_par(spid, dur_ms, i * step_ms,
+                          "clickEffect" if i == 0 else "withEffect", nid)
+             for i, spid in enumerate(ids)]
+    builds = "".join(f'<p:bldP spid="{spid}" grpId="0"/>' for spid in ids)
+    xml = (f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
+           f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
+           f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
+           f'<p:par><p:cTn id="{click}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'<p:par><p:cTn id="{inner}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'{"".join(anims)}</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
+           f'</p:childTnLst></p:cTn>'
+           f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+           f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+           f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
+           f'<p:bldLst>{builds}</p:bldLst></p:timing>')
+    sld = slide.element
+    for el in sld.findall(qn('p:timing')): sld.remove(el)
+    sld.append(etree.fromstring(xml))
+
+
 def slide_proj_digihuman_arch():
+    """DigiHuman pipeline — recreated from the template's page 34, animated."""
     s = prs.slides.add_slide(blank_layout)
-    page_bg(s)
-    add_section_marker(s, "04 / PROJECTS  ·  DIGIHUMAN")
-    add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.7),
-             "Architecture overview", font=H_FONT, size=32, bold=True, color=INK)
-    add_text(s, Inches(0.7), Inches(1.7), Inches(11), Inches(0.4),
-             "Back-end inference → server  →  front-end smoothing & rigging.",
-             font=B_FONT, size=13, italic=True, color=SUB)
-    if DECO == "memphis":
-        # image5.png is a dark navy-background diagram; seat it in a dark
-        # "exhibit" frame so it reads as deliberate on a white slide.
-        path = f"{MEDIA}/image5.png"
-        img_w = 10.6
-        ix = (13.333 - img_w) / 2.0
-        iy = 2.45
-        img_h = img_w * _png_ratio(path)
-        pad = 0.16
-        add_round_rect(s, Inches(ix - pad), Inches(iy - pad),
-                       Inches(img_w + 2 * pad), Inches(img_h + 2 * pad),
-                       NAVY, radius=0.03)
-        add_image(s, path, Inches(ix), Inches(iy), w=Inches(img_w))
-    else:
-        add_image(s, f"{MEDIA}/image5.png", Inches(0.7), Inches(2.35), w=Inches(12))
-    light_footer(s, "PROJECTS", 24)
+    fill_slide(s, WHITE)
+
+    # decorative template-style blobs (behind content; fade in first)
+    add_oval(s, Inches(11.95), Inches(-0.75), Inches(2.1), Inches(2.1), M_PURPLE)
+    add_oval(s, Inches(12.55), Inches(3.15), Inches(0.85), Inches(0.85), DH_CORAL)
+    add_oval(s, Inches(-0.55), Inches(6.35), Inches(1.5), Inches(1.5), M_CYAN)
+    add_oval(s, Inches(0.40), Inches(0.25), Inches(0.26), Inches(0.26), M_YELLOW)
+
+    add_text(s, Inches(0.5), Inches(0.14), Inches(12.33), Inches(0.7),
+             "DigiHuman", font=H_FONT, size=34, bold=True, color=DH_INK,
+             align=PP_ALIGN.CENTER)
+
+    def tile(x, y, w, h):
+        add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), DH_MINT, radius=0.09)
+
+    def pill(x, y, w, h, text, size=12, r=0.5):
+        add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), DH_CORAL, radius=r)
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(h), text, font=H_FONT,
+                 size=size, bold=True, color=WHITE, align=PP_ALIGN.CENTER,
+                 anchor=MSO_ANCHOR.MIDDLE, line_spacing=1.0)
+
+    def label(x, y, w, text):
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(0.38), text, font=H_FONT,
+                 size=13, bold=True, color=DH_INK, align=PP_ALIGN.CENTER,
+                 anchor=MSO_ANCHOR.MIDDLE)
+
+    # ----- TOP ROW: Video -> Server -----
+    tile(0.93, 0.85, 2.30, 2.45)
+    add_image(s, f"{DH_MEDIA}/dh_01.jpg", Inches(1.10), Inches(1.02), w=Inches(1.94))
+    label(0.93, 2.86, 2.30, "Video")
+    tile(3.75, 0.85, 2.30, 2.45)
+    add_image(s, f"{DH_MEDIA}/dh_00.png", Inches(3.93), Inches(1.00), w=Inches(1.95))
+    label(3.75, 2.86, 2.30, "Server")
+    add_chevron(s, Inches(3.20), Inches(1.55), Inches(0.60), Inches(0.48), DH_ARROW)
+    pill(2.50, 3.42, 1.95, 0.46, "Upload")
+
+    # ----- Video Processing -> branch to the three landmark bars -----
+    pill(5.71, 1.74, 2.34, 0.55, "Video Processing")
+    add_rect(s, Inches(8.05), Inches(1.03), Inches(0.035), Inches(2.05), DH_ARROW)
+    bars = [("Facial landmarks", 0.68, "dh_04.png", 10.72, 0.50, 0.89),
+            ("Body Pose landmarks", 1.73, "dh_03.png", 10.62, 1.52, 0.94),
+            ("Hand landmarks", 2.72, "dh_05.png", 10.61, 2.56, 0.89)]
+    for txt, by, icon, ix, iy, isz in bars:
+        add_rect(s, Inches(8.05), Inches(by + 0.33), Inches(0.30), Inches(0.035), DH_ARROW)
+        add_round_rect(s, Inches(8.24), Inches(by), Inches(3.27), Inches(0.70), DH_MINT, radius=0.3)
+        add_text(s, Inches(8.45), Inches(by), Inches(2.05), Inches(0.70), txt,
+                 font=H_FONT, size=12, bold=True, color=DH_INK, anchor=MSO_ANCHOR.MIDDLE)
+        add_image(s, f"{DH_MEDIA}/{icon}", Inches(ix), Inches(iy), w=Inches(isz))
+    pill(8.95, 3.50, 1.95, 0.62, "Receive data from server", size=10, r=0.25)
+
+    # ----- BOTTOM ROW (right -> left): Processing -> Smoothing -> Rendering -----
+    tile(8.70, 3.86, 2.55, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_02.png", Inches(9.10), Inches(4.05), w=Inches(1.80))
+    pill(8.50, 6.42, 2.75, 0.95,
+         "Processing 3D landmarks, calculating rotation & position of body joints",
+         size=8.5, r=0.12)
+    add_chevron(s, Inches(8.15), Inches(4.92), Inches(0.55), Inches(0.50), DH_ARROW, left=True)
+    tile(5.53, 3.86, 2.60, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_06.png", Inches(5.70), Inches(4.00), w=Inches(2.26))
+    pill(5.10, 6.42, 3.20, 0.80,
+         "Smoothing animation in frames, using signal filters (low-pass filter)",
+         size=9, r=0.14)
+    add_chevron(s, Inches(4.85), Inches(4.95), Inches(0.55), Inches(0.50), DH_ARROW, left=True)
+    tile(2.26, 3.86, 2.55, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_07.png", Inches(2.55), Inches(4.05), w=Inches(1.96))
+    pill(2.00, 6.42, 3.00, 0.60, "Rendering the final animation", size=11, r=0.2)
+
+    _dh_fade_transition(s)
+    _dh_build_anim(s)
 
 
 def slide_proj_digihuman_demos():

@@ -140,6 +140,7 @@ SHOW_SLIDES = {
     "caselogic":     True,   # deep-dive: CaseLogic hackathon
     "safezone":      True,   # deep-dive: SAFEZone AI hackathon
     "safezone_arch": True,   # deep-dive: SAFEZone architecture diagram
+    "digihuman":     True,   # deep-dive: animated DigiHuman pipeline
     "projects":      True,   # comprehensive Projects section
     "stack":         True,   # the toolkit
     "honors":        True,   # comprehensive Honors & Awards section
@@ -355,6 +356,27 @@ def add_oval(slide, x, y, w, h, fill):
     return shp
 
 
+def add_chevron(slide, x, y, w, h, fill, left=False):
+    """A chunky chevron arrow (points right; left=True flips it)."""
+    shp = slide.shapes.add_shape(MSO_SHAPE.CHEVRON, x, y, w, h)
+    shp.fill.solid(); shp.fill.fore_color.rgb = fill
+    shp.line.fill.background()
+    if left:
+        shp.rotation = 180
+    spPr = shp.fill._xPr
+    for el in spPr.findall(qn('a:effectLst')): spPr.remove(el)
+    etree.SubElement(spPr, qn('a:effectLst'))
+    return shp
+
+
+# --- DigiHuman pipeline assets (illustrations extracted from the template) --
+DH_MEDIA = "digihuman_assets"
+DH_MINT  = RGBColor(0xD4, 0xF0, 0xD5)   # node tiles / landmark bars
+DH_CORAL = RGBColor(0xEE, 0x6B, 0x6B)   # process pills
+DH_ARROW = RGBColor(0xFC, 0xA0, 0x8E)   # connector arrows
+DH_INK   = RGBColor(0x2B, 0x2B, 0x2B)   # labels
+
+
 def _split_bold(s):
     out, i = [], 0
     while i < len(s):
@@ -546,9 +568,12 @@ prs = None
 blank_layout = None
 
 
+_no_footer_ids = set()
+
+
 def _reset_deck():
     """Fresh Presentation + per-build state (lets us render both themes)."""
-    global prs, blank_layout, _slide_effects, _SLIDE_BREAKS, _deco_i
+    global prs, blank_layout, _slide_effects, _SLIDE_BREAKS, _deco_i, _no_footer_ids
     prs = Presentation()
     prs.slide_width = SLIDE_W
     prs.slide_height = SLIDE_H
@@ -556,6 +581,7 @@ def _reset_deck():
     _slide_effects = []
     _SLIDE_BREAKS = {}
     _deco_i = [0]
+    _no_footer_ids = set()
 
 
 def new_slide(effects=("fade",)):
@@ -687,6 +713,20 @@ def apply_cascade_anim(slide, *, effects=("fade",), step_ms=120, dur_ms=420):
     for el in sld.findall(qn('p:timing')):
         sld.remove(el)
     xml = _cascade_timing_xml(groups, effects, step_ms, dur_ms)
+    sld.append(etree.fromstring(xml))
+
+
+def apply_single_cascade(slide, *, step_ms=80, dur_ms=340):
+    """Auto-playing fade build-up: every shape in one section, revealed in
+    z-order (= creation order) with a small overlap. Used for the DigiHuman
+    pipeline so the diagram 'draws itself' when the slide appears."""
+    ids = _shape_anim_ids(slide)
+    if not ids:
+        return
+    sld = slide.element
+    for el in sld.findall(qn('p:timing')):
+        sld.remove(el)
+    xml = _cascade_timing_xml([ids], ("fade",), step_ms, dur_ms)
     sld.append(etree.fromstring(xml))
 
 
@@ -1542,6 +1582,80 @@ def slide_thanks():
 
 
 # ====================================================================
+# DIGIHUMAN PIPELINE  (recreated from the template's page 34 — animated)
+# ====================================================================
+def slide_digihuman_pipeline():
+    s = new_slide(("seq",))          # ("seq",) → smooth auto fade build-up
+    _no_footer_ids.add(id(s))        # full-bleed diagram: no footer
+    fill_slide(s, M_WHITE)
+
+    # decorative template-style blobs (behind content; fade in first)
+    add_oval(s, Inches(11.95), Inches(-0.75), Inches(2.1), Inches(2.1), M_PURPLE)
+    add_oval(s, Inches(12.55), Inches(3.15), Inches(0.85), Inches(0.85), DH_CORAL)
+    add_oval(s, Inches(-0.55), Inches(6.35), Inches(1.5), Inches(1.5), M_CYAN)
+    add_oval(s, Inches(0.40), Inches(0.25), Inches(0.26), Inches(0.26), M_YELLOW)
+
+    add_text(s, Inches(0.5), Inches(0.14), Inches(12.33), Inches(0.7),
+             "DigiHuman", font=H_FONT, size=34, bold=True, color=DH_INK,
+             align=PP_ALIGN.CENTER)
+
+    def tile(x, y, w, h):
+        add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), DH_MINT, radius=0.09)
+
+    def pill(x, y, w, h, text, size=12, r=0.5):
+        add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), DH_CORAL, radius=r)
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(h), text, font=H_FONT,
+                 size=size, bold=True, color=M_WHITE, align=PP_ALIGN.CENTER,
+                 anchor=MSO_ANCHOR.MIDDLE, line_spacing=1.0)
+
+    def label(x, y, w, text):
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(0.38), text, font=H_FONT,
+                 size=13, bold=True, color=DH_INK, align=PP_ALIGN.CENTER,
+                 anchor=MSO_ANCHOR.MIDDLE)
+
+    # ----- TOP ROW: Video -> Server -----
+    tile(0.93, 0.85, 2.30, 2.45)
+    add_image(s, f"{DH_MEDIA}/dh_01.jpg", Inches(1.10), Inches(1.02), w=Inches(1.94))
+    label(0.93, 2.86, 2.30, "Video")
+    tile(3.75, 0.85, 2.30, 2.45)
+    add_image(s, f"{DH_MEDIA}/dh_00.png", Inches(3.93), Inches(1.00), w=Inches(1.95))
+    label(3.75, 2.86, 2.30, "Server")
+    add_chevron(s, Inches(3.20), Inches(1.55), Inches(0.60), Inches(0.48), DH_ARROW)
+    pill(2.50, 3.42, 1.95, 0.46, "Upload")
+
+    # ----- Video Processing -> branch to the three landmark bars -----
+    pill(5.71, 1.74, 2.34, 0.55, "Video Processing")
+    add_rect(s, Inches(8.05), Inches(1.03), Inches(0.035), Inches(2.05), DH_ARROW)
+    bars = [("Facial landmarks", 0.68, "dh_04.png", 10.72, 0.50, 0.89),
+            ("Body Pose landmarks", 1.73, "dh_03.png", 10.62, 1.52, 0.94),
+            ("Hand landmarks", 2.72, "dh_05.png", 10.61, 2.56, 0.89)]
+    for txt, by, icon, ix, iy, isz in bars:
+        add_rect(s, Inches(8.05), Inches(by + 0.33), Inches(0.30), Inches(0.035), DH_ARROW)
+        add_round_rect(s, Inches(8.24), Inches(by), Inches(3.27), Inches(0.70), DH_MINT, radius=0.3)
+        add_text(s, Inches(8.45), Inches(by), Inches(2.05), Inches(0.70), txt,
+                 font=H_FONT, size=12, bold=True, color=DH_INK, anchor=MSO_ANCHOR.MIDDLE)
+        add_image(s, f"{DH_MEDIA}/{icon}", Inches(ix), Inches(iy), w=Inches(isz))
+    pill(8.95, 3.50, 1.95, 0.62, "Receive data from server", size=10, r=0.25)
+
+    # ----- BOTTOM ROW (right -> left): Processing -> Smoothing -> Rendering -----
+    tile(8.70, 3.86, 2.55, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_02.png", Inches(9.10), Inches(4.05), w=Inches(1.80))
+    pill(8.50, 6.42, 2.75, 0.95,
+         "Processing 3D landmarks, calculating rotation & position of body joints",
+         size=8.5, r=0.12)
+    add_chevron(s, Inches(8.15), Inches(4.92), Inches(0.55), Inches(0.50), DH_ARROW, left=True)
+    tile(5.53, 3.86, 2.60, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_06.png", Inches(5.70), Inches(4.00), w=Inches(2.26))
+    pill(5.10, 6.42, 3.20, 0.80,
+         "Smoothing animation in frames, using signal filters (low-pass filter)",
+         size=9, r=0.14)
+    add_chevron(s, Inches(4.85), Inches(4.95), Inches(0.55), Inches(0.50), DH_ARROW, left=True)
+    tile(2.26, 3.86, 2.55, 2.55)
+    add_image(s, f"{DH_MEDIA}/dh_07.png", Inches(2.55), Inches(4.05), w=Inches(1.96))
+    pill(2.00, 6.42, 3.00, 0.60, "Rendering the final animation", size=11, r=0.2)
+
+
+# ====================================================================
 # BUILD
 # ====================================================================
 def build(theme="midnight", out=None):
@@ -1562,6 +1676,7 @@ def build(theme="midnight", out=None):
     if SHOW_SLIDES["caselogic"]:    slide_caselogic()         # deep-dive
     if SHOW_SLIDES["safezone"]:     slide_safezone()          # deep-dive
     if SHOW_SLIDES["safezone_arch"]: slide_safezone_arch()    # deep-dive
+    if SHOW_SLIDES["digihuman"]:    slide_digihuman_pipeline() # animated pipeline
     if SHOW_SLIDES["projects"]:     build_projects()          # all projects
     if SHOW_SLIDES["stack"]:        slide_stack()
     if SHOW_SLIDES["honors"]:       build_honors()            # all honors
@@ -1570,17 +1685,21 @@ def build(theme="midnight", out=None):
     # --- Footers & page numbers (dynamic): every slide except title & thanks
     total = len(prs.slides)
     for i, slide in enumerate(prs.slides):
-        if i == 0 or i == total - 1:
+        if i == 0 or i == total - 1 or id(slide) in _no_footer_ids:
             continue
         add_footer(slide, i + 1, total)
 
     # --- Animations + transitions ---------------------------------------
     # Per-slide effect mix recorded at slide-creation time; cycled per shape
     # in z-order. fade is the workhorse; float_up + zoom add subtle variation.
+    # ("seq",) marks a smooth auto build-up (DigiHuman pipeline).
     for i, slide in enumerate(prs.slides):
         apply_fade_transition(slide, speed="med")
         eff = _slide_effects[i] if i < len(_slide_effects) else ("fade",)
-        apply_cascade_anim(slide, effects=eff, step_ms=110, dur_ms=420)
+        if eff == ("seq",):
+            apply_single_cascade(slide)
+        else:
+            apply_cascade_anim(slide, effects=eff, step_ms=110, dur_ms=420)
 
     out = out or OUT_FILE.get(theme, "Daniel-CV-5min-Talk.pptx")
     prs.save(out)
