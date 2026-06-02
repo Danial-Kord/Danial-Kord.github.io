@@ -331,6 +331,11 @@ export type Award = {
 export const awards: Award[] = [
   {
     year: "2026",
+    title: "4th place — TMLS Toronto Hackathon",
+    body: "Built BakeryPilot, an agentic AI supply-chain copilot for industrial bakeries (Next.js + FastAPI + LangGraph 5-agent orchestrator), with a 6-person team.",
+  },
+  {
+    year: "2026",
     title: "3rd place — EvenUp-Tech Hackathon",
     body: "Built CaseLogic with hybrid retrieval (vector + keyword), a verification layer, and agentic planning — 24-hour build.",
   },
