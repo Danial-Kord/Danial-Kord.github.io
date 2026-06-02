@@ -16,6 +16,10 @@ export type ImgProject = {
   feature?: boolean;
   /** `contain` for logos / transparent PNGs (default cover) */
   imageFit?: "cover" | "contain";
+  /** badge shown on the feature card (defaults to "● featured") */
+  featureBadge?: string;
+  /** small label above the title on the feature card (defaults to "project") */
+  featureLabel?: string;
 };
 
 export const imgProjects: ImgProject[] = [
@@ -28,6 +32,20 @@ export const imgProjects: ImgProject[] = [
     image: "/images/figure_headphone.gif",
     href: "https://github.com/Danial-Kord/DigiHuman",
     feature: true,
+    featureBadge: "● featured · 500+ ★",
+    featureLabel: "open-source",
+  },
+  {
+    slug: "guardian",
+    title: "Guardian",
+    blurb:
+      "Local-first emergency AI companion for people who live alone. A Wear OS watch detects falls; a six-agent LangGraph backend calls 911 with full medical context and alerts family — all running on an NVIDIA DGX Spark.",
+    stack: "FastAPI · LangGraph · Next.js · Flutter · Wear OS · NVIDIA DGX Spark",
+    image: "/images/guardian.png",
+    href: "https://github.com/Angle-Guardians/Guardians",
+    feature: true,
+    featureBadge: "● featured · NVIDIA Spark Hack",
+    featureLabel: "local-first AI",
   },
   {
     slug: "dreamforge",

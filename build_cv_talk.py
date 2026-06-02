@@ -1,7 +1,24 @@
 """
-Daniel Kordmodanlou — 5-min Talk Deck
+Daniel Kordmodanlou — Talk / CV Deck
 Focus: Agentic AI · LLMs · System Design
-~12 slides @ ~25s each
+
+This deck is COMPREHENSIVE by default: it contains *all* of my education,
+experience, projects and honors. Trim it for any given talk by HIDING what
+you don't want — nothing is ever deleted, just toggled off.
+
+────────────────────────────────────────────────────────────────────────
+HOW TO HIDE THINGS  (two levels of control)
+────────────────────────────────────────────────────────────────────────
+1. Hide an individual entry — set  "show": False  on any item inside the
+   EDUCATION / EXPERIENCES / PROJECTS / HONORS lists in the CONTENT section
+   below. It then disappears from its section (slides re-flow automatically).
+
+2. Hide a whole slide / section — flip the matching key to False in the
+   SHOW_SLIDES dict (e.g. "safezone_arch": False, or "projects": False).
+
+The Title and Thank-you slides always render. Page numbers, the footer and
+the entrance animations all adjust to whatever is left visible — just edit
+the data and re-run  `python build_cv_talk.py`.
 """
 import os
 from pptx import Presentation
@@ -34,6 +51,201 @@ prs = Presentation()
 prs.slide_width = SLIDE_W
 prs.slide_height = SLIDE_H
 blank_layout = prs.slide_layouts[6]
+
+
+# ====================================================================
+# CONTENT  ·  edit these lists / toggles to curate the deck
+# ====================================================================
+
+# --- Whole-slide toggles. Flip to False to drop an entire slide/section. --
+SHOW_SLIDES = {
+    "about":         True,
+    "pillars":       True,
+    "education":     True,   # comprehensive Education section
+    "experience":    True,   # comprehensive Experience section
+    "vector":        True,   # deep-dive: Vector Institute (current role)
+    "latex_cv":      True,   # deep-dive: LaTeX CV Builder
+    "dreamforge":    True,   # deep-dive: DreamForge
+    "caselogic":     True,   # deep-dive: CaseLogic hackathon
+    "safezone":      True,   # deep-dive: SAFEZone AI hackathon
+    "safezone_arch": True,   # deep-dive: SAFEZone architecture diagram
+    "projects":      True,   # comprehensive Projects section
+    "stack":         True,   # the toolkit
+    "honors":        True,   # comprehensive Honors & Awards section
+}
+
+# --- EDUCATION.  "show": False to hide a degree. -------------------------
+EDUCATION = [
+    {"show": True,
+     "degree": "M.Sc. Computer Science",
+     "school": "York University",
+     "loc":    "Toronto, Canada",
+     "dates":  "Jan 2024 — Jun 2026",
+     "gpa":    "GPA 4.0 / 4.0",
+     "note":   "Fully funded graduate position · BioMotion Lab."},
+    {"show": True,
+     "degree": "B.Sc. Computer Science",
+     "school": "Amirkabir University of Technology (AUT)",
+     "loc":    "Tehran, Iran",
+     "dates":  "2017 — 2022",
+     "gpa":    "GPA 3.86 / 4.0",
+     "note":   "Top-tier national polytechnic ('MIT of Iran')."},
+    {"show": True,  # was commented-out in the LaTeX CV — hide if not needed
+     "degree": "Mathematics & Physics Diploma",
+     "school": "Allameh Helli High School (NODET)",
+     "loc":    "Iran",
+     "dates":  "2013 — 2017",
+     "gpa":    "GPA 4.0 / 4.0",
+     "note":   "National Org. for Development of Exceptional Talents."},
+]
+
+# --- EXPERIENCE.  "show": False to hide a role. --------------------------
+EXPERIENCES = [
+    {"show": True,
+     "role": "Machine Learning Associate", "org": "Vector Institute",
+     "loc": "Toronto, Canada", "dates": "Jan 2026 — May 2026",
+     "bullets": [
+        "VR firefighter training with DXTR — a deviation engine over 3D skeletal telemetry (MPJPE + quaternion distance).",
+        "LLM coaching layer: RAG over training manuals (FAISS) via Ollama / LangChain for grounded feedback.",
+     ]},
+    {"show": True,
+     "role": "Research & Teaching Assistant", "org": "BioMotion Lab, York University",
+     "loc": "Toronto, Canada", "dates": "Jan 2024 — Apr 2026",
+     "bullets": [
+        "VR & motion-capture depth-perception studies; presented illusory-parallax research at ECVP 2025, Mainz.",
+        "Diagnosed a Meta XR SDK stereo-geometry bug; TA for Object-Oriented Programming (Java), 5 semesters.",
+     ]},
+    {"show": True,
+     "role": "Senior Unity Developer", "org": "DreamForge",
+     "loc": "Miami, FL (Remote)", "dates": "Dec 2025 — Feb 2026",
+     "bullets": [
+        "Core contributor to a C# / Python AI-driven engine — tooling, procedural generation, CI/CD pipelines.",
+        "Built Claude-assisted tools that intercept exceptions, investigate build issues, and commit fixes.",
+     ]},
+    {"show": True,
+     "role": "Software Developer", "org": "TectoTrack",
+     "loc": "Toronto, Canada", "dates": "Aug 2023 — Feb 2025",
+     "bullets": [
+        "Simulation frameworks for high-traffic environments with fault-tolerant, adaptive pathfinding.",
+        "Real-time logging & monitoring dashboards for system health and agent-behaviour metrics.",
+     ]},
+    {"show": True,
+     "role": "Lead Unity3D Game Developer", "org": "Techu",
+     "loc": "Japan (Remote)", "dates": "Jan 2023 — Apr 2024",
+     "bullets": [
+        "Led a cross-platform multiplayer game; AI agents via DQN + Monte-Carlo Tree Search.",
+        "PlayFab Azure matchmaking and Firebase monitoring for real-time diagnostics & crash alerts.",
+     ]},
+    {"show": True,
+     "role": "Volunteer Full-Stack Developer", "org": "IAESTE",
+     "loc": "Tehran, Iran", "dates": "Jan 2022 — Dec 2022",
+     "bullets": [
+        "Maintained and enhanced IAESTE's web platform (Vue.js + Django), improving performance and UX.",
+     ]},
+    {"show": True,
+     "role": "Technical Staff & Teaching Assistant", "org": "Amirkabir Univ. of Technology",
+     "loc": "Tehran, Iran", "dates": "Sep 2017 — Aug 2022",
+     "bullets": [
+        "Technical staff for AUT game-development events.",
+        "TA for AI, Advanced Java, C Programming, and Operating Systems.",
+     ]},
+    {"show": True,
+     "role": "Software Engineer Intern", "org": "Sepantab",
+     "loc": "Tehran, Iran", "dates": "Jun 2021 — Aug 2021",
+     "bullets": [
+        "Built 'Stone Thrower', an IoT-based WebGL multiplayer game (Unity3D, WebSockets).",
+        "Resilient networking via C#, gRPC, Protocol Buffers, and MQTT.",
+     ]},
+    {"show": True,  # was commented-out in the LaTeX CV — hide if not needed
+     "role": "Game Developer", "org": "Pherma",
+     "loc": "Iran", "dates": "Jan 2019 — Apr 2020",
+     "bullets": [
+        "Hyper-casual and adventure games for iOS, Android, and Windows using Unity and C#.",
+     ]},
+]
+
+# --- PROJECTS.  "cat" sets the colour band (ai / game / sys). ------------
+#     "show": False to hide a project.
+CAT_COLOR = {"ai": AMBER, "game": GOLD, "sys": TEAL}
+CAT_ORDER = ["ai", "game", "sys"]
+CAT_LEGEND = [
+    ("ai",   "AI · ML · VISION"),
+    ("game", "GAMES · GRAPHICS · GAME-AI"),
+    ("sys",  "SYSTEMS · IR · LOW-LEVEL"),
+]
+PROJECTS = [
+    # AI / ML / Vision
+    {"show": True, "cat": "ai", "name": "BakeryPilot",
+     "desc": "Agentic supply-chain copilot; LangGraph + Next.js. 4th @ TMLS."},
+    {"show": True, "cat": "ai", "name": "DigiHuman  ⭐ 500",
+     "desc": "Open-source real-time 3D avatar animation from monocular video."},
+    {"show": True, "cat": "ai", "name": "LaTeX CV Builder",
+     "desc": "LangChain agents + RAG; Next.js streaming UI on Docker / AWS."},
+    {"show": True, "cat": "ai", "name": "PISE (GAN)",
+     "desc": "Reimplemented CVPR'21 decoupled-GAN person-image synthesis."},
+    {"show": True, "cat": "ai", "name": "3D Reconstruction",
+     "desc": "SIFT + RANSAC + PoinTr point-cloud upsampling from 2D images."},
+    {"show": True, "cat": "ai", "name": "Panorama Stitching",
+     "desc": "SIFT matching + RANSAC homography stitching (OpenCV)."},
+    {"show": True, "cat": "ai", "name": "Harris Corner Detector",
+     "desc": "Corner detection from scratch via image-derivative analysis."},
+    {"show": True, "cat": "ai", "name": "AI Algorithms Viz",
+     "desc": "Manim animations of graph-search algorithms for teaching."},
+    {"show": True, "cat": "ai", "name": "GauGAN Painter",
+     "desc": "Semantic-segmentation → photorealistic scene synthesis."},
+    # Games / graphics / game-AI
+    {"show": True, "cat": "game", "name": "Techu",
+     "desc": "Cross-platform multiplayer card game — DQN + MCTS opponents."},
+    {"show": True, "cat": "game", "name": "Backgammon 3D",
+     "desc": "Turn-based multiplayer with Monte-Carlo AI + matchmaking."},
+    {"show": True, "cat": "game", "name": "Solar System Sim",
+     "desc": "C++ / OpenGL renderer with frame-rate optimization."},
+    {"show": True, "cat": "game", "name": "HYPERVIGILANCE",
+     "desc": "Generative-video + Unity psychological-horror short."},
+    {"show": True, "cat": "game", "name": "RingBall (iOS)",
+     "desc": "Commercial Unity hyper-casual game; custom mesh pathfinding."},
+    {"show": True, "cat": "game", "name": "Mobile Games",
+     "desc": "Unity titles shipped to the App Store / Google Play."},
+    {"show": True, "cat": "game", "name": "E' Gadung",
+     "desc": "2D platformer (Unity), published on Google Play."},
+    {"show": True, "cat": "game", "name": "LittleBounty",
+     "desc": "Multiplayer capture-the-flag (Java, UDP / TCP)."},
+    {"show": True, "cat": "game", "name": "Stone Thrower",
+     "desc": "IoT WebGL multiplayer cafe game (Unity, WebSockets)."},
+    # Systems / IR / low-level
+    {"show": True, "cat": "sys", "name": "Search Engine",
+     "desc": "tf-idf · champion lists · KNN / K-means — from scratch."},
+    {"show": True, "cat": "sys", "name": "URL Shortener SaaS",
+     "desc": "Java · MySQL · Docker · K8s · AWS · Hadoop microservices."},
+    {"show": True, "cat": "sys", "name": "Multi-Core Computing",
+     "desc": "Optimized C with OpenMP + CUDA across CPU & GPU."},
+    {"show": True, "cat": "sys", "name": "XV6 Kernel",
+     "desc": "Custom syscalls + CPU-scheduling mods on the XV6 OS."},
+    {"show": True, "cat": "sys", "name": "Sitadu",
+     "desc": "Restaurant DB management — JavaFX + MySQL via JDBC."},
+]
+
+# --- HONORS & AWARDS.  "show": False to hide one. ------------------------
+HONORS = [
+    {"show": True, "big": "4th",        "title": "TMLS Toronto Hackathon",
+     "desc": "BakeryPilot — agentic supply-chain copilot.", "year": "2026"},
+    {"show": True, "big": "3rd",        "title": "Legal-Tech Hackathon",
+     "desc": "CaseLogic — source-grounded legal research (24h).", "year": "2026"},
+    {"show": True, "big": "Semi-Finals", "title": "Boson AI × MScAC",
+     "desc": "SAFEZone AI — voice-first therapist agent (48h).", "year": "2025"},
+    {"show": True, "big": "$10K",       "title": "L2M Lab to Market",
+     "desc": "Accepted into the program with funding.", "year": "2025"},
+    {"show": True, "big": "Funded",     "title": "M.Sc. @ York University",
+     "desc": "Fully funded graduate position in CS.", "year": "2024"},
+    {"show": True, "big": "500⭐",      "title": "DigiHuman (Open Source)",
+     "desc": "Open-source 3D character-animation pipeline.", "year": "2023"},
+    {"show": True, "big": "Top 0.5%",   "title": "AI Graduate Exam",
+     "desc": "Iranian national graduate exam.", "year": "2023"},
+    {"show": True, "big": "Top 1%",     "title": "Konkur Entrance Exam",
+     "desc": "Iranian national university entrance exam.", "year": "2017"},
+    {"show": True, "big": "4th",        "title": "National RoboCup",
+     "desc": "Robotics competition — out of 32 teams.", "year": "2015"},
+]
 
 
 # ---- helpers (compact subset reused from main CV builder) ----
@@ -154,16 +366,8 @@ def add_image(slide, path, x, y, w=None, h=None):
     return slide.shapes.add_picture(path, x, y)
 
 
-def light_footer(s, num, total):
-    add_text(s, Inches(0.5), Inches(7.05), Inches(8), Inches(0.4),
-             "Danial Kordmodanlou  ·  Agentic AI / LLMs / System Design",
-             font=B_FONT, size=9, color=RGBColor(0x94, 0xA3, 0xB8))
-    add_text(s, Inches(11.6), Inches(7.05), Inches(1.3), Inches(0.4),
-             f"{num:02d}  /  {total:02d}", font=B_FONT, size=9,
-             color=RGBColor(0x94, 0xA3, 0xB8), align=PP_ALIGN.RIGHT)
-
-
-def page_footer(s, num, total):
+def add_footer(s, num, total):
+    """Unified footer (name strip + page x/y). Colour reads on navy & ivory."""
     add_text(s, Inches(0.5), Inches(7.05), Inches(8), Inches(0.4),
              "Danial Kordmodanlou  ·  Agentic AI / LLMs / System Design",
              font=B_FONT, size=9, color=SLATE)
@@ -174,9 +378,29 @@ def page_footer(s, num, total):
 
 def corner_marker(s, label):
     add_rect(s, Inches(0.5), Inches(0.5), Inches(0.06), Inches(0.5), AMBER)
-    add_text(s, Inches(0.7), Inches(0.5), Inches(6), Inches(0.5),
+    add_text(s, Inches(0.7), Inches(0.5), Inches(8), Inches(0.5),
              label, font=H_FONT, size=11, bold=True, color=AMBER,
              anchor=MSO_ANCHOR.MIDDLE)
+
+
+def section_header(s, marker, title, subtitle=""):
+    """Standard section intro: corner marker + big title + italic subtitle."""
+    fill_slide(s, IVORY)
+    corner_marker(s, marker)
+    add_text(s, Inches(0.7), Inches(1.05), Inches(12), Inches(0.9),
+             title, font=H_FONT, size=40, bold=True, color=NAVY)
+    if subtitle:
+        add_text(s, Inches(0.7), Inches(1.97), Inches(12.3), Inches(0.5),
+                 subtitle, font=B_FONT, size=14, italic=True, color=ROYAL)
+
+
+def pill(s, x, y, text, *, fill=INDIGO, fg=GOLD, size=10, h=0.32, bold=True):
+    """A small rounded chip; returns its width (EMU) for right-alignment."""
+    w = Inches(0.28 + 0.085 * len(text))
+    add_round_rect(s, x, y, w, Inches(h), fill, radius=0.5)
+    add_text(s, x, y, w, Inches(h), text, font=B_FONT, size=size, bold=bold,
+             color=fg, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    return w
 
 
 def chip_row(s, x_start, y, items, color_fill=NAVY, text_color=GOLD,
@@ -194,6 +418,28 @@ def chip_row(s, x_start, y, items, color_fill=NAVY, text_color=GOLD,
                  align=PP_ALIGN.CENTER)
         cx += cw + Inches(0.1)
     return y
+
+
+def shown(items):
+    """Filter a content list down to the entries flagged show=True."""
+    return [it for it in items if it.get("show", True)]
+
+
+def chunk(items, n):
+    """Yield successive n-sized pages from a list."""
+    for i in range(0, len(items), n):
+        yield items[i:i + n]
+
+
+# Per-slide entrance-effect tuples, recorded as slides are created so the
+# animation pass stays aligned even when slides are toggled off.
+_slide_effects = []
+
+
+def new_slide(effects=("fade",)):
+    s = prs.slides.add_slide(blank_layout)
+    _slide_effects.append(effects)
+    return s
 
 
 # ====================================================================
@@ -408,14 +654,11 @@ def _cascade_timing_xml(groups, effects, step_ms, dur_ms):
     )
 
 
-TOTAL = 13
-
-
 # ====================================================================
 # 1 — TITLE
 # ====================================================================
 def slide_title():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "float_up"))
     fill_slide(s, NAVY)
     add_rect(s, Inches(0.6), Inches(0.9), Inches(0.12), Inches(5.7), AMBER)
     # decorative dots
@@ -423,7 +666,7 @@ def slide_title():
     add_oval(s, Inches(11.85), Inches(0.95), Inches(0.5), Inches(0.5), INDIGO)
     # tag line
     add_text(s, Inches(1.0), Inches(0.95), Inches(11), Inches(0.4),
-             "5-MINUTE TALK  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026",
+             "PORTFOLIO  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026",
              font=H_FONT, size=12, bold=True, color=AMBER)
     # name
     add_text(s, Inches(1.0), Inches(1.65), Inches(12), Inches(1.6),
@@ -452,7 +695,7 @@ def slide_title():
 # 2 — ABOUT  /  Why I'm here
 # ====================================================================
 def slide_about():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade",))
     fill_slide(s, IVORY)
     # left panel
     add_rect(s, 0, 0, Inches(5.0), SLIDE_H, NAVY)
@@ -488,14 +731,13 @@ def slide_about():
     add_bullets(s, corner_marker_x, Inches(3.0), Inches(7.6), Inches(3.5),
                 bullets, size=13, color=DARK_TEXT, line_spacing=1.3,
                 bullet_char="●")
-    light_footer(s, 2, TOTAL)
 
 
 # ====================================================================
 # 3 — THE THREE PILLARS
 # ====================================================================
 def slide_pillars():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("zoom", "fade"))
     fill_slide(s, IVORY)
     corner_marker(s, "FOCUS")
     add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
@@ -545,14 +787,95 @@ def slide_pillars():
                      c, font=B_FONT, size=9, bold=True, color=GOLD,
                      align=PP_ALIGN.CENTER)
             cx += chip_w + Inches(0.08)
-    light_footer(s, 3, TOTAL)
 
 
 # ====================================================================
-# 4 — VECTOR INSTITUTE  (current role headline)
+# EDUCATION  (comprehensive · data-driven · paginated)
+# ====================================================================
+def build_education():
+    entries = shown(EDUCATION)
+    if not entries:
+        return
+    PER = 3
+    pages = list(chunk(entries, PER))
+    for pi, page in enumerate(pages):
+        s = new_slide(("fade", "float_up"))
+        title = "Education" + (" (cont.)" if pi else "")
+        sub = "" if pi else "Where I trained — degrees, institutions and standing."
+        section_header(s, "EDUCATION", title, sub)
+        mark_break(s)
+
+        x = Inches(0.7); w = Inches(11.93)
+        ch = Inches(1.3); gap = Inches(0.18); sy = Inches(2.6)
+        for i, e in enumerate(page):
+            y = sy + i * (ch + gap)
+            band = AMBER if (pi * PER + i) % 2 == 0 else GOLD
+            add_round_rect(s, x, y, w, ch, NAVY, radius=0.06)
+            add_rect(s, x, y, Inches(0.1), ch, band)
+            # left: degree / school / note
+            add_text(s, x + Inches(0.4), y + Inches(0.16), Inches(8.0), Inches(0.45),
+                     e["degree"], font=H_FONT, size=18, bold=True, color=IVORY)
+            add_text(s, x + Inches(0.4), y + Inches(0.62), Inches(8.2), Inches(0.35),
+                     f'{e["school"]}  ·  {e["loc"]}', font=H_FONT, size=12.5,
+                     bold=True, color=GOLD)
+            add_text(s, x + Inches(0.4), y + Inches(0.94), Inches(8.2), Inches(0.32),
+                     e["note"], font=B_FONT, size=10.5, italic=True, color=LIGHT_GREY)
+            # right: dates + GPA pills (right-aligned)
+            right = x + w - Inches(0.3)
+            dw = pill(s, right - Inches(0.28 + 0.085 * len(e["dates"])),
+                      y + Inches(0.2), e["dates"], fill=INDIGO, fg=GOLD, size=10.5)
+            if e.get("gpa"):
+                gw = Inches(0.28 + 0.085 * len(e["gpa"]))
+                pill(s, right - gw, y + Inches(0.66), e["gpa"],
+                     fill=ROYAL, fg=IVORY, size=10.5)
+            mark_break(s)
+
+
+# ====================================================================
+# EXPERIENCE  (comprehensive · data-driven · paginated)
+# ====================================================================
+def build_experience():
+    entries = shown(EXPERIENCES)
+    if not entries:
+        return
+    PER = 3
+    pages = list(chunk(entries, PER))
+    for pi, page in enumerate(pages):
+        s = new_slide(("fade", "wipe_up"))
+        title = "Experience" + (" (cont.)" if pi else "")
+        sub = "" if pi else "Roles where I shipped — research labs, startups and industry."
+        section_header(s, "EXPERIENCE", title, sub)
+        mark_break(s)
+
+        x = Inches(0.7); w = Inches(11.93)
+        ch = Inches(1.4); gap = Inches(0.1); sy = Inches(2.5)
+        for i, e in enumerate(page):
+            y = sy + i * (ch + gap)
+            band = AMBER if (pi * PER + i) % 2 == 0 else GOLD
+            add_round_rect(s, x, y, w, ch, NAVY, radius=0.05)
+            add_rect(s, x, y, Inches(0.1), ch, band)
+            # role + org line
+            add_text(s, x + Inches(0.4), y + Inches(0.12), Inches(8.0), Inches(0.4),
+                     e["role"], font=H_FONT, size=15, bold=True, color=IVORY)
+            add_text(s, x + Inches(0.4), y + Inches(0.5), Inches(8.0), Inches(0.32),
+                     f'{e["org"]}  ·  {e["loc"]}', font=H_FONT, size=11,
+                     bold=True, color=GOLD)
+            # dates pill, right-aligned
+            dlen = Inches(0.28 + 0.085 * len(e["dates"]))
+            pill(s, x + w - dlen - Inches(0.3), y + Inches(0.16), e["dates"],
+                 fill=INDIGO, fg=GOLD, size=10)
+            # condensed bullets
+            add_bullets(s, x + Inches(0.4), y + Inches(0.8), w - Inches(0.8),
+                        Inches(0.55), e["bullets"], size=9.5, color=LIGHT_GREY,
+                        line_spacing=1.1, bullet_char="▸", spacing_after=2)
+            mark_break(s)
+
+
+# ====================================================================
+# DEEP-DIVE · VECTOR INSTITUTE  (current role headline)
 # ====================================================================
 def slide_vector():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "wipe_up"))
     fill_slide(s, IVORY)
     corner_marker(s, "CURRENT ROLE")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
@@ -600,14 +923,13 @@ def slide_vector():
                     "Structured evaluation of generative-AI training pipelines",
                 ],
                 size=12, line_spacing=1.3, bullet_char="▸", color=IVORY)
-    light_footer(s, 4, TOTAL)
 
 
 # ====================================================================
-# 5 — CASELOGIC  (3rd place hackathon)
+# DEEP-DIVE · CASELOGIC  (3rd place hackathon)
 # ====================================================================
 def slide_caselogic():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "float_up"))
     fill_slide(s, IVORY)
     corner_marker(s, "HACKATHON  ·  3RD PLACE")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
@@ -653,14 +975,13 @@ def slide_caselogic():
              ["Chroma", "SQLite FTS5", "LangChain", "Multi-Agent", "RAG"],
              color_fill=INDIGO, text_color=GOLD, size=9,
              max_x=Inches(12.7))
-    light_footer(s, 7, TOTAL)
 
 
 # ====================================================================
-# 6 — SAFEZONE AI
+# DEEP-DIVE · SAFEZONE AI
 # ====================================================================
 def slide_safezone():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "fly_from_bot"))
     fill_slide(s, IVORY)
     corner_marker(s, "HACKATHON  ·  SEMI-FINALIST")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
@@ -702,14 +1023,13 @@ def slide_safezone():
             add_text(s, arrow_x, sy + Inches(1.5), Inches(0.15), Inches(0.4),
                      "▸", font=H_FONT, size=18, bold=True, color=AMBER,
                      align=PP_ALIGN.CENTER)
-    light_footer(s, 8, TOTAL)
 
 
 # ====================================================================
-# 7 — SAFEZONE ARCHITECTURE (image)
+# DEEP-DIVE · SAFEZONE ARCHITECTURE (image)
 # ====================================================================
 def slide_safezone_arch():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "wipe_up"))
     fill_slide(s, NAVY)
     add_text(s, Inches(0.7), Inches(0.5), Inches(8), Inches(0.4),
              "SAFEZONE AI  ·  ARCHITECTURE",
@@ -724,81 +1044,13 @@ def slide_safezone_arch():
     mark_break(s)  # — pause before architecture diagram
 
     add_image(s, f"{MEDIA}/image26.png", Inches(0.7), Inches(2.45), w=Inches(12))
-    page_footer(s, 9, TOTAL)
 
 
 # ====================================================================
-# 10 — PROJECT PORTFOLIO  (more projects at a glance)
-# ====================================================================
-def slide_more_projects():
-    s = prs.slides.add_slide(blank_layout)
-    fill_slide(s, IVORY)
-    corner_marker(s, "MORE PROJECTS")
-    add_text(s, Inches(0.7), Inches(1.05), Inches(12), Inches(0.9),
-             "And there's more",
-             font=H_FONT, size=40, bold=True, color=NAVY)
-    add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
-             "A snapshot of what else I've shipped — across AI, vision, games and systems.",
-             font=B_FONT, size=14, italic=True, color=ROYAL)
-
-    # color-coded legend
-    legend = [
-        ("AI / ML / VISION", AMBER),
-        ("GAMES + CLASSICAL AI", GOLD),
-        ("SYSTEMS / IR", TEAL),
-    ]
-    lx = Inches(0.7); ly = Inches(2.4)
-    for label, color in legend:
-        add_oval(s, lx, ly + Inches(0.08), Inches(0.16), Inches(0.16), color)
-        add_text(s, lx + Inches(0.25), ly, Inches(2.5), Inches(0.3),
-                 label, font=H_FONT, size=9, bold=True, color=DARK_TEXT)
-        lx += Inches(2.55)
-    mark_break(s)  # — pause before first row of project cards
-
-    # 4 cols × 3 rows = 12 mini cards
-    projects = [
-        # Row 1 — AI / ML / Vision (AMBER)
-        ("DigiHuman  ⭐ 500",   "Open-source 3D avatar animation from monocular video.", AMBER),
-        ("GauGan Painter",      "Semantic-segmentation → photoreal scenes.",             AMBER),
-        ("AI Algorithms Viz",   "Manim animations of A*, BFS / DFS, iterative deepening.", AMBER),
-        ("CV: Panorama + 3D",   "SIFT + RANSAC + PoinTr point-cloud upsampling.",         AMBER),
-        # Row 2 — Games + classical AI (GOLD)
-        ("Techu",               "Cross-platform card game — DQN + MCTS opponents.",       GOLD),
-        ("Backgammon 3D",       "Monte-Carlo AI with online matchmaking.",                GOLD),
-        ("HYPERVIGILANCE",      "Generative video + Unity psychological-horror short.",   GOLD),
-        ("Mobile Games",        "Unity titles shipped to App Store / Google Play.",       GOLD),
-        # Row 3 — Systems / IR (TEAL)
-        ("Search Engine",       "tf-idf · champion lists · KNN · K-means — from scratch.", TEAL),
-        ("URL Shortener SaaS",  "Java · MySQL · Docker · K8s · AWS · Hadoop.",            TEAL),
-        ("XV6 Kernel",          "Custom syscalls + CPU scheduling modifications.",        TEAL),
-        ("Multi-Core C",        "Optimized C with OpenMP + CUDA on CPU & GPU.",           TEAL),
-    ]
-
-    sx = Inches(0.7); sy = Inches(2.95)
-    cw = Inches(3.0); ch = Inches(1.32)
-    gap_x = Inches(0.13); gap_y = Inches(0.13)
-    for i, (name, desc, color) in enumerate(projects):
-        r = i // 4
-        c = i % 4
-        x = sx + c * (cw + gap_x)
-        y = sy + r * (ch + gap_y)
-        add_round_rect(s, x, y, cw, ch, NAVY, radius=0.06)
-        add_rect(s, x, y, Inches(0.08), ch, color)
-        add_text(s, x + Inches(0.22), y + Inches(0.2), cw - Inches(0.35), Inches(0.4),
-                 name, font=H_FONT, size=12, bold=True, color=color)
-        add_text(s, x + Inches(0.22), y + Inches(0.6), cw - Inches(0.35), Inches(0.7),
-                 desc, font=B_FONT, size=9.5, color=LIGHT_GREY, line_spacing=1.25)
-        # pause after every row of 4 cards (except the final row — let footer ride along)
-        if (i + 1) % 4 == 0 and (i + 1) < len(projects):
-            mark_break(s)
-    light_footer(s, 10, TOTAL)
-
-
-# ====================================================================
-# 8 — LATEX CV BUILDER  (System design + RAG)
+# DEEP-DIVE · LATEX CV BUILDER  (System design + RAG)
 # ====================================================================
 def slide_latex_cv():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "float_up"))
     fill_slide(s, IVORY)
     corner_marker(s, "SYSTEM DESIGN")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
@@ -829,14 +1081,13 @@ def slide_latex_cv():
     # right: arch image inside a dark frame
     add_rect(s, Inches(8.0), Inches(3.1), Inches(4.85), Inches(3.7), NAVY)
     add_image(s, f"{MEDIA}/image22.png", Inches(8.15), Inches(3.4), w=Inches(4.55))
-    light_footer(s, 5, TOTAL)
 
 
 # ====================================================================
-# 9 — DREAMFORGE  (AI tooling)
+# DEEP-DIVE · DREAMFORGE  (AI tooling)
 # ====================================================================
 def slide_dreamforge():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "wipe_up"))
     fill_slide(s, IVORY)
     corner_marker(s, "INDUSTRY  ·  AGENTIC TOOLING")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
@@ -873,14 +1124,60 @@ def slide_dreamforge():
         add_rect(s, x + Inches(0.35), sy + Inches(1.55), Inches(0.4), Inches(0.04), color)
         add_text(s, x + Inches(0.35), sy + Inches(1.75), cw - Inches(0.6), Inches(1.7),
                  desc, font=B_FONT, size=12, color=LIGHT_GREY, line_spacing=1.35)
-    light_footer(s, 6, TOTAL)
 
 
 # ====================================================================
-# 10 — STACK / TOOLKIT
+# PROJECTS  (comprehensive · data-driven · paginated grid)
+# ====================================================================
+def build_projects():
+    entries = shown(PROJECTS)
+    if not entries:
+        return
+    # group by category order so colour bands cluster
+    entries = sorted(entries, key=lambda p: CAT_ORDER.index(p.get("cat", "ai")))
+    PER = 12  # 4 cols x 3 rows
+    pages = list(chunk(entries, PER))
+    for pi, page in enumerate(pages):
+        s = new_slide(("zoom", "fade"))
+        title = "Projects" + (" (cont.)" if pi else "")
+        sub = ("A snapshot of what I've shipped — across AI, vision, games and systems."
+               if pi == 0 else "")
+        section_header(s, "PROJECTS", title, sub)
+
+        # color-coded legend (every page)
+        lx = Inches(0.7); ly = Inches(2.42)
+        for key, label in CAT_LEGEND:
+            add_oval(s, lx, ly + Inches(0.05), Inches(0.16), Inches(0.16), CAT_COLOR[key])
+            add_text(s, lx + Inches(0.25), ly, Inches(3.0), Inches(0.3),
+                     label, font=H_FONT, size=9, bold=True, color=DARK_TEXT)
+            lx += Inches(3.1)
+        mark_break(s)
+
+        sx = Inches(0.7); sy = Inches(2.9)
+        cw = Inches(3.0); ch = Inches(1.28)
+        gap_x = Inches(0.13); gap_y = Inches(0.12)
+        for i, p in enumerate(page):
+            r = i // 4
+            c = i % 4
+            x = sx + c * (cw + gap_x)
+            y = sy + r * (ch + gap_y)
+            color = CAT_COLOR.get(p.get("cat", "ai"), AMBER)
+            add_round_rect(s, x, y, cw, ch, NAVY, radius=0.06)
+            add_rect(s, x, y, Inches(0.08), ch, color)
+            add_text(s, x + Inches(0.22), y + Inches(0.16), cw - Inches(0.35), Inches(0.4),
+                     p["name"], font=H_FONT, size=12, bold=True, color=color)
+            add_text(s, x + Inches(0.22), y + Inches(0.56), cw - Inches(0.35), Inches(0.66),
+                     p["desc"], font=B_FONT, size=9.5, color=LIGHT_GREY, line_spacing=1.2)
+            # pause after each full row of 4 (except the last row on the page)
+            if (i + 1) % 4 == 0 and (i + 1) < len(page):
+                mark_break(s)
+
+
+# ====================================================================
+# STACK / TOOLKIT
 # ====================================================================
 def slide_stack():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "float_up"))
     fill_slide(s, NAVY)
     add_text(s, Inches(0.7), Inches(0.5), Inches(8), Inches(0.4),
              "THE TOOLKIT",
@@ -920,57 +1217,51 @@ def slide_stack():
                      it, font=B_FONT, size=10, bold=True, color=IVORY,
                      align=PP_ALIGN.CENTER)
             cx += chip_w + Inches(0.08)
-    page_footer(s, 11, TOTAL)
 
 
 # ====================================================================
-# 11 — RECOGNITION
+# HONORS & AWARDS  (comprehensive · data-driven · paginated)
 # ====================================================================
-def slide_recognition():
-    s = prs.slides.add_slide(blank_layout)
-    fill_slide(s, IVORY)
-    corner_marker(s, "RECOGNITION")
-    add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
-             "Track record", font=H_FONT, size=40, bold=True, color=NAVY)
-    add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
-             "Funded, ranked, and shipped — selected highlights.",
-             font=B_FONT, size=14, italic=True, color=ROYAL)
+def build_honors():
+    entries = shown(HONORS)
+    if not entries:
+        return
+    PER = 6  # 3 cols x 2 rows
+    pages = list(chunk(entries, PER))
+    for pi, page in enumerate(pages):
+        s = new_slide(("zoom", "fade"))
+        title = "Honors & Awards" + (" (cont.)" if pi else "")
+        sub = "" if pi else "Funded, ranked, and shipped — the full record."
+        section_header(s, "RECOGNITION", title, sub)
+        mark_break(s)
 
-    cards = [
-        ("3rd",      "Legal-Tech Hackathon",
-         "Toronto, 2026 — built CaseLogic in 24h.", AMBER),
-        ("Semi-Finals", "Boson AI × MScAC",
-         "UofT, 2025 — built SAFEZone AI in 48h.", GOLD),
-        ("$10K",     "L2M Lab to Market",
-         "Accepted into the program (2025).", AMBER),
-        ("$10K",     "Mitacs Funding",
-         "Additional research funding (2024).", GOLD),
-        ("500⭐",    "DigiHuman (OSS)",
-         "Open-source 3D character animation pipeline.", AMBER),
-        ("Top 0.5%", "AI Graduate Exam",
-         "Iranian national exam (2023).", GOLD),
-    ]
-    cw = Inches(4.1); ch = Inches(2.05); sx = Inches(0.7); sy = Inches(2.65)
-    gap_x = Inches(0.15); gap_y = Inches(0.18)
-    for i, (big, title, desc, color) in enumerate(cards):
-        r, c = i // 3, i % 3
-        x = sx + c * (cw + gap_x); y = sy + r * (ch + gap_y)
-        add_round_rect(s, x, y, cw, ch, NAVY, radius=0.05)
-        add_rect(s, x, y, Inches(0.1), ch, color)
-        add_text(s, x + Inches(0.3), y + Inches(0.15), cw - Inches(0.5), Inches(0.8),
-                 big, font=H_FONT, size=32, bold=True, color=color)
-        add_text(s, x + Inches(0.3), y + Inches(1.0), cw - Inches(0.5), Inches(0.4),
-                 title, font=H_FONT, size=14, bold=True, color=IVORY)
-        add_text(s, x + Inches(0.3), y + Inches(1.45), cw - Inches(0.5), Inches(0.5),
-                 desc, font=B_FONT, size=10, color=LIGHT_GREY, line_spacing=1.25)
-    light_footer(s, 12, TOTAL)
+        cw = Inches(4.1); ch = Inches(2.05); sx = Inches(0.7); sy = Inches(2.65)
+        gap_x = Inches(0.15); gap_y = Inches(0.18)
+        for i, h in enumerate(page):
+            r, c = i // 3, i % 3
+            x = sx + c * (cw + gap_x); y = sy + r * (ch + gap_y)
+            color = AMBER if (pi * PER + i) % 2 == 0 else GOLD
+            add_round_rect(s, x, y, cw, ch, NAVY, radius=0.05)
+            add_rect(s, x, y, Inches(0.1), ch, color)
+            add_text(s, x + Inches(0.3), y + Inches(0.15), cw - Inches(0.5), Inches(0.8),
+                     h["big"], font=H_FONT, size=32, bold=True, color=color)
+            add_text(s, x + Inches(0.3), y + Inches(1.0), cw - Inches(1.1), Inches(0.4),
+                     h["title"], font=H_FONT, size=14, bold=True, color=IVORY)
+            add_text(s, x + Inches(0.3), y + Inches(1.45), cw - Inches(0.5), Inches(0.5),
+                     h["desc"], font=B_FONT, size=10, color=LIGHT_GREY, line_spacing=1.25)
+            # year pill, top-right
+            if h.get("year"):
+                yl = Inches(0.28 + 0.085 * len(h["year"]))
+                pill(s, x + cw - yl - Inches(0.25), y + Inches(0.22), h["year"],
+                     fill=INDIGO, fg=GOLD, size=10)
+            mark_break(s)
 
 
 # ====================================================================
-# 12 — THANKS / CONTACT
+# THANKS / CONTACT
 # ====================================================================
 def slide_thanks():
-    s = prs.slides.add_slide(blank_layout)
+    s = new_slide(("fade", "float_up"))
     fill_slide(s, NAVY)
     add_rect(s, Inches(0.6), Inches(0.9), Inches(0.12), Inches(5.7), AMBER)
     add_text(s, Inches(1.0), Inches(1.05), Inches(11), Inches(0.5),
@@ -1006,42 +1297,38 @@ def slide_thanks():
 # BUILD
 # ====================================================================
 def build():
-    slide_title()           # 1
-    slide_about()           # 2
-    slide_pillars()         # 3
-    slide_vector()          # 4  — current role
-    slide_latex_cv()        # 5  — RAG over docs
-    slide_dreamforge()      # 6  — agentic tooling
-    slide_caselogic()       # 7  — multi-agent legal
-    slide_safezone()        # 8  — voice-first agent
-    slide_safezone_arch()   # 9  — architecture
-    slide_more_projects()   # 10 — portfolio at a glance
-    slide_stack()           # 11
-    slide_recognition()     # 12
-    slide_thanks()          # 13
+    # ---- Ordered deck. Each section honours its SHOW_SLIDES toggle; the
+    #      comprehensive sections additionally honour per-entry "show". ----
+    slide_title()                                    # always
+    if SHOW_SLIDES["about"]:        slide_about()
+    if SHOW_SLIDES["pillars"]:      slide_pillars()
+    if SHOW_SLIDES["education"]:    build_education()         # all degrees
+    if SHOW_SLIDES["experience"]:   build_experience()        # all roles
+    if SHOW_SLIDES["vector"]:       slide_vector()            # deep-dive
+    if SHOW_SLIDES["latex_cv"]:     slide_latex_cv()          # deep-dive
+    if SHOW_SLIDES["dreamforge"]:   slide_dreamforge()        # deep-dive
+    if SHOW_SLIDES["caselogic"]:    slide_caselogic()         # deep-dive
+    if SHOW_SLIDES["safezone"]:     slide_safezone()          # deep-dive
+    if SHOW_SLIDES["safezone_arch"]: slide_safezone_arch()    # deep-dive
+    if SHOW_SLIDES["projects"]:     build_projects()          # all projects
+    if SHOW_SLIDES["stack"]:        slide_stack()
+    if SHOW_SLIDES["honors"]:       build_honors()            # all honors
+    slide_thanks()                                   # always
+
+    # --- Footers & page numbers (dynamic): every slide except title & thanks
+    total = len(prs.slides)
+    for i, slide in enumerate(prs.slides):
+        if i == 0 or i == total - 1:
+            continue
+        add_footer(slide, i + 1, total)
 
     # --- Animations + transitions ---------------------------------------
-    # Per-slide effect mix; cycled per shape in z-order. fade is the
-    # workhorse; float_up + zoom add subtle variation on key moments.
-    effect_mix = {
-        0:  ("fade", "float_up"),                 # title — calm
-        1:  ("fade",),                            # about — readable
-        2:  ("zoom", "fade"),                     # pillars — punchy
-        3:  ("fade", "wipe_up"),                  # vector
-        4:  ("fade", "float_up"),                 # latex CV
-        5:  ("fade", "wipe_up"),                  # dreamforge
-        6:  ("fade", "float_up"),                 # caselogic
-        7:  ("fade", "fly_from_bot"),             # safezone
-        8:  ("fade", "wipe_up"),                  # safezone arch
-        9:  ("zoom", "fade"),                     # more projects — grid pop
-        10: ("fade", "float_up"),                 # stack
-        11: ("zoom", "fade"),                     # recognition — punchy
-        12: ("fade", "float_up"),                 # thanks
-    }
+    # Per-slide effect mix recorded at slide-creation time; cycled per shape
+    # in z-order. fade is the workhorse; float_up + zoom add subtle variation.
     for i, slide in enumerate(prs.slides):
         apply_fade_transition(slide, speed="med")
-        apply_cascade_anim(slide, effects=effect_mix.get(i, ("fade",)),
-                           step_ms=110, dur_ms=420)
+        eff = _slide_effects[i] if i < len(_slide_effects) else ("fade",)
+        apply_cascade_anim(slide, effects=eff, step_ms=110, dur_ms=420)
 
     out = "Daniel-CV-5min-Talk.pptx"
     prs.save(out)

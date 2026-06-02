@@ -4,7 +4,7 @@ import { imgProjects } from "@/lib/site-data";
 import { SectionHeader } from "./SectionHeader";
 
 export function ProjectsSection() {
-  const feature = imgProjects.find((p) => p.feature);
+  const features = imgProjects.filter((p) => p.feature);
   const rest = imgProjects.filter((p) => !p.feature);
 
   return (
@@ -17,7 +17,9 @@ export function ProjectsSection() {
           intro="Selected work across game development, ML, computer vision, and systems."
         >
           <div className="grid gap-6">
-            {feature && <FeatureCard p={feature} />}
+            {features.map((p) => (
+              <FeatureCard key={p.slug} p={p} />
+            ))}
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {rest.map((p) => (
@@ -59,14 +61,14 @@ function FeatureCard({ p }: { p: (typeof imgProjects)[number] }) {
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg/40 via-transparent to-transparent" />
         <div className="glass-inner pointer-events-none absolute left-3 top-3 border border-accent/40 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-          ● featured · 500+ ★
+          {p.featureBadge ?? "● featured"}
         </div>
       </div>
 
       {/* body */}
       <div className="glass-inner flex flex-col justify-between gap-6 p-7">
         <div>
-          <div className="label mb-3">open-source</div>
+          <div className="label mb-3">{p.featureLabel ?? "project"}</div>
           <h3 className="font-display text-3xl tracking-tight text-fg">{p.title}</h3>
           <p className="mt-3 text-fg-dim">{p.blurb}</p>
           <div className="mt-4 font-mono text-[11.5px] tracking-[0.04em] text-fg-mute">
