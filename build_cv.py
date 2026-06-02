@@ -226,6 +226,10 @@ def add_bullets(slide, x, y, w, h, bullets, *,
     if color is None:
         color = BODY
     tb = slide.shapes.add_textbox(x, y, w, h)
+    try:
+        tb.name = "BULLETS"          # tag so the entrance reveals it per bullet
+    except Exception:
+        pass
     tf = tb.text_frame
     tf.margin_left = Pt(0)
     tf.margin_right = Pt(0)
@@ -1239,19 +1243,24 @@ def _dh_fade_transition(slide, speed="med"):
     sld.insert(idx, tr)
 
 
-def _dh_anim_par(spid, dur_ms, offset_ms, node_type, nid):
+def _dh_anim_par(spid, dur_ms, offset_ms, node_type, nid, para=None):
     ctn = nid(); setid = nid(); animid = nid()
+    if para is None:
+        tgt = f'<p:spTgt spid="{spid}"/>'
+    else:
+        tgt = (f'<p:spTgt spid="{spid}"><p:txEl>'
+               f'<p:pRg st="{para}" end="{para}"/></p:txEl></p:spTgt>')
     return (f'<p:par><p:cTn id="{ctn}" presetID="10" presetClass="entr" presetSubtype="0" '
             f'fill="hold" grpId="0" nodeType="{node_type}">'
             f'<p:stCondLst><p:cond delay="{offset_ms}"/></p:stCondLst><p:childTnLst>'
             f'<p:set><p:cBhvr><p:cTn id="{setid}" dur="1" fill="hold">'
             f'<p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>'
-            f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+            f'<p:tgtEl>{tgt}</p:tgtEl>'
             f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr>'
             f'<p:to><p:strVal val="visible"/></p:to></p:set>'
             f'<p:anim calcmode="lin" valueType="num"><p:cBhvr additive="base">'
             f'<p:cTn id="{animid}" dur="{dur_ms}" fill="hold"/>'
-            f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+            f'<p:tgtEl>{tgt}</p:tgtEl>'
             f'<p:attrNameLst><p:attrName>style.opacity</p:attrName></p:attrNameLst></p:cBhvr>'
             f'<p:tavLst><p:tav tm="0"><p:val><p:fltVal val="0"/></p:val></p:tav>'
             f'<p:tav tm="100000"><p:val><p:fltVal val="1"/></p:val></p:tav></p:tavLst></p:anim>'
@@ -1329,6 +1338,75 @@ def _dh_build_anim(slide, *, dur_ms=400):
            f'<p:bldLst>{builds}</p:bldLst></p:timing>')
     sld = slide.element
     for el in sld.findall(qn('p:timing')): sld.remove(el)
+    sld.append(etree.fromstring(xml))
+
+
+def _apply_auto_entrance(slide, *, dur_ms=450, bullet_step_ms=220):
+    """Gentle fade-in of all content when the slide opens (no clicks), so every
+    CV page animates in. A bullet list (text box tagged 'BULLETS') streams in
+    one bullet at a time (staggered, still automatic) instead of all at once.
+    Skips the full-slide background and the footer strip."""
+    shapes = []
+    for sp in slide.shapes:
+        try:
+            l = int(sp.left or 0); t = int(sp.top or 0)
+            w = int(sp.width or 0); h = int(sp.height or 0)
+        except Exception:
+            l = t = w = h = 0
+        if l == 0 and t == 0 and w == int(SLIDE_W) and h == int(SLIDE_H):
+            continue
+        if t >= int(Inches(7.0)):
+            continue
+        shapes.append(sp)
+    if not shapes:
+        return
+
+    def is_bullet(sp):
+        try:
+            return sp.name == "BULLETS"
+        except Exception:
+            return False
+
+    def npar(sp):
+        try:
+            return max(1, len(list(sp.text_frame.paragraphs)))
+        except Exception:
+            return 1
+
+    counter = [3]
+    def nid():
+        v = counter[0]; counter[0] += 1; return v
+    click = nid(); inner = nid()
+    anims, whole_ids, para_ids = [], [], []
+    first = True
+    for sp in shapes:
+        if is_bullet(sp):
+            para_ids.append(sp.shape_id)
+            for k in range(npar(sp)):
+                nt = "afterEffect" if first else "withEffect"
+                first = False
+                anims.append(_dh_anim_par(sp.shape_id, dur_ms, k * bullet_step_ms, nt, nid, para=k))
+        else:
+            nt = "afterEffect" if first else "withEffect"
+            first = False
+            anims.append(_dh_anim_par(sp.shape_id, dur_ms, 0, nt, nid))
+            whole_ids.append(sp.shape_id)
+    builds = ("".join(f'<p:bldP spid="{s}" grpId="0" build="p"/>' for s in para_ids)
+              + "".join(f'<p:bldP spid="{s}" grpId="0"/>' for s in whole_ids))
+    xml = (f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
+           f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
+           f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
+           f'<p:par><p:cTn id="{click}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'<p:par><p:cTn id="{inner}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'{"".join(anims)}</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
+           f'</p:childTnLst></p:cTn>'
+           f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+           f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+           f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
+           f'<p:bldLst>{builds}</p:bldLst></p:timing>')
+    sld = slide.element
+    for el in sld.findall(qn('p:timing')):
+        sld.remove(el)
     sld.append(etree.fromstring(xml))
 
 
@@ -2046,6 +2124,14 @@ def build(theme="midnight", out=None):
     slide_hobbies()                          # 41
     slide_contact()                          # 42
     slide_thanks()                           # 43
+
+    # --- Every page: a fade transition + a gentle auto fade-in entrance, so
+    #     the whole CV feels animated. The DigiHuman pipeline already carries
+    #     its grouped click reveals (it has a <p:timing>), so we leave it be.
+    for slide in prs.slides:
+        _dh_fade_transition(slide)
+        if slide.element.find(qn('p:timing')) is None:
+            _apply_auto_entrance(slide)
 
     out = out or OUT_FILE.get(theme, "Daniel's CV (1).pptx")
     prs.save(out)

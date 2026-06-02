@@ -421,6 +421,10 @@ def add_bullets(slide, x, y, w, h, bullets, *, font=None, size=14,
     if font is None: font = B_FONT
     if color is None: color = BODY
     tb = slide.shapes.add_textbox(x, y, w, h)
+    try:
+        tb.name = "BULLETS"          # tag so the animation reveals it per bullet
+    except Exception:
+        pass
     tf = tb.text_frame
     tf.margin_left = Pt(0); tf.margin_right = Pt(0)
     tf.margin_top = Pt(0); tf.margin_bottom = Pt(0)
@@ -750,16 +754,151 @@ def _content_groups(slide):
     return groups
 
 
-def apply_cascade_anim(slide, *, effects=("fade",), step_ms=120, dur_ms=420):
-    """Grouped click reveals: the page frame is static; each content box and
-    its text fade in TOGETHER on one click (step_ms=0 → simultaneous)."""
-    groups = _content_groups(slide)
-    if not groups:
-        return                          # fully static slide
+def _content_steps(slide):
+    """Like _content_groups, but a bullet list (a text box tagged 'BULLETS')
+    is split into ONE step per bullet (paragraph). Returns a list of steps;
+    each step is a list of (shape_id, para) targets (para=None → whole shape,
+    para=k → the k-th paragraph of that shape)."""
+    shapes = list(slide.shapes)
+
+    def is_bullet(sp):
+        try:
+            return sp.name == "BULLETS"
+        except Exception:
+            return False
+
+    def npar(sp):
+        try:
+            return max(1, len(list(sp.text_frame.paragraphs)))
+        except Exception:
+            return 1
+
+    first = next((i for i, sp in enumerate(shapes)
+                  if _is_container(sp) or is_bullet(sp)), None)
+    if first is None:
+        return []
+    steps, cur, cont = [], [], None
+
+    def flush():
+        if cur:
+            steps.append(list(cur))
+            cur.clear()
+
+    for sp in shapes[first:]:
+        try:
+            if (int(sp.left or 0) == 0 and int(sp.top or 0) == 0
+                    and int(sp.width or 0) == int(SLIDE_W)
+                    and int(sp.height or 0) == int(SLIDE_H)):
+                continue
+        except Exception:
+            pass
+        if is_bullet(sp):
+            flush()
+            for k in range(npar(sp)):
+                steps.append([(sp.shape_id, k)])   # one click per bullet
+            cont = None
+        elif _is_container(sp) and not (cont is not None and _center_in(sp, cont)):
+            flush()
+            cur.append((sp.shape_id, None)); cont = sp
+        else:
+            cur.append((sp.shape_id, None))
+    flush()
+    return steps
+
+
+def _steps_timing_xml(steps, dur_ms):
+    """One On-Click step per entry in `steps`. Each step fades its targets in
+    together; paragraph targets get a build='p' bldP entry."""
+    counter = [3]
+    def nid():
+        v = counter[0]; counter[0] += 1; return v
+    click_steps = []
+    para_spids, whole_spids = set(), set()
+    for step in steps:
+        click_id = nid(); inner_id = nid()
+        anims = []
+        for j, (spid, para) in enumerate(step):
+            nt = "clickEffect" if j == 0 else "withEffect"
+            anims.append(_anim_par_xml(spid, 10, "entr", 0, nt, 0, dur_ms, nid, para=para))
+            (para_spids if para is not None else whole_spids).add(spid)
+        click_steps.append(
+            f'<p:par><p:cTn id="{click_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="indefinite"/></p:stCondLst><p:childTnLst>'
+            f'<p:par><p:cTn id="{inner_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+            f'<p:childTnLst>{"".join(anims)}</p:childTnLst></p:cTn></p:par>'
+            f'</p:childTnLst></p:cTn></p:par>')
+    builds = ("".join(f'<p:bldP spid="{s}" grpId="0" build="p"/>' for s in para_spids)
+              + "".join(f'<p:bldP spid="{s}" grpId="0"/>'
+                        for s in (whole_spids - para_spids)))
+    return (
+        f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
+        f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
+        f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
+        f'{"".join(click_steps)}</p:childTnLst></p:cTn>'
+        f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+        f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+        f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
+        f'<p:bldLst>{builds}</p:bldLst></p:timing>')
+
+
+def apply_auto_entrance(slide, *, dur_ms=450):
+    """Gentle fade-in of all content the moment the slide opens (no clicks).
+    Used for slides with no content boxes so every page still animates in.
+    Skips the full-slide background and the footer strip (kept static)."""
+    ids = []
+    for sp in slide.shapes:
+        try:
+            l = int(sp.left or 0); t = int(sp.top or 0)
+            w = int(sp.width or 0); h = int(sp.height or 0)
+        except Exception:
+            l = t = w = h = 0
+        if l == 0 and t == 0 and w == int(SLIDE_W) and h == int(SLIDE_H):
+            continue                      # full-slide background
+        if t >= int(Inches(7.0)):
+            continue                      # footer strip
+        ids.append(sp.shape_id)
+    if not ids:
+        return
+    counter = [3]
+    def nid():
+        v = counter[0]; counter[0] += 1; return v
+    click = nid(); inner = nid()
+    anims, builds = [], []
+    for i, spid in enumerate(ids):
+        nt = "afterEffect" if i == 0 else "withEffect"   # auto-play on enter
+        anims.append(_anim_par_xml(spid, 10, "entr", 0, nt, 0, dur_ms, nid))
+        builds.append(f'<p:bldP spid="{spid}" grpId="0"/>')
+    xml = (f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
+           f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
+           f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
+           f'<p:par><p:cTn id="{click}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'<p:par><p:cTn id="{inner}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+           f'{"".join(anims)}</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
+           f'</p:childTnLst></p:cTn>'
+           f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+           f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+           f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'
+           f'<p:bldLst>{"".join(builds)}</p:bldLst></p:timing>')
     sld = slide.element
     for el in sld.findall(qn('p:timing')):
         sld.remove(el)
-    xml = _cascade_timing_xml(groups, ("fade",), 0, dur_ms)
+    sld.append(etree.fromstring(xml))
+
+
+def apply_cascade_anim(slide, *, effects=("fade",), step_ms=120, dur_ms=420):
+    """Grouped click reveals: the page frame is static; each content box and
+    its text fade in TOGETHER on one click, and a bullet list reveals one
+    bullet per click. Slides with no boxes/bullets get a gentle auto fade-in
+    instead, so every page still animates."""
+    steps = _content_steps(slide)
+    if not steps:
+        apply_auto_entrance(slide, dur_ms=dur_ms)   # nothing to reveal → fade page in
+        return
+    sld = slide.element
+    for el in sld.findall(qn('p:timing')):
+        sld.remove(el)
+    xml = _steps_timing_xml(steps, dur_ms)
     sld.append(etree.fromstring(xml))
 
 
@@ -769,9 +908,15 @@ def apply_single_cascade(slide, *, step_ms=0, dur_ms=420):
 
 
 def _anim_par_xml(spid, preset_id, preset_class, preset_sub,
-                  node_type, offset_ms, dur_ms, nid):
-    """Build the <p:par> for a single entrance animation on one shape."""
+                  node_type, offset_ms, dur_ms, nid, para=None):
+    """Build the <p:par> for a single entrance animation on one shape, or on a
+    single paragraph (para index) of a shape when `para` is given."""
     ctn_id = nid(); set_id = nid(); anim_id = nid()
+    if para is None:
+        tgt = f'<p:spTgt spid="{spid}"/>'
+    else:
+        tgt = (f'<p:spTgt spid="{spid}"><p:txEl>'
+               f'<p:pRg st="{para}" end="{para}"/></p:txEl></p:spTgt>')
     return (
         f'<p:par><p:cTn id="{ctn_id}" presetID="{preset_id}" '
         f'presetClass="{preset_class}" presetSubtype="{preset_sub}" '
@@ -781,13 +926,13 @@ def _anim_par_xml(spid, preset_id, preset_class, preset_sub,
         f'<p:set><p:cBhvr>'
         f'<p:cTn id="{set_id}" dur="1" fill="hold">'
         f'<p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>'
-        f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+        f'<p:tgtEl>{tgt}</p:tgtEl>'
         f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>'
         f'</p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>'
         f'<p:anim calcmode="lin" valueType="num">'
         f'<p:cBhvr additive="base">'
         f'<p:cTn id="{anim_id}" dur="{dur_ms}" fill="hold"/>'
-        f'<p:tgtEl><p:spTgt spid="{spid}"/></p:tgtEl>'
+        f'<p:tgtEl>{tgt}</p:tgtEl>'
         f'<p:attrNameLst><p:attrName>style.opacity</p:attrName></p:attrNameLst>'
         f'</p:cBhvr><p:tavLst>'
         f'<p:tav tm="0"><p:val><p:fltVal val="0"/></p:val></p:tav>'
