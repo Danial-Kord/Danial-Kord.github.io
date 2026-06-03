@@ -1589,38 +1589,148 @@ def slide_safezone_arch():
 # DEEP-DIVE · LATEX CV BUILDER  (System design + RAG)
 # ====================================================================
 def slide_latex_cv():
-    s = new_slide(("fade", "float_up"))
-    page_bg(s)
-    marker(s, "SYSTEM DESIGN")
-    add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
-             "PERSONAL PROJECT  ·  2022 — PRESENT",
-             font=H_FONT, size=12, bold=True, color=EYE)
-    add_text(s, Inches(0.7), Inches(1.4), Inches(12), Inches(1.0),
-             "LaTeX CV Builder — RAG over documents",
-             font=H_FONT, size=32, bold=True, color=INK)
-    add_text(s, Inches(0.7), Inches(2.3), Inches(12), Inches(0.5),
-             "A distributed document generator: LLM agents parse old CVs and emit role-tailored LaTeX.",
-             font=B_FONT, size=14, italic=True, color=SUB)
+    """LaTeX CV Builder — animated pipeline exhibit (DigiHuman-style).
+    One job description in -> a tailored CV, cover letter & fit score out.
+    Mirrors the real repo: Obsidian vault + JD -> 5-stage cv_pipeline -> PDFs."""
+    s = new_slide(("seq",))
+    _no_footer_ids.add(id(s))            # full-bleed diagram: no footer
+    fill_slide(s, M_WHITE)
 
-    # left: stack
-    add_text(s, Inches(0.7), Inches(3.1), Inches(7), Inches(0.4),
-             "WHAT'S INSIDE", font=H_FONT, size=11, bold=True, color=EYE)
-    bullets = [
-        "[b]Next.js (App Router + Server Components)[/b] with streaming UI patterns.",
-        "[b]LangChain[/b] LLM agents for automated CV parsing and structuring.",
-        "[b]RAG[/b] pipeline for context-aware formatting from prior versions.",
-        "[b]Spring Boot[/b] orchestration with [b]Docker + AWS[/b] microservices.",
-        "[b]Nginx[/b] service for LaTeX → PDF rendering.",
-    ]
-    add_bullets(s, Inches(0.7), Inches(3.55), Inches(7), Inches(3.2),
-                bullets, size=12, line_spacing=1.3, bullet_char="▸",
-                color=BODY)
-    mark_break(s)  # — pause before right-side architecture panel
+    # --- decorative blobs (static page frame) ---
+    add_oval(s, Inches(11.98), Inches(-0.80), Inches(2.05), Inches(2.05), M_PURPLE)
+    add_oval(s, Inches(12.63), Inches(2.92), Inches(0.74), Inches(0.74), M_CYAN)
+    add_oval(s, Inches(-0.55), Inches(6.40), Inches(1.45), Inches(1.45), M_YELLOW)
+    add_oval(s, Inches(0.45), Inches(0.34), Inches(0.24), Inches(0.24), DH_CORAL)
 
-    # right: arch image inside a themed frame
-    add_rect(s, Inches(8.0), Inches(3.1), Inches(4.85), Inches(3.7), FRAME,
-             line=(ACC1 if DECO == "memphis" else None))
-    add_image(s, f"{MEDIA}/image22.png", Inches(8.15), Inches(3.4), w=Inches(4.55))
+    # --- title + subtitle (static) ---
+    add_text(s, Inches(0.5), Inches(0.10), Inches(12.33), Inches(0.54),
+             "LaTeX CV Builder", font=H_FONT, size=30, bold=True,
+             color=DH_INK, align=PP_ALIGN.CENTER)
+    add_text(s, Inches(0.5), Inches(0.64), Inches(12.33), Inches(0.34),
+             "One job description in   →   a tailored CV, cover letter & fit score out",
+             font=B_FONT, size=12.5, italic=True, color=M_TEAL,
+             align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+
+    # ---- nested helpers ----
+    def card(x, y, w, h, fill, *, radius=0.10, line=None):
+        return add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h),
+                              fill, radius=radius, line=line)
+
+    def t(x, y, w, h, text, *, size=10, bold=False, color=DH_INK,
+          align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP, font=None, italic=False,
+          ls=None):
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(h), text,
+                 font=font or H_FONT, size=size, bold=bold, color=color,
+                 align=align, anchor=anchor, italic=italic, line_spacing=ls)
+
+    def badge(x, y, w, h, text, fill, size=8.5):
+        add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), fill, radius=0.5)
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(h), text, font=H_FONT,
+                 size=size, bold=True, color=M_WHITE, align=PP_ALIGN.CENTER,
+                 anchor=MSO_ANCHOR.MIDDLE)
+
+    def arrow(x, y, w=0.52, h=0.56, left=False, down=False):
+        c = add_chevron(s, Inches(x), Inches(y), Inches(w), Inches(h),
+                        DH_ARROW, left=left)
+        if down:
+            c.rotation = 90
+        return c
+
+    TOP_Y, BOT_Y, TH = 1.62, 3.92, 1.88
+
+    # ---- SOURCES lane (read every run) ----
+    card(0.40, 1.06, 12.13, 0.46, M_CARD, radius=0.22, line=M_CYAN)
+    t(0.62, 1.06, 2.0, 0.46, "READS EVERY RUN", size=8.5, bold=True,
+      color=M_PURPLE, anchor=MSO_ANCHOR.MIDDLE)
+    t(2.78, 1.06, 4.6, 0.46, "Obsidian vault  ·  experiences / projects / skills",
+      size=9.5, bold=True, color=M_TEAL, anchor=MSO_ANCHOR.MIDDLE)
+    t(7.55, 1.06, 2.3, 0.46, "canonical CV .tex", size=9.5, bold=True,
+      color=DH_INK, anchor=MSO_ANCHOR.MIDDLE)
+    t(10.0, 1.06, 2.4, 0.46, "referrals.db (SQLite)", size=9.5, bold=True,
+      color=DH_INK, anchor=MSO_ANCHOR.MIDDLE)
+
+    # ---- INPUT: Job Description (the trigger) ----
+    card(0.40, TOP_Y, 1.85, TH, M_PURPLE)
+    t(0.40, TOP_Y + 0.18, 1.85, 0.28, "INPUT", size=8.5, bold=True,
+      color=M_WHITE, align=PP_ALIGN.CENTER)
+    t(0.45, TOP_Y + 0.55, 1.75, 0.72, "Job Description", size=15, bold=True,
+      color=M_WHITE, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, ls=1.0)
+    t(0.45, TOP_Y + 1.30, 1.75, 0.48, "paste · URL · Gmail queue", size=8.5,
+      color=M_WHITE, align=PP_ALIGN.CENTER, ls=1.0)
+    arrow(2.27, TOP_Y + 0.66)
+
+    # ---- the 5-stage pipeline (LLM only in stages 1 & 3) ----
+    def stage(x, y, num, title, module, desc, out, badge_txt, badge_fill,
+              out_color=DH_CORAL):
+        w = 2.85
+        card(x, y, w, TH, DH_MINT)
+        add_oval(s, Inches(x + 0.15), Inches(y + 0.16), Inches(0.44),
+                 Inches(0.44), DH_CORAL)
+        t(x + 0.15, y + 0.16, 0.44, 0.44, num, size=15, bold=True, color=M_WHITE,
+          align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        t(x + 0.68, y + 0.15, w - 0.84, 0.46, title, size=14, bold=True,
+          color=DH_INK, anchor=MSO_ANCHOR.MIDDLE)
+        t(x + 0.18, y + 0.72, w - 0.36, 0.28, module, size=9.5, bold=True,
+          color=M_TEAL, font=B_FONT)
+        t(x + 0.18, y + 1.01, w - 0.36, 0.52, desc, size=9, color=DH_INK, ls=1.04)
+        t(x + 0.18, y + 1.54, w - 1.15, 0.30, out, size=10, bold=True,
+          color=out_color, anchor=MSO_ANCHOR.MIDDLE)
+        bw = 0.34 + 0.082 * len(badge_txt)
+        badge(x + w - bw - 0.14, y + 1.55, bw, 0.30, badge_txt, badge_fill)
+
+    # top row: 1 Parse JD -> 2 Select -> 3 Generate
+    stage(2.88, TOP_Y, "1", "Parse JD", "job_parser.py",
+          "LLM reads the JD into domain, role-fit, tags & constraints",
+          "→ JobTargets", "LLM", DH_CORAL)
+    arrow(5.78, TOP_Y + 0.66)
+    stage(6.37, TOP_Y, "2", "Select", "candidate_selector.py",
+          "Rule-based scoring of vault notes — anchors & de-dupe",
+          "→ shortlist", "no LLM", M_TEAL)
+    arrow(9.27, TOP_Y + 0.66)
+    stage(9.86, TOP_Y, "3", "Generate", "bullet · cover · fit",
+          "One LLM call writes bullets, a cover letter & a fit score",
+          "→ bullets + letter", "LLM", DH_CORAL)
+    # serpentine turn: stage 3 (top) -> stage 4 (bottom)
+    arrow(11.05, 3.46, w=0.46, h=0.52, down=True)
+
+    # bottom row (right -> left): 4 Render LaTeX -> 5 Compile
+    stage(9.86, BOT_Y, "4", "Render LaTeX", "latex_formatter.py",
+          "Fills résumé + per-entry .tex from the generation",
+          "→ resume.tex", ".tex", M_PURPLE)
+    arrow(9.27, BOT_Y + 0.66, left=True)
+    stage(6.37, BOT_Y, "5", "Compile", "build_runner.py",
+          "pdflatex builds the final PDF (skippable)",
+          "→ CV.pdf", "pdflatex", M_TEAL)
+    arrow(5.78, BOT_Y + 0.66, left=True)
+
+    # ---- OUTPUTS panel ----
+    card(0.40, BOT_Y, 5.30, TH, M_CARD, radius=0.10, line=M_GREEN)
+    t(0.62, BOT_Y + 0.12, 3.0, 0.30, "OUTPUTS", size=10.5, bold=True,
+      color=M_PURPLE)
+    outs = [("CV.pdf", "tailored résumé", DH_CORAL),
+            ("Cover letter .pdf", "matched tone & structure", M_TEAL),
+            ("Fit score", "0–100 with strengths & gaps", M_GREEN),
+            ("Archived", "JSON · SQLite · Obsidian note", M_PURPLE)]
+    for i, (name, sub, acc) in enumerate(outs):
+        ry = BOT_Y + 0.50 + i * 0.335
+        add_oval(s, Inches(0.66), Inches(ry + 0.05), Inches(0.15),
+                 Inches(0.15), acc)
+        t(0.92, ry, 1.95, 0.30, name, size=10.5, bold=True, color=DH_INK,
+          anchor=MSO_ANCHOR.MIDDLE)
+        t(2.90, ry, 2.70, 0.30, sub, size=8.7, color=DH_INK,
+          anchor=MSO_ANCHOR.MIDDLE)
+
+    # ---- backend swap + UI (captions) ----
+    card(1.95, 6.04, 9.45, 0.48, M_PURPLE, radius=0.24)
+    t(1.95, 6.04, 9.45, 0.48,
+      "LLM backend (swappable):   api_llm — LangChain → GPT-4o / Ollama"
+      "      ·      claude_code — claude CLI",
+      size=9.5, bold=True, color=M_WHITE, align=PP_ALIGN.CENTER,
+      anchor=MSO_ANCHOR.MIDDLE)
+    t(1.95, 6.60, 9.45, 0.32,
+      "CV-UI · Next.js wraps the CLI — paste a JD and watch Step 1/5 … 5/5 stream live",
+      size=10, bold=True, color=M_TEAL, align=PP_ALIGN.CENTER,
+      anchor=MSO_ANCHOR.MIDDLE)
 
 
 # ====================================================================
