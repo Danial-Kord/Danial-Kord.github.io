@@ -1010,6 +1010,135 @@ def slide_exp_dreamforge():
                slide_num=12, key="dreamforge")
 
 
+def slide_dreamforge_cicd():
+    """DreamForge — animated crash-to-merged-fix pipeline (DigiHuman-style).
+    A runtime exception flows Backtrace -> .NET -> queue -> a triage agent;
+    criticals run Claude Code in an Azure container that opens a reviewed PR
+    and merges — every step is mirrored in Slack."""
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, M_WHITE)
+
+    RED   = RGBColor(0xDB, 0x3A, 0x34)   # the crash / critical path
+    GREEN = RGBColor(0x2F, 0xA0, 0x55)   # merged
+    GREY  = RGBColor(0x8A, 0x94, 0xA6)   # non-critical
+    SLACK = RGBColor(0x4A, 0x15, 0x4B)   # Slack aubergine
+
+    # --- decorative blobs (static page frame) ---
+    add_oval(s, Inches(11.98), Inches(-0.80), Inches(2.05), Inches(2.05), M_PURPLE)
+    add_oval(s, Inches(12.63), Inches(2.92), Inches(0.74), Inches(0.74), M_CYAN)
+    add_oval(s, Inches(-0.55), Inches(5.45), Inches(1.25), Inches(1.25), M_YELLOW)
+    add_oval(s, Inches(0.45), Inches(0.34), Inches(0.24), Inches(0.24), DH_CORAL)
+
+    # --- title + subtitle (static) ---
+    add_text(s, Inches(0.5), Inches(0.10), Inches(12.33), Inches(0.52),
+             "DreamForge — Autonomous Exception Resolution", font=H_FONT,
+             size=28, bold=True, color=DH_INK, align=PP_ALIGN.CENTER)
+    add_text(s, Inches(0.5), Inches(0.62), Inches(12.33), Inches(0.34),
+             "A live crash is captured, triaged, and fixed by Claude Code in "
+             "Azure — merged via a reviewed PR, all mirrored in Slack",
+             font=B_FONT, size=11.5, italic=True, color=M_TEAL,
+             align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+
+    # ---- nested helpers ----
+    def card(x, y, w, h, fill, *, radius=0.10, line=None, line_w=1.25):
+        return add_round_rect(s, Inches(x), Inches(y), Inches(w), Inches(h),
+                              fill, radius=radius, line=line, line_w=line_w)
+
+    def t(x, y, w, h, text, *, size=10, bold=False, color=DH_INK,
+          align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.TOP, font=None, ls=None):
+        add_text(s, Inches(x), Inches(y), Inches(w), Inches(h), text,
+                 font=font or H_FONT, size=size, bold=bold, color=color,
+                 align=align, anchor=anchor, line_spacing=ls)
+
+    def hchev(x, y, fill, left=False, w=0.42, h=0.5):
+        add_chevron(s, Inches(x), Inches(y), Inches(w), Inches(h), fill, left=left)
+
+    def rail(x, y, w, h, fill):
+        add_rect(s, Inches(x), Inches(y), Inches(w), Inches(h), fill)
+
+    def vchev(x, y, fill, up=False, w=0.44, h=0.42):
+        c = add_chevron(s, Inches(x), Inches(y), Inches(w), Inches(h), fill)
+        c.rotation = 270 if up else 90
+
+    def stage(x, y, w, h, num, title, sub, *, num_fill=DH_CORAL, num_color=M_WHITE,
+              fill=DH_MINT, tcolor=DH_INK, scolor=DH_INK, line=None, tsize=13):
+        card(x, y, w, h, fill, line=line, line_w=2.25 if line else 1.25)
+        cd = 0.4
+        add_oval(s, Inches(x + w / 2 - cd / 2), Inches(y + 0.11), Inches(cd),
+                 Inches(cd), num_fill)
+        t(x + w / 2 - cd / 2, y + 0.11, cd, cd, num, size=14, bold=True,
+          color=num_color, anchor=MSO_ANCHOR.MIDDLE)
+        t(x + 0.06, y + 0.55, w - 0.12, 0.4, title, size=tsize, bold=True,
+          color=tcolor)
+        t(x + 0.06, y + 0.95, w - 0.12, h - 0.99, sub, size=8.7, color=scolor,
+          ls=1.05)
+
+    TOP_Y, TH = 1.55, 1.5
+    BOT_Y, BH = 4.35, 1.5
+    TOP_BOT = TOP_Y + TH           # 3.05 — bottom edge of the top row
+
+    # ===== TOP ROW (left -> right): Exception -> Backtrace -> .NET -> Queue -> Classify
+    TW = 2.14
+    stage(0.40, TOP_Y, TW, TH, "1", "Exception", "thrown in the live app",
+          num_fill=RED)
+    hchev(2.56, TOP_Y + 0.50, DH_ARROW)
+    stage(2.99, TOP_Y, TW, TH, "2", "Backtrace", "cloud crash monitoring")
+    hchev(5.15, TOP_Y + 0.50, DH_ARROW)
+    stage(5.58, TOP_Y, TW, TH, "3", ".NET server", "receives the webhook")
+    hchev(7.74, TOP_Y + 0.50, DH_ARROW)
+    stage(8.17, TOP_Y, TW, TH, "4", "Queue", "enqueued for triage")
+    hchev(10.33, TOP_Y + 0.50, DH_ARROW)
+    stage(10.76, TOP_Y, TW, TH, "5", "Classify", "critical or non-critical?",
+          num_fill=M_PURPLE)
+
+    # ===== BOTTOM ROW (right -> left): Azure -> Claude Code -> Open PR -> Merge
+    BW = 2.7
+    # 6 - Azure container (+ the red "critical" drop from the classifier)
+    stage(10.00, BOT_Y, BW, BH, "6", "Azure container",
+          "isolated container spins up")
+    rail(11.33, TOP_BOT, 0.05, BOT_Y - TOP_BOT, RED)
+    vchev(11.13, BOT_Y - 0.40, RED)
+    t(11.42, TOP_BOT + 0.10, 1.6, 0.26, "critical", size=9.5, bold=True,
+      color=RED, align=PP_ALIGN.LEFT)
+    hchev(9.53, BOT_Y + 0.50, DH_ARROW, left=True)
+    # 7 - Claude Code (the star, highlighted)
+    stage(6.80, BOT_Y, BW, BH, "7", "Claude Code",
+          "fixes on a fresh git pull with the exception", line=DH_CORAL)
+    hchev(6.33, BOT_Y + 0.50, DH_ARROW, left=True)
+    # 8 - Open PR
+    stage(3.60, BOT_Y, BW, BH, "8", "Open PR",
+          "commit · push · assign reviewers")
+    hchev(3.13, BOT_Y + 0.50, DH_ARROW, left=True)
+    # 9 - Merge
+    stage(0.40, BOT_Y, BW, BH, "9", "Merge", "reviewers approve → merged",
+          fill=GREEN, tcolor=M_WHITE, scolor=M_WHITE, num_fill=M_WHITE,
+          num_color=GREEN)
+
+    # ===== non-critical branch (an aside off the classifier) =====
+    card(4.70, TOP_BOT + 0.37, 3.2, 0.5, GREY, radius=0.16)
+    t(4.70, TOP_BOT + 0.37, 3.2, 0.5, "non-critical  ·  logged & deprioritized",
+      size=9, bold=True, color=M_WHITE, anchor=MSO_ANCHOR.MIDDLE)
+    rail(11.00, TOP_BOT, 0.05, 0.66, GREY)
+    rail(7.90, TOP_BOT + 0.61, 11.05 - 7.90, 0.05, GREY)
+    hchev(7.62, TOP_BOT + 0.46, GREY, left=True, w=0.3, h=0.34)
+
+    # ===== Slack observability rail (mirrors every step) =====
+    card(0.40, 6.15, 12.53, 0.58, SLACK, radius=0.14)
+    for i, dc in enumerate([RGBColor(0xE0, 0x1E, 0x5A), RGBColor(0xEC, 0xB2, 0x2E),
+                            RGBColor(0x2E, 0xB6, 0x7D), RGBColor(0x36, 0xC5, 0xF0)]):
+        add_oval(s, Inches(0.62 + i * 0.17), Inches(6.35), Inches(0.13),
+                 Inches(0.13), dc)
+    t(1.50, 6.15, 1.3, 0.58, "Slack", size=14, bold=True, color=M_WHITE,
+      align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
+    t(2.80, 6.15, 9.9, 0.58,
+      "one live thread mirrors the whole interaction — crash · triage · "
+      "Claude's fix · PR · merge", size=10.5, color=M_WHITE,
+      align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
+
+    _dh_fade_transition(s)
+    _dh_build_anim(s)
+
+
 def slide_exp_biomotion():
     s = prs.slides.add_slide(blank_layout)
     exp_detail(s,
@@ -2395,6 +2524,7 @@ def build(theme="midnight", role="general", out=None):
     slide_exp_overview()                     # 10
     slide_exp_mla()                          # 11
     slide_exp_dreamforge()                   # 12
+    slide_dreamforge_cicd()                  # DreamForge — self-healing CI/CD flowchart
     slide_exp_biomotion()                    # 13
     slide_exp_tectotrack()                   # 14
     slide_exp_techu()                        # 15
