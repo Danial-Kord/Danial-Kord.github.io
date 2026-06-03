@@ -137,6 +137,8 @@ SHOW_SLIDES = {
     "latex_cv":      True,   # deep-dive: LaTeX CV Builder
     "dreamforge":    True,   # deep-dive: DreamForge
     "guardian":      True,   # deep-dive: Guardian (NVIDIA Spark Hack)
+    "guardian_arch": True,   # Guardian — system-architecture exhibit
+    "guardian_demo": True,   # Guardian — embedded live-demo video
     "caselogic":     True,   # deep-dive: CaseLogic hackathon
     "safezone":      True,   # deep-dive: SAFEZone AI hackathon
     "safezone_arch": True,   # deep-dive: SAFEZone architecture diagram
@@ -477,6 +479,8 @@ DH_MINT  = RGBColor(0xD4, 0xF0, 0xD5)   # node tiles / landmark bars
 DH_CORAL = RGBColor(0xEE, 0x6B, 0x6B)   # process pills
 DH_ARROW = RGBColor(0xFC, 0xA0, 0x8E)   # connector arrows
 DH_INK   = RGBColor(0x2B, 0x2B, 0x2B)   # labels
+GUARDIAN_MEDIA = "guardian_assets"
+GUARD_BG = RGBColor(0x0C, 0x10, 0x19)   # dark navy matching the Guardian diagram/video
 
 
 def _split_bold(s):
@@ -675,11 +679,12 @@ blank_layout = None
 
 
 _no_footer_ids = set()
+_video_slide_ids = set()   # slides whose embedded-movie timing must NOT be overwritten
 
 
 def _reset_deck():
     """Fresh Presentation + per-build state (lets us render both themes)."""
-    global prs, blank_layout, _slide_effects, _SLIDE_BREAKS, _deco_i, _no_footer_ids
+    global prs, blank_layout, _slide_effects, _SLIDE_BREAKS, _deco_i, _no_footer_ids, _video_slide_ids
     prs = Presentation()
     prs.slide_width = SLIDE_W
     prs.slide_height = SLIDE_H
@@ -688,6 +693,7 @@ def _reset_deck():
     _SLIDE_BREAKS = {}
     _deco_i = [0]
     _no_footer_ids = set()
+    _video_slide_ids = set()
 
 
 def new_slide(effects=("fade",)):
@@ -1453,6 +1459,34 @@ def slide_guardian():
              size=9, max_x=Inches(12.7))
 
 
+def slide_guardian_arch():
+    """Guardian — full-bleed System Architecture exhibit (dark, like the diagram)."""
+    s = new_slide(("seq",))
+    _no_footer_ids.add(id(s))
+    fill_slide(s, GUARD_BG)
+    # architecture PNG is 2400x1500 (ratio 1.6) -> fit to full height, centred
+    s.shapes.add_picture(f"{GUARDIAN_MEDIA}/guardian-architecture.png",
+                         Inches(0.667), Inches(0.0), Inches(12.0), Inches(7.5))
+
+
+def slide_guardian_demo():
+    """Guardian — embedded 60s live-demo video on a dark exhibit slide."""
+    s = new_slide(("fade",))
+    _no_footer_ids.add(id(s))
+    _video_slide_ids.add(id(s))
+    fill_slide(s, GUARD_BG)
+    s.shapes.add_movie(
+        f"{GUARDIAN_MEDIA}/guardian-combined-demo.mp4",
+        Inches(0.917), Inches(0.34), Inches(11.5), Inches(6.469),
+        poster_frame_image=f"{GUARDIAN_MEDIA}/guardian-demo-poster.png",
+        mime_type="video/mp4")
+    add_text(s, Inches(0.5), Inches(6.95), Inches(12.33), Inches(0.4),
+             "Live demo  ·  watch detects a fall  →  risk escalates to CRITICAL"
+             "  →  autonomous 911 call with full medical context",
+             font=B_FONT, size=11, color=RGBColor(0x9A, 0xA6, 0xB8),
+             align=PP_ALIGN.CENTER)
+
+
 # ====================================================================
 # DEEP-DIVE · CASELOGIC  (3rd place hackathon)
 # ====================================================================
@@ -2080,6 +2114,8 @@ def build(theme="midnight", role="general", out=None):
     if show["latex_cv"]:     slide_latex_cv()          # deep-dive
     if show["dreamforge"]:   slide_dreamforge()        # deep-dive
     if show["guardian"]:     slide_guardian()          # deep-dive
+    if show["guardian_arch"]: slide_guardian_arch()    # Guardian — architecture
+    if show["guardian_demo"]: slide_guardian_demo()    # Guardian — live demo (video)
     if show["caselogic"]:    slide_caselogic()         # deep-dive
     if show["safezone"]:     slide_safezone()          # deep-dive
     if show["safezone_arch"]: slide_safezone_arch()    # deep-dive
@@ -2095,6 +2131,8 @@ def build(theme="midnight", role="general", out=None):
     # together on a single click.
     for i, slide in enumerate(prs.slides):
         apply_fade_transition(slide, speed="med")
+        if id(slide) in _video_slide_ids:
+            continue              # keep the embedded movie's own play timing
         apply_cascade_anim(slide, dur_ms=400)
 
     # --- Footers & page numbers: added AFTER animation → never animated.

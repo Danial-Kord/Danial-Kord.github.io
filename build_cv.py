@@ -492,7 +492,7 @@ def page_footer(slide, label, num):
              color=FOOT)
     add_text(slide, Inches(11.8), Inches(7.05), Inches(1.1), Inches(0.4),
              f"{num:02d}  /  {label}", font=B_FONT, size=9, color=FOOT,
-             align=PP_ALIGN.RIGHT)
+             align=PP_ALIGN.RIGHT).name = "FOOTNUM"
 
 
 def light_footer(slide, label, num):
@@ -502,7 +502,7 @@ def light_footer(slide, label, num):
     add_text(slide, Inches(11.8), Inches(7.05), Inches(1.1), Inches(0.4),
              f"{num:02d}  /  {label}", font=B_FONT, size=9,
              color=FOOT,
-             align=PP_ALIGN.RIGHT)
+             align=PP_ALIGN.RIGHT).name = "FOOTNUM"
 
 
 # ====================================================================
@@ -1358,6 +1358,8 @@ DH_MINT  = RGBColor(0xD4, 0xF0, 0xD5)
 DH_CORAL = RGBColor(0xEE, 0x6B, 0x6B)
 DH_ARROW = RGBColor(0xFC, 0xA0, 0x8E)
 DH_INK   = RGBColor(0x2B, 0x2B, 0x2B)
+GUARDIAN_MEDIA = "guardian_assets"
+GUARD_BG = RGBColor(0x0C, 0x10, 0x19)   # dark navy matching the Guardian diagram/video
 _PNS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 
 
@@ -1746,6 +1748,31 @@ def slide_proj_caselogic():
                  align=PP_ALIGN.CENTER)
         cx += cw + Inches(0.1)
     light_footer(s, "PROJECTS", 28)
+
+
+def slide_proj_guardian_arch():
+    """Guardian — full-bleed System Architecture exhibit (dark, like the diagram)."""
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, GUARD_BG)
+    # architecture PNG is 2400x1500 (ratio 1.6) -> fit to full height, centred
+    s.shapes.add_picture(f"{GUARDIAN_MEDIA}/guardian-architecture.png",
+                         Inches(0.667), Inches(0.0), Inches(12.0), Inches(7.5))
+
+
+def slide_proj_guardian_demo():
+    """Guardian — embedded 60s live-demo video on a dark exhibit slide."""
+    s = prs.slides.add_slide(blank_layout)
+    fill_slide(s, GUARD_BG)
+    s.shapes.add_movie(
+        f"{GUARDIAN_MEDIA}/guardian-combined-demo.mp4",
+        Inches(0.917), Inches(0.34), Inches(11.5), Inches(6.469),
+        poster_frame_image=f"{GUARDIAN_MEDIA}/guardian-demo-poster.png",
+        mime_type="video/mp4")
+    add_text(s, Inches(0.5), Inches(6.95), Inches(12.33), Inches(0.4),
+             "Live demo  ·  watch detects a fall  →  risk escalates to CRITICAL"
+             "  →  autonomous 911 call with full medical context",
+             font=B_FONT, size=11, color=RGBColor(0x9A, 0xA6, 0xB8),
+             align=PP_ALIGN.CENTER)
 
 
 def slide_proj_latex_cv():
@@ -2385,6 +2412,8 @@ def build(theme="midnight", role="general", out=None):
     slide_proj_safezone_cover()              # 26
     slide_proj_safezone_arch()               # 27
     slide_proj_caselogic()                   # 28
+    slide_proj_guardian_arch()               # Guardian — system architecture
+    slide_proj_guardian_demo()               # Guardian — live demo (embedded video)
     slide_proj_latex_cv()                    # 29
     slide_proj_techu()                       # 30
     if "hypervigilance" not in hide: slide_proj_hypervigilance()  # 31
@@ -2408,6 +2437,16 @@ def build(theme="midnight", role="general", out=None):
         _dh_fade_transition(slide)
         if slide.element.find(qn('p:timing')) is None:
             _apply_auto_entrance(slide)
+
+    # Renumber footers to true slide position (robust to inserted exhibits).
+    for idx, slide in enumerate(prs.slides, start=1):
+        for shp in slide.shapes:
+            if getattr(shp, "name", "") != "FOOTNUM" or not shp.has_text_frame:
+                continue
+            label = shp.text_frame.text.split("/")[-1].strip()
+            runs = shp.text_frame.paragraphs[0].runs
+            if runs:
+                runs[0].text = f"{idx:02d}  /  {label}"
 
     out = out or OUT_FILE.get(theme, "Daniel's CV (1).pptx")
     sfx = rp("suffix")
