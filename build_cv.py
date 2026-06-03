@@ -399,7 +399,7 @@ def slide_title():
                  "Computer Vision  ·  AI / ML  ·  XR & Game Engineering",
                  font=B_FONT, size=19, color=M_GREY_D)
         add_text(s, Inches(1.05), Inches(5.1), Inches(11), Inches(0.4),
-                 "M.Sc. Candidate, Computer Science  ·  York University, Toronto",
+                 "M.Sc. Computer Science  ·  York University  ·  Graduating June 2026",
                  font=B_FONT, size=14, color=M_INK)
         add_text(s, Inches(1.05), Inches(5.5), Inches(11), Inches(0.4),
                  "Machine Learning Associate, Vector Institute",
@@ -475,8 +475,8 @@ def slide_about():
              font=B_FONT, size=18, italic=True, color=SUB)
 
     bullets = [
-        "Currently a [b]Machine Learning Associate[/b] at the Vector Institute, working on real-time VR firefighter training with skeletal-telemetry deviation detection and LLM-driven coaching.",
-        "M.Sc. researcher in the [b]BioMotion Lab[/b] at York University — stereopsis, motion parallax and immersive telepresence on Meta Quest / Unity / Unreal.",
+        "Recently completed a [b]Machine Learning Associate[/b] term at the Vector Institute, building real-time VR firefighter training with skeletal-telemetry deviation detection and LLM-driven coaching.",
+        "M.Sc. researcher in the [b]BioMotion Lab[/b] at York University ([b]graduating June 2026[/b]) — stereopsis, motion parallax and immersive telepresence on Meta Quest / Unity / Unreal.",
         "5+ years shipping production [b]Unity3D, C#, Python, ML[/b] systems for games, simulation, training and digital humans.",
         "Open-source author of [b]DigiHuman[/b] (500⭐ GitHub), an automatic 3D character animation pipeline from monocular video.",
     ]
@@ -489,7 +489,7 @@ def slide_about():
         ("9+", "yrs coding"),
         ("4.0/4.0", "MSc GPA"),
         ("500+", "GitHub ⭐"),
-        ("3rd", "Hackathon"),
+        ("Top 0.5%", "AI exam"),
     ]
     for i, (n, lbl) in enumerate(stats):
         x = Inches(5.7 + i*1.85)
@@ -651,7 +651,7 @@ def slide_edu_york():
              "Toronto, Ontario, Canada", font=B_FONT, size=10, color=ACC2)
 
     add_text(s, Inches(0.7), Inches(1.05), Inches(8), Inches(0.45),
-             "2024 — PRESENT  ·  M.SC.", font=H_FONT, size=12,
+             "2024 — JUNE 2026  ·  M.SC.", font=H_FONT, size=12,
              bold=True, color=EYE)
     add_text(s, Inches(0.7), Inches(1.45), Inches(8), Inches(1.0),
              "Master of Computer Science", font=H_FONT, size=34, bold=True, color=INK)
@@ -660,7 +660,7 @@ def slide_edu_york():
     # stat row
     stat_y = Inches(3.2)
     cards = [
-        ("4.0 / 4.0", "Current GPA"),
+        ("4.0 / 4.0", "Final GPA"),
         ("100%", "Fully-funded RA + TA"),
         ("$10K", "Mitacs Funding"),
     ]
@@ -1341,11 +1341,10 @@ def _dh_build_anim(slide, *, dur_ms=400):
     sld.append(etree.fromstring(xml))
 
 
-def _apply_auto_entrance(slide, *, dur_ms=450, bullet_step_ms=220):
-    """Gentle fade-in of all content when the slide opens (no clicks), so every
-    CV page animates in. A bullet list (text box tagged 'BULLETS') streams in
-    one bullet at a time (staggered, still automatic) instead of all at once.
-    Skips the full-slide background and the footer strip."""
+def _apply_auto_entrance(slide, *, dur_ms=450):
+    """Non-bullet content fades in automatically when the slide opens; a bullet
+    list (text box tagged 'BULLETS') is NOT auto-chained — each bullet reveals
+    on its OWN click. Skips the full-slide background and the footer strip."""
     shapes = []
     for sp in slide.shapes:
         try:
@@ -1376,30 +1375,43 @@ def _apply_auto_entrance(slide, *, dur_ms=450, bullet_step_ms=220):
     counter = [3]
     def nid():
         v = counter[0]; counter[0] += 1; return v
-    click = nid(); inner = nid()
-    anims, whole_ids, para_ids = [], [], []
-    first = True
+
+    def step_par(anims, on_click):
+        cid = nid(); iid = nid()
+        delay = "indefinite" if on_click else "0"
+        return (f'<p:par><p:cTn id="{cid}" fill="hold">'
+                f'<p:stCondLst><p:cond delay="{delay}"/></p:stCondLst><p:childTnLst>'
+                f'<p:par><p:cTn id="{iid}" fill="hold">'
+                f'<p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+                f'<p:childTnLst>{"".join(anims)}</p:childTnLst></p:cTn></p:par>'
+                f'</p:childTnLst></p:cTn></p:par>')
+
+    steps_xml, whole_ids, para_ids = [], [], []
+    # 1) auto step — all non-bullet content fades in on slide enter
+    auto_anims, first = [], True
+    for sp in shapes:
+        if not is_bullet(sp):
+            nt = "afterEffect" if first else "withEffect"
+            first = False
+            auto_anims.append(_dh_anim_par(sp.shape_id, dur_ms, 0, nt, nid))
+            whole_ids.append(sp.shape_id)
+    if auto_anims:
+        steps_xml.append(step_par(auto_anims, on_click=False))
+    # 2) one On-Click step per bullet (paragraph)
     for sp in shapes:
         if is_bullet(sp):
             para_ids.append(sp.shape_id)
             for k in range(npar(sp)):
-                nt = "afterEffect" if first else "withEffect"
-                first = False
-                anims.append(_dh_anim_par(sp.shape_id, dur_ms, k * bullet_step_ms, nt, nid, para=k))
-        else:
-            nt = "afterEffect" if first else "withEffect"
-            first = False
-            anims.append(_dh_anim_par(sp.shape_id, dur_ms, 0, nt, nid))
-            whole_ids.append(sp.shape_id)
+                anim = _dh_anim_par(sp.shape_id, dur_ms, 0, "clickEffect", nid, para=k)
+                steps_xml.append(step_par([anim], on_click=True))
+    if not steps_xml:
+        return
     builds = ("".join(f'<p:bldP spid="{s}" grpId="0" build="p"/>' for s in para_ids)
               + "".join(f'<p:bldP spid="{s}" grpId="0"/>' for s in whole_ids))
     xml = (f'<p:timing xmlns:p="{_PNS}"><p:tnLst><p:par>'
            f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
            f'<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
-           f'<p:par><p:cTn id="{click}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
-           f'<p:par><p:cTn id="{inner}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
-           f'{"".join(anims)}</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>'
-           f'</p:childTnLst></p:cTn>'
+           f'{"".join(steps_xml)}</p:childTnLst></p:cTn>'
            f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
            f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
            f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>'

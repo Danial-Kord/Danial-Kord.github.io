@@ -1027,7 +1027,7 @@ def slide_title():
                  "Machine Learning Associate  ·  Vector Institute, Toronto",
                  font=B_FONT, size=14, color=M_INK)
         add_text(s, Inches(1.05), Inches(5.5), Inches(11), Inches(0.4),
-                 "M.Sc. Computer Science  ·  York University",
+                 "M.Sc. Computer Science  ·  York University  ·  Graduating June 2026",
                  font=B_FONT, size=13, italic=True, color=M_GREY_M)
         add_text(s, Inches(1.05), Inches(6.55), Inches(12), Inches(0.4),
                  "danielkordm@gmail.com   ·   linkedin.com/in/danial-kord   ·   github.com/Danial-Kord",
@@ -1099,8 +1099,8 @@ def slide_about():
     mark_break(s)  # — pause before bullets
 
     bullets = [
-        "Currently a [b]Machine Learning Associate at the Vector Institute[/b], shipping a real-time VR firefighter training system: skeletal-telemetry deviation detection + an LLM coaching layer grounded in training manuals.",
-        "Hackathon track record: [b]3rd place[/b] (Legal-Tech, Toronto 2026) and [b]semi-finals[/b] (Boson AI × MScAC 2025) — both multi-agent, source-grounded AI systems.",
+        "Just completed a [b]Machine Learning Associate[/b] term at the [b]Vector Institute[/b], building a real-time VR firefighter training system: skeletal-telemetry deviation detection + an LLM coaching layer grounded in training manuals.",
+        "Graduating with my [b]M.Sc. in Computer Science[/b] from [b]York University[/b] in June 2026 (GPA 4.0); presented VR depth-perception research at [b]ECVP 2025[/b], Mainz.",
         "Open-source: [b]DigiHuman[/b] (500⭐), a real-time 3D avatar animation pipeline.",
     ]
     add_bullets(s, rx, Inches(3.0), Inches(7.6), Inches(3.5),
@@ -1252,7 +1252,7 @@ def build_experience():
 def slide_vector():
     s = new_slide(("fade", "wipe_up"))
     page_bg(s)
-    marker(s, "CURRENT ROLE")
+    marker(s, "RECENT ROLE")
     add_text(s, Inches(0.7), Inches(1.0), Inches(8), Inches(0.4),
              "JANUARY 2026 — MAY 2026  ·  VECTOR INSTITUTE",
              font=H_FONT, size=12, bold=True, color=EYE)
