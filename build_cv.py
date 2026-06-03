@@ -113,6 +113,138 @@ def apply_theme(name):
 # Initialise to midnight so module-level defaults resolve before build().
 apply_theme("midnight")
 
+
+# ====================================================================
+# ROLE MODES  ·  tailor the CV's wording to a target role
+# ====================================================================
+# `python build_cv.py [midnight|memphis|both] [general|backend]`. Default
+# role=general keeps the content written throughout this file. A role profile
+# overrides the positioning, the per-role descriptions, the skills and which
+# project slides show — everything else falls back via rp().
+ROLE = "general"
+
+ROLE_PROFILES = {
+    "general": {},
+    "backend": {
+        "suffix": "Backend",
+        "eyebrow": "PORTFOLIO  ·  BACKEND SOFTWARE ENGINEER  ·  2026",
+        "title_role": "Backend Software Engineer  ·  APIs · Distributed Systems · Cloud",
+        "about_sub": "I build reliable, scalable backend systems — APIs, data and cloud infrastructure.",
+        "about_bullets": [
+            "[b]Backend & distributed-systems[/b] engineer — REST / gRPC services in [b]FastAPI, Spring Boot, Django[/b] over [b]PostgreSQL / MySQL / Redis[/b], containerized on [b]Docker / Kubernetes / AWS[/b].",
+            "Shipped a [b]URL-shortener SaaS[/b] (Java microservices on K8s + AWS with a Hadoop redundancy layer) and a [b]from-scratch search engine[/b] (inverted index, tf-idf, KNN).",
+            "Built the [b]FastAPI + LangGraph[/b] backends for Guardian (multi-agent, idempotent 911 tooling) and CaseLogic (hybrid Chroma + SQLite FTS5 retrieval).",
+            "Strong CS fundamentals: [b]XV6 kernel[/b] syscalls + scheduling, [b]multi-core C[/b] (OpenMP / CUDA), and CI/CD on .NET / Azure / GitHub Actions.",
+        ],
+        "exp_sub": "From IoT networking to cloud microservices and ML platforms — a track of shipping reliable backends.",
+        "exp_overview": {
+            "Machine Learning Associate": "Built the FastAPI + Ollama/LangChain services and RAG pipeline (FAISS) behind a real-time VR coaching system.",
+            "Senior Unity Developer": "Built CI/CD delivery, Docker workflows and Claude-assisted tooling that auto-investigates exceptions and commits fixes.",
+            "Research & Teaching Assistant": "Built reproducible test tooling and motion-capture data pipelines; root-caused an SDK bug. TA for OOP (Java).",
+            "Software Developer": "Built simulation backends with fault-tolerant pathfinding and real-time monitoring dashboards (DOTS/ECS).",
+            "Lead Unity3D Developer": "Led the online-multiplayer backend: Photon + PlayFab (Azure) matchmaking, Firebase analytics, DQN + MCTS AI.",
+            "Volunteer Full-Stack Developer": "Maintained & optimized a Django backend (+ Vue.js) for a 100+ country student-exchange platform.",
+            "Software Engineer Intern": "Built a real-time IoT multiplayer backend — WebSockets / gRPC / Protobuf / MQTT.",
+            "Technical Staff & TA": "TA for Operating Systems, C, Advanced Java and AI. GameCraft events.",
+        },
+        "exp": {
+            "vector": {
+                "summary": "Built the backend services and ML data pipeline for a real-time VR firefighter training system — FastAPI, Ollama/LangChain, RAG over FAISS.",
+                "bullets": [
+                    "Engineered the [b]LLM Coaching Layer[/b] as a service: [b]FastAPI[/b] + [b]Ollama / LangChain[/b] with a [b]RAG[/b] retrieval pipeline (FAISS similarity) over training manuals.",
+                    "Architected a [b]Deviation Engine[/b] over sliding windows of 3D skeletal telemetry — MPJPE and quaternion distances scored against training standards.",
+                    "Built a full-body [b]data-collection pipeline[/b] mapping headset telemetry to the [b]NTU-25[/b] skeleton with cross-platform frame normalization.",
+                    "Collaborated on structured evaluation of generative-AI pipelines.",
+                ],
+                "tags": ["FastAPI", "RAG", "FAISS", "Ollama", "LangChain", "NTU-25", "Python", "Data Pipeline"],
+            },
+            "dreamforge": {
+                "summary": "Core contributor to a C# + Python engine. Built CI/CD delivery, Docker workflows and Claude-assisted tooling that auto-resolves build failures.",
+                "bullets": [
+                    "Designed [b]CI/CD delivery components[/b] and [b]Docker-based workflows[/b] in [b].NET / Azure / GitHub Actions[/b] for automated deployment and exception analysis.",
+                    "Built [b]AI-assisted tooling (Claude)[/b] that auto-intercepts exceptions, investigates root causes across C# / Python / Docker layers, and commits permanent fixes.",
+                    "Performed deep code reviews; led peers in resolving structural inefficiencies and maintaining robust debugging workflows.",
+                    "Focus on reliable tooling, procedural generation and continuous delivery.",
+                ],
+                "tags": ["C#", ".NET", "Python", "Docker", "Azure", "GitHub Actions", "CI/CD", "Claude"],
+            },
+            "biomotion": {
+                "summary": "Built reproducible test tooling and motion-capture data pipelines; root-caused a critical SDK bug. TA for OOP (Java), 5 semesters.",
+                "bullets": [
+                    "Investigated and reported a critical [b]stereo-geometry bug[/b] in Meta XR SDK Unity; shipped a [b]reproducible test project[/b] documenting the root cause.",
+                    "Built [b]data pipelines[/b] for VR + motion-capture experiments on Meta Quest / ARKit / Unity / Unreal.",
+                    "Presented research at the [b]47th European Conference on Visual Perception (ECVP 2025)[/b], Mainz.",
+                    "Taught Object-Oriented Programming ([b]Java[/b]) for 5 semesters — design patterns and systems thinking.",
+                ],
+                "tags": ["Java", "Test Harness", "Data Pipeline", "Meta Quest", "ARKit", "ECVP 2025"],
+            },
+            "tectotrack": {
+                "summary": "Built simulation backends for high-traffic environments with fault-tolerant pathfinding and real-time monitoring dashboards.",
+                "bullets": [
+                    "Built [b]simulation frameworks[/b] for high-traffic environments with [b]fault-tolerant pathfinding[/b] for adaptive crowd movement.",
+                    "Developed [b]real-time monitoring dashboards[/b] for performance, agent state and logs.",
+                    "Built internal tooling for debugging, visualization and flow adjustment.",
+                    "Optimized high-density scenes with [b]ECS[/b] (Unity DOTS).",
+                ],
+                "tags": ["C#", "DOTS / ECS", "Pathfinding", "Dashboards", "Simulation", "Monitoring"],
+            },
+            "techu": {
+                "summary": "Led the online-multiplayer backend: Photon + PlayFab (Azure) matchmaking, Firebase analytics, and AI opponents (DQN + MCTS).",
+                "bullets": [
+                    "Engineered [b]online multiplayer[/b] via [b]Photon[/b] + [b]PlayFab (Azure)[/b] for matchmaking and session management.",
+                    "Integrated [b]Firebase[/b] for real-time crash analytics and diagnostics.",
+                    "Built AI opponents with [b]DQN[/b] + [b]Monte Carlo Tree Search[/b].",
+                    "Owned the full pipeline: gameplay, backend, UI and store releases.",
+                ],
+                "tags": ["Photon", "PlayFab", "Azure", "Firebase", "DQN", "MCTS", "C#"],
+            },
+            "iaeste": {
+                "summary": "Maintained and optimized a Django backend (with a Vue.js frontend) for a student-exchange platform serving 100+ countries.",
+                "bullets": [
+                    "Maintained the platform backend in [b]Django[/b] (with a [b]Vue.js[/b] frontend).",
+                    "Optimized backend routes and reduced latency on key endpoints.",
+                    "Improved UI/UX for student-exchange applications.",
+                    "Contributed long-term maintainability through refactoring and tests.",
+                ],
+                "tags": ["Django", "Python", "Vue.js", "REST", "Optimization"],
+            },
+            "sepantab": {
+                "summary": "Built a real-time IoT multiplayer backend with resilient distributed networking — gRPC, Protocol Buffers, MQTT, WebSockets.",
+                "bullets": [
+                    "Implemented real-time networked messaging using [b]WebSockets[/b].",
+                    "Built resilient distributed communication with [b]gRPC[/b] + [b]Protocol Buffers[/b] + [b]MQTT[/b].",
+                    "Designed low-latency state-sync networking infrastructure in [b]C#[/b].",
+                    "Delivered an IoT-based WebGL multiplayer experience.",
+                ],
+                "tags": ["gRPC", "Protobuf", "MQTT", "WebSockets", "C#", "IoT", "Real-time"],
+            },
+        },
+        "skills": [
+            ("Core",
+             ["Java", "Python", "C#", "C++", "Go", "C", "SQL"]),
+            ("Backend & Data",
+             ["FastAPI", "Spring Boot", "Django", "gRPC", "REST", "PostgreSQL", "MySQL", "Redis",
+              "pgvector", "Chroma", "SQLite FTS5", "MQTT", "Protobuf"]),
+            ("Infra & Tooling",
+             ["Docker", "Kubernetes", "AWS (ECR)", "Azure", ".NET", "GitHub Actions", "Nginx",
+              "Hadoop", "OpenMP", "CUDA", "Firebase", "PyTorch"]),
+        ],
+        "proj_div_sub": "Backend services, data systems & low-level work — and open source.",
+        "hide_proj": ["minigames", "hypervigilance", "gaugan"],
+    },
+}
+
+
+def apply_role(name):
+    global ROLE
+    ROLE = name if name in ROLE_PROFILES else "general"
+
+
+def rp(key, default=None):
+    """Return the active role's override for `key`, or `default`."""
+    return ROLE_PROFILES.get(ROLE, {}).get(key, default)
+
+
 # Deck state — (re)created per build by _reset_deck().
 prs = None
 blank_layout = None
@@ -390,13 +522,13 @@ def slide_title():
         add_oval(s, Inches(0.6), Inches(6.75), Inches(0.34), Inches(0.34), M_PINK)
         # content sits below the top-left corner circle so nothing is covered
         add_text(s, Inches(1.0), Inches(2.05), Inches(11), Inches(0.4),
-                 "PORTFOLIO  ·  CURRICULUM VITAE  ·  2026",
+                 rp("eyebrow", "PORTFOLIO  ·  CURRICULUM VITAE  ·  2026"),
                  font=H_FONT, size=12, bold=True, color=M_CORAL)
         add_text(s, Inches(1.0), Inches(2.5), Inches(12), Inches(1.5),
                  "Danial Kordmodanlou", font=H_FONT, size=60, bold=True, color=M_INK)
         add_rect(s, Inches(1.05), Inches(3.95), Inches(2.6), Inches(0.09), M_CYAN)
         add_text(s, Inches(1.05), Inches(4.2), Inches(11), Inches(0.6),
-                 "Computer Vision  ·  AI / ML  ·  XR & Game Engineering",
+                 rp("title_role", "Computer Vision  ·  AI / ML  ·  XR & Game Engineering"),
                  font=B_FONT, size=19, color=M_GREY_D)
         add_text(s, Inches(1.05), Inches(5.1), Inches(11), Inches(0.4),
                  "M.Sc. Computer Science  ·  York University  ·  Graduating June 2026",
@@ -417,7 +549,7 @@ def slide_title():
     add_oval(s, Inches(11.85), Inches(0.95), Inches(0.5), Inches(0.5), INDIGO)
     # tag
     add_text(s, Inches(1.0), Inches(1.05), Inches(6), Inches(0.4),
-             "PORTFOLIO  ·  CURRICULUM VITAE  ·  2026",
+             rp("eyebrow", "PORTFOLIO  ·  CURRICULUM VITAE  ·  2026"),
              font=H_FONT, size=12, bold=True, color=AMBER)
     # main title
     add_text(s, Inches(1.0), Inches(1.7), Inches(11), Inches(1.6),
@@ -425,7 +557,7 @@ def slide_title():
              font=H_FONT, size=72, bold=True, color=IVORY)
     # subtitle / role
     add_text(s, Inches(1.0), Inches(3.5), Inches(11), Inches(0.6),
-             "Computer Vision  ·  AI / ML  ·  XR & Game Engineering",
+             rp("title_role", "Computer Vision  ·  AI / ML  ·  XR & Game Engineering"),
              font=B_FONT, size=22, color=GOLD)
     # divider
     add_rect(s, Inches(1.0), Inches(4.4), Inches(2.5), Inches(0.04), AMBER)
@@ -471,15 +603,15 @@ def slide_about():
              "Hello, I'm Danial.",
              font=H_FONT, size=38, bold=True, color=INK)
     add_text(s, Inches(5.7), Inches(2.05), Inches(7), Inches(0.6),
-             "I build at the intersection of vision, AI and immersive systems.",
+             rp("about_sub", "I build at the intersection of vision, AI and immersive systems."),
              font=B_FONT, size=18, italic=True, color=SUB)
 
-    bullets = [
+    bullets = rp("about_bullets", [
         "Recently completed a [b]Machine Learning Associate[/b] term at the Vector Institute, building real-time VR firefighter training with skeletal-telemetry deviation detection and LLM-driven coaching.",
         "M.Sc. researcher in the [b]BioMotion Lab[/b] at York University ([b]graduating June 2026[/b]) — stereopsis, motion parallax and immersive telepresence on Meta Quest / Unity / Unreal.",
         "5+ years shipping production [b]Unity3D, C#, Python, ML[/b] systems for games, simulation, training and digital humans.",
         "Open-source author of [b]DigiHuman[/b] (500⭐ GitHub), an automatic 3D character animation pipeline from monocular video.",
-    ]
+    ])
     add_bullets(s, Inches(5.7), Inches(2.85), Inches(7.2), Inches(4.0),
                 bullets, size=14, color=BODY, line_spacing=1.25,
                 bullet_char="●")
@@ -746,7 +878,7 @@ def slide_exp_overview():
     add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
              "Career timeline", font=H_FONT, size=40, bold=True, color=INK)
     add_text(s, Inches(0.7), Inches(1.85), Inches(11), Inches(0.4),
-             "From hyper-casual games to VR research and AI tooling — a track of shipping production systems.",
+             rp("exp_sub", "From hyper-casual games to VR research and AI tooling — a track of shipping production systems."),
              font=B_FONT, size=14, italic=True, color=SUB)
 
     # Vertical timeline on left
@@ -789,9 +921,15 @@ def slide_exp_overview():
 # ====================================================================
 def exp_detail(s, *, period, company, location, title, summary, bullets,
                tags, image_path=None, image_pos="right", slide_num=0,
-               accent=None):
+               accent=None, key=None):
     if accent is None:
         accent = ACC1
+    # role-mode may re-frame this position toward the target role
+    ov = rp("exp", {}).get(key, {})
+    title = ov.get("title", title)
+    summary = ov.get("summary", summary)
+    bullets = ov.get("bullets", bullets)
+    tags = ov.get("tags", tags)
     page_bg(s)
     add_section_marker(s, "02 / EXPERIENCE", accent)
     # header
@@ -851,7 +989,7 @@ def slide_exp_mla():
                    "Collaborated on structured evaluation of generative-AI pipelines for high-fidelity training scenarios.",
                ],
                tags=["RAG", "FAISS", "Ollama", "LangChain", "NTU-25", "VR Telemetry", "Quaternion", "MPJPE"],
-               slide_num=11)
+               slide_num=11, key="vector")
 
 
 def slide_exp_dreamforge():
@@ -869,7 +1007,7 @@ def slide_exp_dreamforge():
                    "Focus on robust tooling, procedural generation, and continuous delivery pipelines.",
                ],
                tags=["C#", ".NET", "Python", "Docker", "Azure", "GitHub Actions", "Claude", "Unity"],
-               slide_num=12)
+               slide_num=12, key="dreamforge")
 
 
 def slide_exp_biomotion():
@@ -889,7 +1027,7 @@ def slide_exp_biomotion():
                tags=["Meta Quest", "ARKit", "Unity", "Unreal", "ECVP 2025", "Stereopsis", "Java OOP"],
                image_path=f"{MEDIA}/image4.png",
                image_pos="right",
-               slide_num=13)
+               slide_num=13, key="biomotion")
 
 
 def slide_exp_tectotrack():
@@ -910,7 +1048,7 @@ def slide_exp_tectotrack():
                tags=["Unity", "DOTS / ECS", "Pathfinding", "C#", "Dashboards", "Simulation"],
                image_path=f"{MEDIA}/image11.png",
                image_pos="right",
-               slide_num=14)
+               slide_num=14, key="tectotrack")
 
 
 def slide_exp_techu():
@@ -931,7 +1069,7 @@ def slide_exp_techu():
                tags=["Unity", "C#", "DQN", "MCTS", "PlayFab", "Photon", "Firebase"],
                image_path=f"{MEDIA}/image18.png",
                image_pos="right",
-               slide_num=15)
+               slide_num=15, key="techu")
 
 
 def slide_exp_iaeste():
@@ -952,7 +1090,7 @@ def slide_exp_iaeste():
                image_path=f"{MEDIA}/image2.png",
                image_pos="right",
                slide_num=16,
-               accent=ACC2)
+               accent=ACC2, key="iaeste")
 
 
 def slide_exp_sepantab():
@@ -971,7 +1109,7 @@ def slide_exp_sepantab():
                ],
                tags=["C#", "Unity WebGL", "WebSockets", "gRPC", "Protobuf", "MQTT", "IoT"],
                slide_num=17,
-               accent=ACC2)
+               accent=ACC2, key="sepantab")
 
 
 # ====================================================================
@@ -987,15 +1125,17 @@ def slide_skills():
              "Languages, frameworks, runtimes and tools — grouped by depth.",
              font=B_FONT, size=14, italic=True, color=SUB)
 
-    # 3 columns
-    cols = [
-        ("Fluent",       ACC1,             ["Unity3D", "Unreal Engine", "C#", "Java", "Python", "C++", "C"]),
-        ("Intermediate", ACC2,             ["PyTorch", "Django", "Vue.js", "React", "Next.js", "OpenGL", "Docker", "Kubernetes", "AWS (ECR)", "OpenMP", "CUDA", "MySQL", "Spring Boot", "Firebase", "PlayFab", "Photon"]),
-        ("Familiar",     ACC3,             ["DOTS / ECS", "Go", "Hadoop", "Keras", "Blender", "MediaPipe", "OpenCV", "LangChain", "Ollama", "FAISS"]),
-    ]
+    # 3 columns (role mode may re-group them)
+    cols = rp("skills", [
+        ("Fluent",       ["Unity3D", "Unreal Engine", "C#", "Java", "Python", "C++", "C"]),
+        ("Intermediate", ["PyTorch", "Django", "Vue.js", "React", "Next.js", "OpenGL", "Docker", "Kubernetes", "AWS (ECR)", "OpenMP", "CUDA", "MySQL", "Spring Boot", "Firebase", "PlayFab", "Photon"]),
+        ("Familiar",     ["DOTS / ECS", "Go", "Hadoop", "Keras", "Blender", "MediaPipe", "OpenCV", "LangChain", "Ollama", "FAISS"]),
+    ])
+    _skcolors = [ACC1, ACC2, ACC3]
     col_x = [Inches(0.7), Inches(5.0), Inches(9.3)]
     col_w = Inches(3.9)
-    for i, (label, color, items) in enumerate(cols):
+    for i, (label, items) in enumerate(cols):
+        color = _skcolors[i % 3]
         x = col_x[i]
         add_round_rect(s, x, Inches(2.7), col_w, Inches(4.0), CARD, radius=0.05,
                        line=cline(color))
@@ -2089,9 +2229,11 @@ def slide_thanks():
 # ====================================================================
 # BUILD
 # ====================================================================
-def build(theme="midnight", out=None):
+def build(theme="midnight", role="general", out=None):
     apply_theme(theme)
+    apply_role(role)
     _reset_deck()
+    hide = rp("hide_proj", [])               # role may drop off-target projects
 
     slide_title()                            # 1
     slide_about()                            # 2
@@ -2114,7 +2256,8 @@ def build(theme="midnight", out=None):
     slide_languages()                        # 19
     slide_certifications()                   # 20
     slide_honors()                           # 21
-    section_divider("04", "Projects", "Open-source, hackathons & academic builds", 22)
+    section_divider("04", "Projects",
+                    rp("proj_div_sub", "Open-source, hackathons & academic builds"), 22)
     slide_proj_digihuman_cover()             # 23
     slide_proj_digihuman_arch()              # 24
     slide_proj_digihuman_demos()             # 25
@@ -2123,14 +2266,14 @@ def build(theme="midnight", out=None):
     slide_proj_caselogic()                   # 28
     slide_proj_latex_cv()                    # 29
     slide_proj_techu()                       # 30
-    slide_proj_hypervigilance()              # 31
+    if "hypervigilance" not in hide: slide_proj_hypervigilance()  # 31
     slide_proj_backgammon()                  # 32
     slide_proj_cv()                          # 33
     slide_proj_ai_viz()                      # 34
     slide_proj_search()                      # 35
     slide_proj_solar()                       # 36
-    slide_proj_minigames()                   # 37
-    slide_proj_gaugan()                      # 38
+    if "minigames" not in hide: slide_proj_minigames()           # 37
+    if "gaugan" not in hide: slide_proj_gaugan()                  # 38
     slide_proj_xv6()                         # 39
     slide_future_digital_earth()             # 40
     slide_hobbies()                          # 41
@@ -2146,17 +2289,21 @@ def build(theme="midnight", out=None):
             _apply_auto_entrance(slide)
 
     out = out or OUT_FILE.get(theme, "Daniel's CV (1).pptx")
+    sfx = rp("suffix")
+    if sfx and out.endswith(".pptx"):
+        out = f"{out[:-5]} - {sfx}.pptx"
     prs.save(out)
-    print(f"[{theme}] Saved {out} with {len(prs.slides)} slides")
+    print(f"[{theme} | {ROLE}] Saved {out} with {len(prs.slides)} slides")
 
 
 if __name__ == "__main__":
-    arg = (sys.argv[1] if len(sys.argv) > 1 else "midnight").lower()
-    if arg == "both":
-        build("midnight")
-        build("memphis")
-    elif arg in ("midnight", "memphis"):
-        build(arg)
-    else:
-        print("usage: python build_cv.py [midnight|memphis|both]")
+    theme_arg = (sys.argv[1] if len(sys.argv) > 1 else "midnight").lower()
+    role_arg = (sys.argv[2] if len(sys.argv) > 2 else "general").lower()
+    themes = (["midnight", "memphis"] if theme_arg == "both"
+              else [theme_arg] if theme_arg in ("midnight", "memphis") else None)
+    if themes is None or role_arg not in ROLE_PROFILES:
+        print("usage: python build_cv.py [midnight|memphis|both] "
+              f"[{'|'.join(ROLE_PROFILES)}]")
         sys.exit(1)
+    for th in themes:
+        build(th, role_arg)

@@ -146,6 +146,108 @@ SHOW_SLIDES = {
     "honors":        True,   # comprehensive Honors & Awards section
 }
 
+# ====================================================================
+# ROLE MODES  ·  tailor the deck's wording to a target role
+# ====================================================================
+# "general" (default) uses the content written throughout this file. Pass a
+# role on the CLI — e.g.  `python build_cv_talk.py memphis backend` — to
+# re-frame the positioning, roles and projects toward that role. Add another
+# dict to ROLE_PROFILES to support more roles (frontend, ml, ...).
+ROLE = "general"
+
+ROLE_PROFILES = {
+    "general": {},
+    "backend": {
+        "suffix": "Backend",
+        "footer_tag": "Backend Software Engineering  ·  APIs · Data · Cloud",
+        "eyebrow": "BACKEND SOFTWARE ENGINEER  ·  APIs · DISTRIBUTED SYSTEMS  ·  2026",
+        "title_role": "Backend software engineering  ·  APIs · data · cloud infrastructure",
+        "about_lead": "I build [b]reliable, scalable backend systems[/b] — APIs, data pipelines and cloud infrastructure.",
+        "about_bullets": [
+            "Backend engineer across research labs and startups — [b]FastAPI, Spring Boot, Django, gRPC[/b] services over [b]PostgreSQL / MySQL / Redis[/b], containerized on [b]Docker / Kubernetes / AWS[/b].",
+            "Shipped a [b]URL-shortener SaaS[/b] (Java microservices on K8s + AWS, Hadoop redundancy) and a [b]from-scratch search engine[/b] (inverted index, tf-idf, KNN).",
+            "Built the [b]FastAPI + LangGraph[/b] backends for Guardian (multi-agent, idempotent 911 tooling) and CaseLogic (hybrid Chroma + SQLite FTS5 retrieval).",
+            "Solid CS fundamentals: [b]XV6 kernel[/b] syscalls + scheduling, [b]multi-core C[/b] (OpenMP / CUDA), and [b]CI/CD[/b] on .NET / Azure / GitHub Actions.",
+        ],
+        "pillars_sub": "Three pillars I bring to every backend I build.",
+        "pillars": [
+            ("01", "APIs & Services",
+             "REST / gRPC services, multi-agent orchestration and idempotent, fault-tolerant tooling.",
+             ["FastAPI", "Spring Boot", "Django", "gRPC", "LangGraph"]),
+            ("02", "Data & Storage",
+             "Relational + vector stores, caching, search and retrieval — built to scale.",
+             ["PostgreSQL", "MySQL", "Redis", "pgvector", "Chroma", "FTS5"]),
+            ("03", "Infra & Delivery",
+             "Containers, orchestration and CI/CD — built to ship and stay up.",
+             ["Docker", "Kubernetes", "AWS", "GitHub Actions", ".NET / Azure"]),
+        ],
+        "stack": [
+            ("Languages & APIs",
+             ["Java", "Python", "C#", "C++", "Go", "FastAPI", "Spring Boot", "Django", "gRPC", "REST"]),
+            ("Data & Messaging",
+             ["PostgreSQL", "MySQL", "Redis", "pgvector", "Chroma", "SQLite FTS5", "MQTT", "Protobuf", "Hadoop"]),
+            ("Infra & Delivery",
+             ["Docker", "Kubernetes", "AWS (ECR)", "Azure", ".NET", "GitHub Actions", "Nginx", "Firebase", "CI/CD"]),
+        ],
+        "exp_hide": ["Pherma"],
+        "exp_bullets": {
+            "Vector Institute": [
+                "Engineered the [b]FastAPI + Ollama / LangChain[/b] services and the [b]RAG[/b] retrieval pipeline (FAISS) behind a real-time VR coaching system.",
+                "Built the data-collection & normalization pipeline mapping headset telemetry to NTU-25 skeletons for cross-platform robustness.",
+            ],
+            "BioMotion Lab, York University": [
+                "Root-caused a Meta XR SDK stereo-geometry bug and shipped a reproducible [b]test harness[/b] documenting it.",
+                "TA for Object-Oriented Programming (Java), 5 semesters — design patterns and systems thinking.",
+            ],
+            "DreamForge": [
+                "Designed [b]CI/CD delivery[/b] components and [b]Docker[/b] workflows on [b].NET / Azure / GitHub Actions[/b] for automated deployment.",
+                "Built Claude-assisted tooling that intercepts exceptions, isolates root causes across C# / Python / Docker layers, and commits fixes.",
+            ],
+            "TectoTrack": [
+                "Built [b]simulation backends[/b] for high-traffic environments with fault-tolerant pathfinding.",
+                "Shipped real-time [b]logging & monitoring dashboards[/b] for system health and agent-behaviour metrics.",
+            ],
+            "Techu": [
+                "Built the online-multiplayer backend: [b]PlayFab (Azure)[/b] matchmaking and [b]Firebase[/b] real-time diagnostics & crash alerts.",
+                "Engineered robust client/server game logic and AI agents (DQN + MCTS).",
+            ],
+            "IAESTE": [
+                "Maintained and optimized a [b]Django[/b] backend (with a Vue.js frontend) for a student-exchange platform spanning 100+ countries.",
+            ],
+            "Amirkabir Univ. of Technology": [
+                "TA for [b]Operating Systems, C Programming, Advanced Java[/b] and AI.",
+                "Technical staff for AUT game-development events.",
+            ],
+            "Sepantab": [
+                "Designed resilient distributed networking with [b]gRPC, Protocol Buffers, MQTT[/b] and WebSockets in C#.",
+                "Built an IoT-based real-time multiplayer backend with low-latency state sync.",
+            ],
+        },
+        "cat_order": ["sys", "ai", "game"],
+        "projects_sub": "Backend & systems first — services, data, infra and low-level.",
+        "project_desc": {
+            "BakeryPilot": "FastAPI + LangGraph backend; PostgreSQL + pgvector, Redis streams, OR-Tools.",
+            "Guardian": "FastAPI + LangGraph backend; deterministic risk monitor + idempotent Twilio tools.",
+            "LaTeX CV Builder": "Spring Boot orchestration; Node / Python microservices; Docker + AWS; Nginx.",
+            "URL Shortener SaaS": "Java microservices on Docker / K8s / AWS; Hadoop redundancy layer.",
+            "Search Engine": "Inverted index · tf-idf · champion lists · KNN / K-means — from scratch.",
+            "Stone Thrower": "IoT real-time backend — WebSockets / gRPC / MQTT networking (Unity client).",
+        },
+        "show_slides": {"safezone": False, "safezone_arch": False, "digihuman": False},
+    },
+}
+
+
+def apply_role(name):
+    global ROLE
+    ROLE = name if name in ROLE_PROFILES else "general"
+
+
+def rp(key, default=None):
+    """Return the active role's override for `key`, or `default`."""
+    return ROLE_PROFILES.get(ROLE, {}).get(key, default)
+
+
 # --- EDUCATION.  "show": False to hide a degree. -------------------------
 EDUCATION = [
     {"show": True,
@@ -547,7 +649,7 @@ def chip_row(s, x_start, y, items, color_fill=None, text_color=None,
 def add_footer(s, num, total):
     """Unified footer (name strip + page x/y), themed text colour."""
     add_text(s, Inches(0.5), Inches(7.05), Inches(8), Inches(0.4),
-             "Danial Kordmodanlou  ·  Agentic AI / LLMs / System Design",
+             f"Danial Kordmodanlou  ·  {rp('footer_tag', 'Agentic AI / LLMs / System Design')}",
              font=B_FONT, size=9, color=FOOT)
     add_text(s, Inches(11.6), Inches(7.05), Inches(1.3), Inches(0.4),
              f"{num:02d}  /  {total:02d}", font=B_FONT, size=9, color=FOOT,
@@ -1015,13 +1117,13 @@ def slide_title():
         add_oval(s, Inches(10.8), Inches(6.7), Inches(0.3), Inches(0.3), M_CORAL)
         add_oval(s, Inches(0.6), Inches(6.75), Inches(0.34), Inches(0.34), M_PINK)
         add_text(s, Inches(1.0), Inches(2.05), Inches(11), Inches(0.4),
-                 "PORTFOLIO  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026",
+                 rp("eyebrow", "PORTFOLIO  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026"),
                  font=H_FONT, size=12, bold=True, color=M_CORAL)
         add_text(s, Inches(1.0), Inches(2.5), Inches(12), Inches(1.5),
                  "Danial Kordmodanlou", font=H_FONT, size=60, bold=True, color=M_INK)
         add_rect(s, Inches(1.05), Inches(3.95), Inches(2.6), Inches(0.09), M_CYAN)
         add_text(s, Inches(1.05), Inches(4.2), Inches(11), Inches(0.6),
-                 "Building agentic AI systems  ·  grounded LLMs  ·  production at scale",
+                 rp("title_role", "Building agentic AI systems  ·  grounded LLMs  ·  production at scale"),
                  font=B_FONT, size=19, color=M_GREY_D)
         add_text(s, Inches(1.05), Inches(5.1), Inches(11), Inches(0.4),
                  "Machine Learning Associate  ·  Vector Institute, Toronto",
@@ -1041,7 +1143,7 @@ def slide_title():
     add_oval(s, Inches(11.85), Inches(0.95), Inches(0.5), Inches(0.5), INDIGO)
     # tag line
     add_text(s, Inches(1.0), Inches(0.95), Inches(11), Inches(0.4),
-             "PORTFOLIO  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026",
+             rp("eyebrow", "PORTFOLIO  ·  AGENTIC AI  ·  LLM SYSTEMS  ·  2026"),
              font=H_FONT, size=12, bold=True, color=AMBER)
     # name
     add_text(s, Inches(1.0), Inches(1.65), Inches(12), Inches(1.6),
@@ -1049,7 +1151,7 @@ def slide_title():
              font=H_FONT, size=70, bold=True, color=IVORY)
     # role line
     add_text(s, Inches(1.0), Inches(3.4), Inches(11), Inches(0.7),
-             "Building agentic AI systems  ·  grounded LLMs  ·  production at scale",
+             rp("title_role", "Building agentic AI systems  ·  grounded LLMs  ·  production at scale"),
              font=B_FONT, size=22, color=GOLD)
     # divider
     add_rect(s, Inches(1.0), Inches(4.4), Inches(2.5), Inches(0.04), AMBER)
@@ -1094,15 +1196,15 @@ def slide_about():
              "Hi, I'm Danial.",
              font=H_FONT, size=44, bold=True, color=INK)
     add_text(s, rx, Inches(2.3), Inches(8), Inches(0.5),
-             "I build [b]agentic AI systems[/b] grounded in real-world data.",
+             rp("about_lead", "I build [b]agentic AI systems[/b] grounded in real-world data."),
              font=B_FONT, size=17, italic=True, color=SUB)
     mark_break(s)  # — pause before bullets
 
-    bullets = [
+    bullets = rp("about_bullets", [
         "Just completed a [b]Machine Learning Associate[/b] term at the [b]Vector Institute[/b], building a real-time VR firefighter training system: skeletal-telemetry deviation detection + an LLM coaching layer grounded in training manuals.",
         "Graduating with my [b]M.Sc. in Computer Science[/b] from [b]York University[/b] in June 2026 (GPA 4.0); presented VR depth-perception research at [b]ECVP 2025[/b], Mainz.",
         "Open-source: [b]DigiHuman[/b] (500⭐), a real-time 3D avatar animation pipeline.",
-    ]
+    ])
     add_bullets(s, rx, Inches(3.0), Inches(7.6), Inches(3.5),
                 bullets, size=13, color=BODY, line_spacing=1.3,
                 bullet_char="●")
@@ -1118,26 +1220,25 @@ def slide_pillars():
     add_text(s, Inches(0.7), Inches(1.05), Inches(11), Inches(0.9),
              "What I build", font=H_FONT, size=40, bold=True, color=INK)
     add_text(s, Inches(0.7), Inches(1.95), Inches(12), Inches(0.4),
-             "Three pillars that cut through every project I take on.",
+             rp("pillars_sub", "Three pillars that cut through every project I take on."),
              font=B_FONT, size=15, italic=True, color=SUB)
 
-    pillars = [
+    pillars = rp("pillars", [
         ("01",  "Agentic AI",
          "Multi-agent planning, tool-use orchestration, and per-claim verification.",
-         ["LangChain", "LangGraph", "Multi-Agent", "n8n", "Cursor IDE"],
-         ACC1),
+         ["LangChain", "LangGraph", "Multi-Agent", "n8n", "Cursor IDE"]),
         ("02",  "LLM Systems",
          "Grounded LLMs with RAG over hybrid retrieval, voice + vision modalities.",
-         ["RAG", "FAISS", "Chroma", "Ollama", "GPT-4o", "Higgs Audio"],
-         ACC2),
+         ["RAG", "FAISS", "Chroma", "Ollama", "GPT-4o", "Higgs Audio"]),
         ("03",  "System Design",
          "Microservices, CI/CD, containers and observability — built to ship.",
-         ["Docker", "AWS", "Spring Boot", ".NET / Azure", "Streaming UI"],
-         ACC1),
-    ]
+         ["Docker", "AWS", "Spring Boot", ".NET / Azure", "Streaming UI"]),
+    ])
+    _pcolors = [ACC1, ACC2, ACC1]
     sx = Inches(0.7); sy = Inches(2.7)
     cw = Inches(4.05); ch = Inches(3.95); gap = Inches(0.15)
-    for i, (num, title, body, chips, color) in enumerate(pillars):
+    for i, (num, title, body, chips) in enumerate(pillars):
+        color = _pcolors[i % 3]
         x = sx + i * (cw + gap)
         add_round_rect(s, x, sy, cw, ch, CARD, radius=0.05, line=cline(color))
         # left color band
@@ -1210,7 +1311,8 @@ def build_education():
 # EXPERIENCE  (comprehensive · data-driven · paginated)
 # ====================================================================
 def build_experience():
-    entries = shown(EXPERIENCES)
+    hide = rp("exp_hide", [])
+    entries = [e for e in shown(EXPERIENCES) if e["org"] not in hide]
     if not entries:
         return
     PER = 3
@@ -1218,7 +1320,8 @@ def build_experience():
     for pi, page in enumerate(pages):
         s = new_slide(("fade", "wipe_up"))
         title = "Experience" + (" (cont.)" if pi else "")
-        sub = "" if pi else "Roles where I shipped — research labs, startups and industry."
+        sub = "" if pi else rp("exp_sub",
+                               "Roles where I shipped — research labs, startups and industry.")
         section_header(s, "EXPERIENCE", title, sub)
         mark_break(s)
 
@@ -1239,9 +1342,10 @@ def build_experience():
             dlen = Inches(0.28 + 0.085 * len(e["dates"]))
             pill(s, x + w - dlen - Inches(0.3), y + Inches(0.16), e["dates"],
                  fill=PILL_BG, fg=PILL_FG, size=10)
-            # condensed bullets
+            # condensed bullets (role-aware)
+            ebullets = rp("exp_bullets", {}).get(e["org"], e["bullets"])
             add_bullets(s, x + Inches(0.4), y + Inches(0.8), w - Inches(0.8),
-                        Inches(0.55), e["bullets"], size=9.5, color=CBODY,
+                        Inches(0.55), ebullets, size=9.5, color=CBODY,
                         line_spacing=1.1, bullet_char="▸", spacing_after=2)
             mark_break(s)
 
@@ -1569,14 +1673,17 @@ def build_projects():
     entries = shown(PROJECTS)
     if not entries:
         return
-    # group by category order so colour bands cluster
-    entries = sorted(entries, key=lambda p: CAT_ORDER.index(p.get("cat", "ai")))
+    # group by category order so colour bands cluster (role may reorder)
+    order = rp("cat_order", CAT_ORDER)
+    entries = sorted(entries, key=lambda p: order.index(p.get("cat", "ai"))
+                     if p.get("cat", "ai") in order else len(order))
     PER = 12  # 4 cols x 3 rows
     pages = list(chunk(entries, PER))
     for pi, page in enumerate(pages):
         s = new_slide(("zoom", "fade"))
         title = "Projects" + (" (cont.)" if pi else "")
-        sub = ("A snapshot of what I've shipped — across AI, vision, games and systems."
+        sub = (rp("projects_sub",
+                  "A snapshot of what I've shipped — across AI, vision, games and systems.")
                if pi == 0 else "")
         section_header(s, "PROJECTS", title, sub)
 
@@ -1600,10 +1707,11 @@ def build_projects():
             color = CATC.get(p.get("cat", "ai"), ACC1)
             add_round_rect(s, x, y, cw, ch, CARD, radius=0.06, line=cline(color))
             add_rect(s, x, y, Inches(0.08), ch, color)
+            pdesc = rp("project_desc", {}).get(p["name"], p["desc"])
             add_text(s, x + Inches(0.22), y + Inches(0.16), cw - Inches(0.35), Inches(0.4),
                      p["name"], font=H_FONT, size=12, bold=True, color=color)
             add_text(s, x + Inches(0.22), y + Inches(0.56), cw - Inches(0.35), Inches(0.66),
-                     p["desc"], font=B_FONT, size=9.5, color=CBODY, line_spacing=1.2)
+                     pdesc, font=B_FONT, size=9.5, color=CBODY, line_spacing=1.2)
             # pause after each full row of 4 (except the last row on the page)
             if (i + 1) % 4 == 0 and (i + 1) < len(page):
                 mark_break(s)
@@ -1625,17 +1733,19 @@ def slide_stack():
              "Battle-tested across the projects above.",
              font=B_FONT, size=14, italic=True, color=SUB_F)
 
-    cols = [
-        ("Agentic AI",     ACC1,
+    cols = rp("stack", [
+        ("Agentic AI",
          ["LangChain", "LangGraph", "Multi-Agent", "Ollama", "n8n", "Cursor IDE", "Claude API"]),
-        ("LLM & Retrieval", ACC2,
+        ("LLM & Retrieval",
          ["RAG", "FAISS", "Chroma", "SQLite FTS5", "GPT-4o", "Higgs Audio", "Embeddings"]),
-        ("System Design",  ACC1,
+        ("System Design",
          ["Docker", "Kubernetes", "AWS (ECR)", "Spring Boot", ".NET / Azure",
           "GitHub Actions", "Next.js", "FastAPI", "MySQL", "Firebase"]),
-    ]
+    ])
+    _scolors = [ACC1, ACC2, ACC1]
     sx = Inches(0.7); sy = Inches(2.8); cw = Inches(4.1); ch = Inches(3.7); gap = Inches(0.15)
-    for i, (label, color, items) in enumerate(cols):
+    for i, (label, items) in enumerate(cols):
+        color = _scolors[i % 3]
         x = sx + i * (cw + gap)
         add_round_rect(s, x, sy, cw, ch, CARD2, radius=0.05, line=cline(color))
         add_rect(s, x, sy, cw, Inches(0.55), STACKHDR)
@@ -1841,28 +1951,32 @@ def slide_digihuman_pipeline():
 # ====================================================================
 # BUILD
 # ====================================================================
-def build(theme="midnight", out=None):
+def build(theme="midnight", role="general", out=None):
     apply_theme(theme)
+    apply_role(role)
     _reset_deck()
 
-    # ---- Ordered deck. Each section honours its SHOW_SLIDES toggle; the
-    #      comprehensive sections additionally honour per-entry "show". ----
+    # Role profiles may hide slides that aren't relevant to the target role.
+    show = {**SHOW_SLIDES, **(rp("show_slides") or {})}
+
+    # ---- Ordered deck. Each section honours its toggle; the comprehensive
+    #      sections additionally honour per-entry "show". ----
     slide_title()                                    # always
-    if SHOW_SLIDES["about"]:        slide_about()
-    if SHOW_SLIDES["pillars"]:      slide_pillars()
-    if SHOW_SLIDES["education"]:    build_education()         # all degrees
-    if SHOW_SLIDES["experience"]:   build_experience()        # all roles
-    if SHOW_SLIDES["vector"]:       slide_vector()            # deep-dive
-    if SHOW_SLIDES["latex_cv"]:     slide_latex_cv()          # deep-dive
-    if SHOW_SLIDES["dreamforge"]:   slide_dreamforge()        # deep-dive
-    if SHOW_SLIDES["guardian"]:     slide_guardian()          # deep-dive
-    if SHOW_SLIDES["caselogic"]:    slide_caselogic()         # deep-dive
-    if SHOW_SLIDES["safezone"]:     slide_safezone()          # deep-dive
-    if SHOW_SLIDES["safezone_arch"]: slide_safezone_arch()    # deep-dive
-    if SHOW_SLIDES["digihuman"]:    slide_digihuman_pipeline() # animated pipeline
-    if SHOW_SLIDES["projects"]:     build_projects()          # all projects
-    if SHOW_SLIDES["stack"]:        slide_stack()
-    if SHOW_SLIDES["honors"]:       build_honors()            # all honors
+    if show["about"]:        slide_about()
+    if show["pillars"]:      slide_pillars()
+    if show["education"]:    build_education()         # all degrees
+    if show["experience"]:   build_experience()        # all roles
+    if show["vector"]:       slide_vector()            # deep-dive
+    if show["latex_cv"]:     slide_latex_cv()          # deep-dive
+    if show["dreamforge"]:   slide_dreamforge()        # deep-dive
+    if show["guardian"]:     slide_guardian()          # deep-dive
+    if show["caselogic"]:    slide_caselogic()         # deep-dive
+    if show["safezone"]:     slide_safezone()          # deep-dive
+    if show["safezone_arch"]: slide_safezone_arch()    # deep-dive
+    if show["digihuman"]:    slide_digihuman_pipeline() # animated pipeline
+    if show["projects"]:     build_projects()          # all projects
+    if show["stack"]:        slide_stack()
+    if show["honors"]:       build_honors()            # all honors
     slide_thanks()                                   # always
 
     # --- Animations + transitions (BEFORE footers, so footers stay static) ---
@@ -1881,17 +1995,21 @@ def build(theme="midnight", out=None):
         add_footer(slide, i + 1, total)
 
     out = out or OUT_FILE.get(theme, "Daniel-CV-5min-Talk.pptx")
+    sfx = rp("suffix")
+    if sfx and out.endswith(".pptx"):
+        out = f"{out[:-5]}-{sfx}.pptx"
     prs.save(out)
-    print(f"[{theme}] Saved {out} with {len(prs.slides)} slides")
+    print(f"[{theme} | {ROLE}] Saved {out} with {len(prs.slides)} slides")
 
 
 if __name__ == "__main__":
-    arg = (sys.argv[1] if len(sys.argv) > 1 else "midnight").lower()
-    if arg == "both":
-        build("midnight")
-        build("memphis")
-    elif arg in ("midnight", "memphis"):
-        build(arg)
-    else:
-        print("usage: python build_cv_talk.py [midnight|memphis|both]")
+    theme_arg = (sys.argv[1] if len(sys.argv) > 1 else "midnight").lower()
+    role_arg = (sys.argv[2] if len(sys.argv) > 2 else "general").lower()
+    themes = (["midnight", "memphis"] if theme_arg == "both"
+              else [theme_arg] if theme_arg in ("midnight", "memphis") else None)
+    if themes is None or role_arg not in ROLE_PROFILES:
+        print("usage: python build_cv_talk.py [midnight|memphis|both] "
+              f"[{'|'.join(ROLE_PROFILES)}]")
         sys.exit(1)
+    for th in themes:
+        build(th, role_arg)
