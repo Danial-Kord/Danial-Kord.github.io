@@ -1,4 +1,5 @@
 import { sections } from "./data";
+import { bio } from "@/lib/site-data";
 
 /**
  * Static, no-WebGL hero. Same identity + working anchor links — recruiter
@@ -25,8 +26,7 @@ export function Fallback() {
           Danial <span className="text-accent">Kordmodanlou</span>
         </h1>
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-fg-dim">
-          ML <span className="text-accent">×</span> real-time systems{" "}
-          <span className="text-accent">×</span> game engineering
+          {bio.tagline}
         </p>
 
         <ul className="mt-10 flex flex-wrap items-center justify-center gap-3">

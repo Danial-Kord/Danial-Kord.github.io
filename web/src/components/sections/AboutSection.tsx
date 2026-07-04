@@ -33,7 +33,7 @@ export function AboutSection() {
                 <Row k="github" v="Danial-Kord" />
                 <Row k="linkedin" v="/in/danial-kord" />
                 <Row k="languages" v={bio.language} />
-                <Row k="status" v="open to roles" accent />
+                <Row k="status" v={bio.status} accent />
               </dl>
             </aside>
           </div>

@@ -196,6 +196,25 @@ export type Experience = {
 
 export const experience: Experience[] = [
   {
+    when: "Jun 2026 — present",
+    org: "EvenUp",
+    role: "Software Engineer",
+    blurb:
+      "Software Engineer building full-stack and agentic AI systems at EvenUp.",
+    bullets: [
+      "Full-stack development.",
+      "Agentic AI development.",
+    ],
+    link: { label: "EvenUp", href: "https://www.evenup.ai/" },
+  },
+  {
+    when: "Jun 2026",
+    org: "Toronto Machine Learning Summit (TMLS)",
+    role: "Volunteer",
+    blurb:
+      "Contributed behind the scenes at TMLS 2026, connecting with researchers, founders, and practitioners across Toronto's AI ecosystem.",
+  },
+  {
     when: "Jan 2026 — Mar 2026",
     org: "Vector Institute",
     role: "Machine Learning Associate (MLA)",
@@ -223,14 +242,15 @@ export const experience: Experience[] = [
     link: { label: "DreamForge", href: "https://www.playdreamforge.com/" },
   },
   {
-    when: "Jan 2024 — present",
+    when: "Jan 2024 — Jun 2026",
     org: "York University",
     role: "Research Assistant & Teaching Assistant",
     blurb:
-      "VR and motion-capture projects using Meta Quest, ARKit, Unity3D, and Unreal Engine.",
+      "Vision-science research at the BioMotion Lab and Centre for Vision Research — illusory parallax in stereoscopic VR using Meta Quest 3.",
     bullets: [
-      "Designed experiments for VR illusions in the Cubics project and developed the Deep app for immersive iOS-based telecommunication.",
-      "Taught Java-based object-oriented programming labs for four semesters.",
+      "Designed and ran five Meta Quest 3 experiments on how the visual system resolves conflicts between stereoscopic depth and missing motion parallax.",
+      "Presented at ECVP 2025 (Mainz) and CSBBCS 2026 — poster on scene-context effects in illusory parallax.",
+      "Investigated stereo geometry in Meta XR SDK Unity; taught Java OOP labs for five semesters.",
     ],
   },
   {
@@ -306,13 +326,13 @@ export type Education = {
 
 export const education: Education[] = [
   {
-    when: "2024 — 2025",
+    when: "2024 — 2026",
     degree: "MSc",
     field: "Computer Science",
     school: "York University, Toronto, Ontario",
     blurb:
-      "Master's work at the intersection of virtual reality and telecommunication: facial expression and motion capture on 3D virtual characters. Leverages Unity3D, Unreal Engine, and ARKit to bridge virtual and real-world interaction — pushing C# and C++ depth for game development and XR.",
-    stats: ["CGPA: 4.0 / 4.0"],
+      "Thesis: illusory parallax in stereoscopic displays — when VR shows stereoscopic depth but head motion lacks matching parallax, the visual system resolves the conflict as scene motion. Five Meta Quest 3 experiments at the BioMotion Lab; supervisor Nikolaus Troje.",
+    stats: ["CGPA: 4.0 / 4.0", "Thesis defended, 2026"],
   },
   {
     when: "2017 — 2022",
@@ -356,6 +376,11 @@ export const awards: Award[] = [
     year: "2026",
     title: "3rd place — EvenUp-Tech Hackathon",
     body: "Built CaseLogic with hybrid retrieval (vector + keyword), a verification layer, and agentic planning — 24-hour build.",
+  },
+  {
+    year: "2026",
+    title: "CSBBCS 2026 — poster presentation",
+    body: 'Canadian Society for Brain, Behavior, and Cognitive Science — presented "Illusory parallax in stereoscopic displays: the effect of scene context."',
   },
   {
     year: "2025",
@@ -407,11 +432,11 @@ export const skillGroups: { group: string; items: string[] }[] = [
   },
   {
     group: "ML / AI",
-    items: ["PyTorch", "TensorFlow", "Keras", "NumPy", "MediaPipe", "BlazePose", "PIFuHD", "RigNet", "LSTMs", "LLMs", "ONNX"],
+    items: ["PyTorch", "TensorFlow", "Keras", "NumPy", "MediaPipe", "BlazePose", "PIFuHD", "RigNet", "LSTMs", "LLMs", "LangGraph", "LangChain", "ONNX"],
   },
   {
     group: "Web / Systems",
-    items: ["Next.js", "React", "Vue.js", "FastAPI", "Django", "Spring Boot", "Docker", "Kubernetes", "Azure", "GitHub Actions"],
+    items: ["Next.js", "React", "Vue.js", "FastAPI", "Django", "Spring Boot", "PostgreSQL", "Docker", "Kubernetes", "Azure", "GitHub Actions"],
   },
   {
     group: "XR / Sensing",
@@ -426,11 +451,13 @@ export const bio = {
   email: "Danial.Kordmodanlou@gmail.com",
   location: "Toronto, ON",
   language: "English · Persian",
+  tagline: "Agentic AI × ML × real-time systems",
+  status: "Software Engineer @ EvenUp",
   github: "https://github.com/Danial-Kord",
   linkedin: "https://www.linkedin.com/in/danial-kord",
   telegram: "https://telegram.me/Danial_km",
   instagram: "https://www.instagram.com/danial._.km",
   cv: "https://drive.google.com/file/d/1WE7IhSHCR79zJD5mhZ3sAkDQkbu7MgBx/view?usp=sharing",
   about:
-    "MSc Computer Science at York University (Toronto, Ontario), focused on VR — facial expression and motion capture for 3D virtual characters with Unity3D, Unreal Engine, and ARKit, bridging virtual and real-world interaction. I build hybrid systems where ML, real-time graphics, and game engines meet: mocap pipelines, AI-driven engines, VR training, and LLM systems.",
+    "Software Engineer at EvenUp, building agentic AI for legal workflows and access to justice — hired through their hackathon after CaseLogic. Recently defended an MSc at York University's BioMotion Lab, researching illusory parallax in stereoscopic VR: how the visual system resolves conflicts between depth cues and missing motion parallax. I bridge vision-science research and production multi-agent systems — LangGraph backends, hybrid retrieval, and full-stack demos from hackathons like Guardian and BakeryPilot.",
 };

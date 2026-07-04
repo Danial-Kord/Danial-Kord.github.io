@@ -23,15 +23,15 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://danial-kord.github.io"),
   title: {
-    default: "Danial Kordmodanlou — ML × Real-time Systems × Game Engineering",
+    default: "Danial Kordmodanlou — Agentic AI × ML × Real-time Systems",
     template: "%s · Danial Kordmodanlou",
   },
   description:
-    "Hybrid ML + game engineer. Real-time avatars, procedural worlds, VR training, and LLM systems.",
+    "Software Engineer at EvenUp. Agentic AI, defended MSc in VR perception (York), LangGraph multi-agent systems. Guardian, DigiHuman, CaseLogic.",
   openGraph: {
     title: "Danial Kordmodanlou",
     description:
-      "ML × real-time systems × game engineering. DigiHuman, DreamForge, VR firefighter trainer, LLM CV builder.",
+      "Software Engineer @ EvenUp · agentic AI · defended MSc (illusory parallax in VR) · Guardian, DigiHuman, LangGraph systems.",
     type: "website",
     siteName: "Danial Kordmodanlou",
     locale: "en_US",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Danial Kordmodanlou",
     description:
-      "ML × real-time systems × game engineering. DigiHuman, DreamForge, VR firefighter trainer, LLM CV builder.",
+      "Software Engineer @ EvenUp · agentic AI · defended MSc (illusory parallax in VR) · Guardian, DigiHuman, LangGraph systems.",
     images: ["/images/figure_headphone.gif", "/images/Dani.jpg"],
   },
 };

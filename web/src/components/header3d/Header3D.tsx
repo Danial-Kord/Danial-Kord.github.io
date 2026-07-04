@@ -21,6 +21,7 @@ import { ArrowDown } from "lucide-react";
 import type { SectionPlanet } from "./data";
 import type { V3 } from "./SolarScene";
 import { Fallback } from "./Fallback";
+import { bio } from "@/lib/site-data";
 
 const SolarScene = dynamic(() => import("./SolarScene"), {
   ssr: false,
@@ -162,8 +163,7 @@ export function Header3D() {
           Danial <span className="text-accent">Kordmodanlou</span>
         </h1>
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-fg-dim">
-          ML <span className="text-accent">×</span> real-time systems{" "}
-          <span className="text-accent">×</span> game engineering
+          {bio.tagline}
         </p>
       </div>
 
