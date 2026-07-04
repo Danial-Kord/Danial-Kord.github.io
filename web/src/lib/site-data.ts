@@ -370,7 +370,7 @@ export const awards: Award[] = [
   {
     year: "2026",
     title: "4th place — TMLS Toronto Hackathon",
-    body: "Built BakeryPilot, an agentic AI supply-chain copilot for industrial bakeries (Next.js + FastAPI + LangGraph 5-agent orchestrator), with a 6-person team.",
+    body: "Built BakeryPilot, an agentic AI supply-chain copilot for industrial bakeries (Next.js + FastAPI + LangGraph 5-agent orchestrator), with a 5-person team.",
   },
   {
     year: "2026",
