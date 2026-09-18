@@ -1,0 +1,7 @@
+\subsection{Guardian}{NVIDIA Spark Hack Project, \href{https://github.com/Angel-Guardians/Guardians}{project link}}{2026}
+\begin{itemize}
+    \item Led the backend and multi-agent core of a local-first emergency AI companion for people living alone, built with a 5-person team at \textbf{NVIDIA Spark Hack Toronto}; a smartwatch detects falls and vitals anomalies and the system autonomously calls 911 with full medical context.
+    \item Architected a \textbf{FastAPI} + \textbf{LangGraph} hybrid router over six specialist agents with a deterministic, CTAS-aligned weighted risk monitor and idempotent emergency tools (\textbf{Twilio} 911/SMS, caregiver alerts, scheduling, vitals, memory recall).
+    \item Built a real-time, two-way voice loop (\textbf{faster-whisper} STT to \textbf{Kokoro} TTS over WebSockets) and a Server-Sent-Events bus streaming every routing decision, tool call, and risk score to a \textbf{Next.js} dashboard, Flutter app, and Wear OS watch.
+    \item Ran the entire agentic stack on-device through a provider-neutral LLM seam, serving \textbf{NVIDIA Nemotron} (NVFP4 via \textbf{TensorRT}) on an \textbf{NVIDIA DGX Spark} with a one-line switch back to cloud.
+\end{itemize}

@@ -1,0 +1,7 @@
+\subsection{BakeryPilot}{TMLS Hackathon Project, \href{https://github.com/PantryPilot/BakeryPilot}{project link}}{2026}
+\begin{itemize}
+    \item Built an agentic AI supply-chain copilot for industrial bakery operations with a 5-person team, placing \textbf{4th} at the \textbf{TMLS} (Toronto Machine Learning Summit) Toronto hackathon; deployed live at \href{https://bakerypilot.ca}{bakerypilot.ca}.
+    \item Engineered full-stack across the product: a \textbf{Next.js 15} cockpit with a real-time \textbf{PixiJS} supply-network map, a \textbf{FastAPI} backend, and a \textbf{LangGraph} multi-agent orchestrator routing to five specialist agents.
+    \item Implemented human-in-the-loop \textbf{action cards} so every order, schedule change, and transfer is confirmed before commit, backed by append-only \textbf{PostgreSQL + pgvector} audit tables and \textbf{Redis} event streaming.
+    \item Integrated CPU-only \textbf{OR-Tools} scheduling, LightGBM/Prophet demand forecasting, and RAG over SOPs, with a pluggable \textbf{Claude} LLM tier for chat, tool use, and supplier-negotiation drafts.
+\end{itemize}
